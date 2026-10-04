@@ -20,6 +20,16 @@ export function buzz(p: number | number[]) {
   }
 }
 
+/** Gentle "that didn't work" haptic (wrong tag, rejected input). */
+export function buzzError() {
+  if (!getState().vib) return;
+  try {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+  } catch {
+    // Haptics are best-effort.
+  }
+}
+
 type Toast = { msg: string; on: boolean; key: number };
 let toast: Toast = { msg: '', on: false, key: 0 };
 const ls = new Set<() => void>();

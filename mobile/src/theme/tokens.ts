@@ -61,6 +61,12 @@ export const FIXED = {
   ok: '#5EB87A',
   ink: '#111217',
   white: '#FFFFFF',
+  /** Wake-scan backdrop (deepest stop of G.scan) and the dim scrim drawn over the live camera. */
+  scanBg: '#07080A',
+  scanScrim: 'rgba(7,8,10,0.38)',
+  /** Translucent chrome over the camera (close / torch / stage pill / permission card). */
+  glass: 'rgba(255,255,255,0.12)',
+  glassCard: 'rgba(30,31,38,0.92)',
   sel: 'inset 0 0 0 1.5px rgba(242,166,90,0.75)',
   avatars: ['#F7BD5A', '#9FB3F0', '#9FD8C2', '#F5A092', '#D6A8F0', '#E4E2DE'],
 };

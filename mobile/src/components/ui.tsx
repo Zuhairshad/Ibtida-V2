@@ -6,7 +6,7 @@ import {
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { buzz, say, useToast } from '../lib/feedback';
+import { buzz, buzzError, say, useToast } from '../lib/feedback';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED, FONTS, G } from '../theme/tokens';
 import { Icon, type IconName } from './Icon';
@@ -524,4 +524,4 @@ export function ToastHost() {
   );
 }
 
-export { buzz, say };
+export { buzz, buzzError, say };

@@ -52,6 +52,15 @@
         {
           "locationWhenInUsePermission": "Ibtida uses your location on-device to calculate prayer times and the Qibla direction."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Ibtida uses the camera only to scan your wudu-station and prayer-mat QR tags for the Fajr wake alarm. Nothing is recorded or uploaded.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
       ]
     ],
     "experiments": {
