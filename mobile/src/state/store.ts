@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { CITIES, type City, type PrayerName } from '../data/content';
+import { isAyahRef } from '../data/surahs';
 
 export type Goal = {
   id: number; name: string; target: number; prog: number; streak: number;
@@ -13,6 +14,8 @@ export type Circle = {
 export type Emergency = { when: string; after: string; reason: string };
 export type PrayerLog = 'prayed' | 'missed';
 export type ThemePref = 'dark' | 'light' | 'system';
+/** A reading position: surah, ayah and when it was reached (ms). */
+export type QPos = { s: number; a: number; at: number };
 
 export type AppState = {
   hydrated: boolean;
@@ -42,7 +45,14 @@ export type AppState = {
   notifs: boolean[];
   wakeVerify: boolean[];
   token: string;
-  marks: Record<number, boolean>;
+  /** Quran bookmarks keyed "surah:ayah" (e.g. "2:183"). */
+  marks: Record<string, boolean>;
+  /** Last reading position in the Quran reader. */
+  qLast: QPos | null;
+  /** Recently read surahs, newest first, one entry per surah. */
+  qHist: QPos[];
+  /** Furthest ayah reached per surah. */
+  qMax: Record<string, number>;
   fontSize: number;
   showTr: boolean;
   rTheme: number;
@@ -87,7 +97,10 @@ const initial: AppState = {
   notifs: [true, true, true, false, true, false],
   wakeVerify: [true, false, false, false, false],
   token: 'A7F2-KQ9M-3XPD',
-  marks: { 183: true },
+  marks: {},
+  qLast: null,
+  qHist: [],
+  qMax: {},
   fontSize: 30,
   showTr: true,
   rTheme: 0,
@@ -138,7 +151,7 @@ export async function hydrate() {
     const raw = await AsyncStorage.getItem(KEY);
     if (raw) {
       const saved = JSON.parse(raw) as Partial<AppState>;
-      set({ ...saved, hydrated: true });
+      set({ ...saved, ...migrate(saved), hydrated: true });
       return;
     }
   } catch {
@@ -152,3 +165,53 @@ export async function resetAll() {
   state = { ...initial, hydrated: true };
   listeners.forEach(l => l());
 }
+
+/* ----------------------------------------------------------------- Quran */
+
+/**
+ * Bookmarks used to be numeric keys into Al-Baqarah (the only surah the v7 reader showed);
+ * they are now "surah:ayah". Numeric keys map to "2:N"; anything invalid is dropped.
+ */
+export function migrateMarks(marks: unknown): Record<string, boolean> {
+  const out: Record<string, boolean> = {};
+  if (!marks || typeof marks !== 'object') return out;
+  for (const [k, v] of Object.entries(marks as Record<string, unknown>)) {
+    if (!v) continue;
+    const key = /^\d+$/.test(k) ? `2:${k}` : k;
+    const m = /^(\d+):(\d+)$/.exec(key);
+    if (m && isAyahRef(+m[1], +m[2])) out[key] = true;
+  }
+  return out;
+}
+
+const isPos = (p: unknown): p is QPos =>
+  !!p && typeof p === 'object' && isAyahRef((p as QPos).s, (p as QPos).a) && typeof (p as QPos).at === 'number';
+
+function migrate(saved: Partial<AppState>): Partial<AppState> {
+  return {
+    marks: migrateMarks(saved.marks),
+    qLast: isPos(saved.qLast) ? saved.qLast : null,
+    qHist: Array.isArray(saved.qHist) ? saved.qHist.filter(isPos) : [],
+    qMax: saved.qMax && typeof saved.qMax === 'object' ? saved.qMax : {},
+  };
+}
+
+export const HISTORY_MAX = 30;
+
+/** Saves the reader position: last position, per-surah history and furthest ayah. */
+export function recordReading(s: number, a: number, at = Date.now()) {
+  if (!isAyahRef(s, a)) return;
+  const cur = state.qLast;
+  if (cur && cur.s === s && cur.a === a) return;
+  set(st => {
+    const pos = { s, a, at };
+    const key = String(s);
+    return {
+      qLast: pos,
+      qHist: [pos, ...st.qHist.filter(h => h.s !== s)].slice(0, HISTORY_MAX),
+      qMax: (st.qMax[key] ?? 0) >= a ? st.qMax : { ...st.qMax, [key]: a },
+    };
+  });
+}
+
+export const markKey = (s: number, a: number) => `${s}:${a}`;

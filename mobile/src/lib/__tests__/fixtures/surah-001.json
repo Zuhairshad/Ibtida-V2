@@ -1,0 +1,294 @@
+{
+ "code": 200,
+ "status": "OK",
+ "data": [
+  {
+   "number": 1,
+   "name": "AR_NAME_1",
+   "englishName": "EN_NAME_1",
+   "englishNameTranslation": "EN_MEANING_1",
+   "revelationType": "Meccan",
+   "numberOfAyahs": 7,
+   "ayahs": [
+    {
+     "number": 1,
+     "text": "AR_TEXT_1_1",
+     "numberInSurah": 1,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 2,
+     "text": "AR_TEXT_1_2",
+     "numberInSurah": 2,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 3,
+     "text": "AR_TEXT_1_3",
+     "numberInSurah": 3,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 4,
+     "text": "AR_TEXT_1_4",
+     "numberInSurah": 4,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 5,
+     "text": "AR_TEXT_1_5",
+     "numberInSurah": 5,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 6,
+     "text": "AR_TEXT_1_6",
+     "numberInSurah": 6,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 7,
+     "text": "AR_TEXT_1_7",
+     "numberInSurah": 7,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    }
+   ],
+   "edition": {
+    "identifier": "quran-uthmani",
+    "language": "ar",
+    "name": "EDITION_NAME",
+    "englishName": "Uthmani",
+    "format": "text",
+    "type": "quran",
+    "direction": "rtl"
+   }
+  },
+  {
+   "number": 1,
+   "name": "AR_NAME_1",
+   "englishName": "EN_NAME_1",
+   "englishNameTranslation": "EN_MEANING_1",
+   "revelationType": "Meccan",
+   "numberOfAyahs": 7,
+   "ayahs": [
+    {
+     "number": 1,
+     "text": "EN_TEXT_1_1",
+     "numberInSurah": 1,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 2,
+     "text": "EN_TEXT_1_2",
+     "numberInSurah": 2,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 3,
+     "text": "EN_TEXT_1_3",
+     "numberInSurah": 3,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 4,
+     "text": "EN_TEXT_1_4",
+     "numberInSurah": 4,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 5,
+     "text": "EN_TEXT_1_5",
+     "numberInSurah": 5,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 6,
+     "text": "EN_TEXT_1_6",
+     "numberInSurah": 6,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 7,
+     "text": "EN_TEXT_1_7",
+     "numberInSurah": 7,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    }
+   ],
+   "edition": {
+    "identifier": "en.sahih",
+    "language": "en",
+    "name": "EDITION_NAME",
+    "englishName": "Saheeh International",
+    "format": "text",
+    "type": "translation",
+    "direction": "ltr"
+   }
+  },
+  {
+   "number": 1,
+   "name": "AR_NAME_1",
+   "englishName": "EN_NAME_1",
+   "englishNameTranslation": "EN_MEANING_1",
+   "revelationType": "Meccan",
+   "numberOfAyahs": 7,
+   "ayahs": [
+    {
+     "number": 1,
+     "text": "UR_TEXT_1_1",
+     "numberInSurah": 1,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 2,
+     "text": "UR_TEXT_1_2",
+     "numberInSurah": 2,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 3,
+     "text": "UR_TEXT_1_3",
+     "numberInSurah": 3,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 4,
+     "text": "UR_TEXT_1_4",
+     "numberInSurah": 4,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 5,
+     "text": "UR_TEXT_1_5",
+     "numberInSurah": 5,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 6,
+     "text": "UR_TEXT_1_6",
+     "numberInSurah": 6,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    },
+    {
+     "number": 7,
+     "text": "UR_TEXT_1_7",
+     "numberInSurah": 7,
+     "juz": 1,
+     "manzil": 7,
+     "page": 1,
+     "ruku": 1,
+     "hizbQuarter": 1,
+     "sajda": false
+    }
+   ],
+   "edition": {
+    "identifier": "ur.jalandhry",
+    "language": "ur",
+    "name": "EDITION_NAME",
+    "englishName": "Jalandhry",
+    "format": "text",
+    "type": "translation",
+    "direction": "rtl"
+   }
+  }
+ ]
+}

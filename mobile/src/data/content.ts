@@ -1,7 +1,8 @@
 /**
  * Static content from the v7 prototype. Religious text is limited to short, well-sourced
- * dhikr and hadith carried over verbatim from the design; Quran verse text is never
- * generated — the reader shows a licensed-source placeholder (content governance §35).
+ * dhikr and hadith carried over verbatim from the design. Quran verse text is never
+ * written here — it is loaded from AlQuran Cloud (Tanzil) by `src/lib/quran.ts`, and the
+ * surah index lives in `src/data/surahs.ts` (content governance §35).
  */
 import type { IconName } from '../components/Icon';
 
@@ -74,26 +75,18 @@ export const HADITH = [
   { ar: 'كَلِمَتَانِ خَفِيفَتَانِ عَلَى اللِّسَانِ ثَقِيلَتَانِ فِي الْمِيزَانِ', en: 'Two words light on the tongue, heavy on the scale: SubhanAllahi wa bihamdihi, SubhanAllahil-Azim.', src: 'Sahih al-Bukhari 6406', ur: 'دو کلمے زبان پر ہلکے، میزان میں بھاری اور رحمٰن کو محبوب ہیں: سبحان اللہ وبحمدہ، سبحان اللہ العظیم۔' },
 ];
 
-export const SURAHS = [
-  { n: 1, name: 'Al-Fatihah', meta: '7 ayat · Makkah', ar: 'الفاتحة' }, { n: 2, name: 'Al-Baqarah', meta: '286 ayat · Madinah', ar: 'البقرة' },
-  { n: 3, name: 'Ali ‘Imran', meta: '200 ayat · Madinah', ar: 'آل عمران' }, { n: 4, name: 'An-Nisa', meta: '176 ayat · Madinah', ar: 'النساء' },
-  { n: 5, name: 'Al-Ma’idah', meta: '120 ayat · Madinah', ar: 'المائدة' }, { n: 18, name: 'Al-Kahf', meta: '110 ayat · Makkah', ar: 'الكهف' },
-  { n: 19, name: 'Maryam', meta: '98 ayat · Makkah', ar: 'مريم' }, { n: 36, name: 'Ya-Sin', meta: '83 ayat · Makkah', ar: 'يس' },
-  { n: 55, name: 'Ar-Rahman', meta: '78 ayat · Madinah', ar: 'الرحمن' }, { n: 67, name: 'Al-Mulk', meta: '30 ayat · Makkah', ar: 'الملك' },
-];
-
 const AR_NUM = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 export const arNum = (n: number) => String(n).split('').map(d => AR_NUM[+d]).join('');
 
 export const APPS = ['Instagram', 'TikTok', 'YouTube', 'X', 'Snapchat', 'Facebook'];
 
 export const RESULTS = [
-  { type: 'Quran', title: 'Surah Nuh · 71:10', sub: 'Verse text loads from Kalimat', tag: 'Quran', keys: 'istighfar forgiveness astaghfirullah استغفار' },
+  { type: 'Quran', title: 'Surah Nuh · 71:10', sub: 'Open in the reader', tag: 'Quran', keys: 'istighfar forgiveness astaghfirullah استغفار' },
   { type: 'Hadith', title: 'Sahih Muslim 591', sub: 'Istighfar after salah', tag: 'Sahih', keys: 'istighfar astaghfirullah salah استغفار' },
   { type: 'Hadith', title: 'Sahih Muslim 2702', sub: 'Seeking forgiveness 100 times a day', tag: 'Sahih', keys: 'istighfar forgiveness استغفار' },
   { type: 'Azkar', title: 'Forgiveness adhkar', sub: '6 adhkar · 2 min', tag: 'Category', keys: 'istighfar forgiveness استغفار' },
   { type: 'Hadith', title: 'Sahih al-Bukhari 6405', sub: 'SubhanAllahi wa bihamdihi', tag: 'Sahih', keys: 'tasbih subhanallah dhikr سبحان' },
-  { type: 'Quran', title: 'Ayat al-Kursi · 2:255', sub: 'Verse text loads from Kalimat', tag: 'Quran', keys: 'kursi protection throne كرسي' },
+  { type: 'Quran', title: 'Ayat al-Kursi · 2:255', sub: 'Open in the reader', tag: 'Quran', keys: 'kursi protection throne كرسي' },
   { type: 'Azkar', title: 'Morning adhkar', sub: '18 adhkar · 7 min', tag: 'Category', keys: 'morning sabah صباح' },
   { type: 'Azkar', title: 'Before sleep', sub: '8 adhkar · 4 min', tag: 'Category', keys: 'sleep night نوم' },
 ] as const;
