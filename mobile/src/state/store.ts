@@ -12,6 +12,8 @@ export type Circle = {
 };
 export type Emergency = { when: string; after: string; reason: string };
 export type PrayerLog = 'prayed' | 'missed';
+/** One verified two-stage wake scan. `date` is the local day key, `at` epoch ms. */
+export type WakeEntry = { date: string; at: number };
 export type ThemePref = 'dark' | 'light' | 'system';
 
 export type AppState = {
@@ -41,6 +43,7 @@ export type AppState = {
   privacy: boolean[];
   notifs: boolean[];
   wakeVerify: boolean[];
+  wakeLog: WakeEntry[];
   token: string;
   marks: Record<number, boolean>;
   fontSize: number;
@@ -86,6 +89,7 @@ const initial: AppState = {
   privacy: [false, false, true, false, true, false],
   notifs: [true, true, true, false, true, false],
   wakeVerify: [true, false, false, false, false],
+  wakeLog: [],
   token: 'A7F2-KQ9M-3XPD',
   marks: { 183: true },
   fontSize: 30,

@@ -1,14 +1,27 @@
 import { useRouter } from 'expo-router';
+import { Icon } from '../../../components/Icon';
 import { View } from 'react-native';
 import { BackBar, Cta, ListCard, Screen, Statement, SwitchRow, Txt, say } from '../../../components/ui';
 import { PH, PRAYER_META } from '../../../data/content';
-import { set, useApp } from '../../../state/store';
+import { addDays, dayKey, fmtTime } from '../../../lib/prayer';
+import { set, useApp, type WakeEntry } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
+
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function lastWakeLine(e: WakeEntry | undefined) {
+  if (!e) return 'No wake verified yet · try “Test the alarm”';
+  const d = new Date(e.at);
+  const today = dayKey(new Date());
+  const day = e.date === today ? 'today' : e.date === dayKey(addDays(new Date(), -1)) ? 'yesterday' : `${d.getDate()} ${MON[d.getMonth()]}`;
+  return `Last verified ${day} at ${fmtTime(d)}`;
+}
 
 export default function WakeAlarm() {
   const t = useT();
   const router = useRouter();
   const wake = useApp(s => s.wakeVerify);
+  const lastWake = useApp(s => s.wakeLog[s.wakeLog.length - 1]);
   return (
     <Screen top={54}>
       <BackBar title="Wake alarm" />
@@ -30,6 +43,10 @@ export default function WakeAlarm() {
       <View style={{ paddingTop: 12, paddingHorizontal: 16, flexDirection: 'row', gap: 10 }}>
         <Cta label="Print QR tags" icon="qr" height={54} size={15} style={{ flex: 1 }} onPress={() => router.push('/mat-tag')} />
         <Cta label="Test the alarm" kind="secondary" height={54} size={15} style={{ flex: 1 }} onPress={() => router.push('/wake-scan')} />
+      </View>
+      <View style={{ paddingTop: 12, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <Icon name="check" size={15} color={lastWake ? t.mint : t.t4} />
+        <Txt style={{ fontSize: 12.5, fontWeight: 600, color: lastWake ? t.t2 : t.t4 }}>{lastWakeLine(lastWake)}</Txt>
       </View>
       <View style={{ marginTop: 12, marginHorizontal: 16, borderRadius: 22, backgroundColor: t.noteBg, boxShadow: 'inset 0 0 0 1px rgba(242,166,90,0.3)', paddingVertical: 14, paddingHorizontal: 16 }}>
         <Txt style={{ fontSize: 13, lineHeight: 20, color: t.noteTx }}>Honest note: phones treat this as a high-priority notification, not a true alarm clock. Keep the volume on and Do Not Disturb exceptions enabled.</Txt>
