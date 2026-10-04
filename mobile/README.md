@@ -19,6 +19,54 @@ npm i -g eas-cli && eas login
 eas build -p android --profile preview   # produces an installable .apk
 ```
 
+## Backend (Supabase)
+
+The app talks to the Supabase project **Ibadat** (`qjpjlmeedrdfcrncqpeo`). `mobile/.env` holds
+`EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` (the *publishable* key; never put a
+service_role key in the app). See `.env.example`. **With the variables empty the app runs fully
+offline**: no accounts, local-only data, sample community content.
+
+| File | What |
+| --- | --- |
+| `src/lib/supabase.ts` | Client (session in AsyncStorage, PKCE, auto-refresh only in foreground); `null` when env is missing |
+| `src/lib/account.ts` | Email+password sign up / sign in, magic link, Google OAuth, `ibtida://auth-callback` handling, sign out |
+| `src/lib/sync.ts` | Offline-first sync: store diff → durable outbox (AsyncStorage) → Supabase with backoff; pull + merge on sign-in |
+| `src/lib/live.ts` | Live Ummah totals, community goals, feed with Ameen, circles (create / join by code / regenerate / leave / delete / shared goals / members) |
+| `supabase/migrations/` | Full schema: `0001`–`0016` from the original app, `0017`–`0022` added for this app |
+| `supabase/tests/rls_verify.sql` | RLS + RPC checks with throwaway users; runs in one rolled-back transaction |
+
+**How sync works.** The local store stays the source of truth, so every tap is instant and works
+offline. Changes to prayer logs, goals and their progress, the wake log, emergency unlocks and
+settings/profile (name, method, madhab, city, privacy flags and the rest of the settings) become
+small operations in an outbox that survives restarts, and they upload when signed in and reachable,
+with exponential backoff. On sign-in the app pulls the account's rows and merges them by last write
+wins: the client sends the time of each change as `updated_at`, and a server trigger (`lww_touch`)
+refuses stale writes. Tasbeeh taps only bump a pending counter (no I/O per tap). They upload in
+batches through `log_dhikr`, which adds to the anonymous Ummah total and to a joined community
+goal. Switching off *Community participation* in Privacy keeps your counts out of the Ummah total.
+
+**Community.** When signed in and online, the Community tab shows live data: the Ummah total and
+"this hour", the three community goals (seeded from `COMMUNITY_GOALS`) with join and contribute,
+your circles, and the feed. Totals only ever come back as aggregates from `SECURITY DEFINER` RPCs.
+No other user's counts are readable, and there are no rankings. Circles use 8-character invite
+codes (`join_circle_by_code`, `regenerate_circle_invite`), and only members can see a circle, its
+goals and its feed items. A member's name is visible to their circle only when their *Profile
+visibility* switch is on. Signed out or offline, the tab shows the bundled sample data.
+
+**Dashboard setup (one-time, by the project owner):**
+1. *Authentication → URL Configuration → Redirect URLs*: add `ibtida://auth-callback` (builds) and
+   `exp://**` (Expo Go during development). Magic links, email confirmation and Google return here.
+2. *Authentication → Providers → Google*: enable it with a Google Cloud OAuth client (Web
+   client id + secret; authorised redirect URI `https://qjpjlmeedrdfcrncqpeo.supabase.co/auth/v1/callback`).
+   Until then "Continue with Google" shows a calm toast and email sign-in works as normal.
+3. *Authentication → Emails / SMTP*: the built-in mailer is rate-limited (a few emails per hour).
+   Configure custom SMTP before launch. If "Confirm email" stays on, sign-up asks the user to
+   confirm by email before entering.
+4. Optional: enable *Leaked password protection* (security advisor warning).
+
+Verify RLS any time by running `supabase/tests/rls_verify.sql` in the SQL editor. The "error" it
+raises is the report (every line should read PASS), and the rollback leaves no test data behind.
+
 ## Structure
 
 | Path | What |
@@ -59,7 +107,7 @@ Adhan sounds play the system default until audio files are added — see `ADHAN_
 On Android 12+ times are exact only if the user allows "Alarms & reminders"
 (`SCHEDULE_EXACT_ALARM`); otherwise Android may deliver them a few minutes late.
 
-Not wired yet (UI is complete, needs native work or a backend):
+Not wired yet (UI is complete, needs native work):
 - **Ibadah Lock app shielding** — needs the FamilyControls (iOS) / Accessibility-service
   (Android) native module from the handover; the lock session itself works.
 - **Wake alarm ringing until stage 2** — the alarm notification opens the scan, but it
@@ -67,6 +115,5 @@ Not wired yet (UI is complete, needs native work or a backend):
 - **Adhan audio** — no recordings bundled yet; notifications use the default sound.
 - **Focus / Community notifications** — toggles persist; Ibadah Lock start/end and circle
   milestones need the lock module and backend push (TODOs in `notifications.ts`).
-- **Accounts, community totals, feed, circles sync** — local sample data until Supabase is connected.
 - **Quran text** — reader shows a licensed-source placeholder; scripture is never generated.
 - Urdu translations were authored in the design phase and need scholarly review.

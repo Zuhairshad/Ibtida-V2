@@ -8,6 +8,7 @@
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo-google-fonts/scheherazade-new": "^0.4.3",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.117.2",
     "adhan": "^4.4.6",
     "expo": "~57.0.26",
     "expo-blur": "~57.0.3",
@@ -24,13 +25,15 @@
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
+    "expo-web-browser": "~57.0.3",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "15.15.4",
+    "react-native-url-polyfill": "^4.0.0"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.6",

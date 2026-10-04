@@ -29,22 +29,23 @@ export default function CommunityGoal() {
         </Ring>
       </View>
       <View style={{ paddingTop: 18, paddingHorizontal: 16, flexDirection: 'row', gap: 10 }}>
-        {[['YOUR CONTRIBUTION', c.joined ? '1,240' : '0'], ['THIS HOUR', '+18,421']].map(([k, v]) => (
+        {[['YOUR CONTRIBUTION', c.joined ? fmt(c.mine) : '0'], ['THIS HOUR', `+${fmt(c.hour)}`]].map(([k, v]) => (
           <View key={k} style={{ flex: 1, borderRadius: 24, backgroundColor: t.card, padding: 16 }}>
             <Label>{k}</Label>
             <Txt style={{ fontSize: 26, fontWeight: 800, marginTop: 6 }}>{v}</Txt>
           </View>
         ))}
       </View>
-      <Label style={{ marginTop: 20, marginBottom: 10, marginHorizontal: 26 }}>RECENT CONTRIBUTORS</Label>
-      <View style={{ paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      {/* Live data never names individual contributors (counts only), so this sample row is offline-only. */}
+      {!c.live && <Label style={{ marginTop: 20, marginBottom: 10, marginHorizontal: 26 }}>RECENT CONTRIBUTORS</Label>}
+      {!c.live && <View style={{ paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {([['AR', 33], ['SK', 100], ['MA', 33], ['HN', 66], ['ZB', 33]] as const).map(([i, n], k) => (
           <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 42, paddingLeft: 5, paddingRight: 14, borderRadius: 21, backgroundColor: t.card }}>
             <Avatar i={i} bg={FIXED.avatars[k]} />
             <Txt style={{ fontSize: 13, fontWeight: 600 }}>+{n}</Txt>
           </View>
         ))}
-      </View>
+      </View>}
       <View style={{ paddingTop: 22, paddingHorizontal: 16 }}>
         <Cta label={c.joined ? 'Contribute with Tasbeeh' : 'Join & contribute'} onPress={() => {
           if (!c.joined) joinGoal(c.i);

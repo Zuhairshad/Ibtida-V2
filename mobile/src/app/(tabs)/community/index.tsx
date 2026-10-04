@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { AvatarRow, circlePct, FeedRow, joinGoal, Sparkline, useCommunityGoals } from '../../../components/community';
+import { AvatarRow, circlePct, FeedRow, joinGoal, Sparkline, useCommunityGoals, useFeed } from '../../../components/community';
 import { Icon } from '../../../components/Icon';
 import { Breathe, FadeIn, PulseDot, useCountUp, useNow } from '../../../components/motion';
 import { Avatar, Bar, Cta, IconBtn, Ring, Screen, SectionHead, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
-import { FEED, fmt, IMPACT_TARGET } from '../../../data/content';
+import { fmt, IMPACT_TARGET } from '../../../data/content';
+import { useLive, useLiveRefresh } from '../../../lib/live';
 import { useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 import { FIXED, G } from '../../../theme/tokens';
@@ -15,11 +16,14 @@ export default function Community() {
   const router = useRouter();
   const now = useNow();
   const [tab, setTab] = useState(0);
-  const impact = useCountUp(IMPACT_TARGET);
+  useLiveRefresh();
+  const ummah = useLive(l => (l.on ? l.ummah : null));
+  const feed = useFeed();
+  const impact = useCountUp(ummah ? ummah.today : IMPACT_TARGET);
   const cgs = useCommunityGoals();
   const circles = useApp(s => s.circles);
   const joinedCount = cgs.filter(c => c.joined).length;
-  const live = 12408 + (now.getSeconds() % 9) * 7;
+  const live = ummah ? ummah.now : 12408 + (now.getSeconds() % 9) * 7;
   const openGoal = (i: number) => router.push(`/community/goal/${i}`);
   const openCircle = (id: number) => router.push(`/community/circle/${id}`);
 
@@ -53,7 +57,7 @@ export default function Community() {
                 </View>
               </View>
               <Txt style={{ fontSize: 48, fontWeight: 800, letterSpacing: -1.7, lineHeight: 52, marginTop: 18, color: '#FFFFFF' }}>{fmt(impact)}</Txt>
-              <Txt style={{ fontSize: 14, marginTop: 8, color: '#FFFFFF' }}>dhikr counted · <Txt style={{ fontSize: 14, fontWeight: 700, color: '#C8F0DC' }}>+18,421 this hour</Txt></Txt>
+              <Txt style={{ fontSize: 14, marginTop: 8, color: '#FFFFFF' }}>dhikr counted · <Txt style={{ fontSize: 14, fontWeight: 700, color: '#C8F0DC' }}>+{fmt(ummah ? ummah.hour : 18421)} this hour</Txt></Txt>
               <Sparkline />
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 14 }}>
                 <Cta label="Add your dhikr" height={50} size={15} color="#111217" style={{ flex: 1.3, backgroundColor: '#FFFFFF' }} onPress={() => router.push({ pathname: '/tasbeeh', params: { goal: '1' } })} />
@@ -129,7 +133,7 @@ export default function Community() {
 
           <SectionHead title="Happening now" action="See all" onAction={() => setTab(3)} />
           <View style={{ paddingHorizontal: 16, gap: 8 }}>
-            {FEED.slice(0, 3).map((f, i) => <FadeIn key={f.k} delay={i * 50} dur={350}><FeedRow k={f.k} /></FadeIn>)}
+            {feed.slice(0, 3).map((f, i) => <FadeIn key={f.k} delay={i * 50} dur={350}><FeedRow k={f.k} /></FadeIn>)}
           </View>
         </>
       )}
@@ -192,7 +196,7 @@ export default function Community() {
             <Txt style={{ fontSize: 13.5, lineHeight: 20, color: t.okTx }}>Encouragement only. No likes, no rankings — just “Ameen” for each other.</Txt>
           </View>
           <View style={{ paddingTop: 10, paddingHorizontal: 16, gap: 8 }}>
-            {FEED.map((f, i) => <FadeIn key={f.k} delay={i * 40} dur={350}><FeedRow k={f.k} /></FadeIn>)}
+            {feed.map((f, i) => <FadeIn key={f.k} delay={i * 40} dur={350}><FeedRow k={f.k} /></FadeIn>)}
           </View>
         </>
       )}

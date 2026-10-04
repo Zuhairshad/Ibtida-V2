@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import { Icon } from '../components/Icon';
 import { Breathe } from '../components/motion';
 import { BackBar, Cta, Label, Page, say, Txt } from '../components/ui';
+import { currentUserId } from '../lib/supabase';
+import { syncNow } from '../lib/sync';
 import { useT } from '../theme/ThemeProvider';
 import { G } from '../theme/tokens';
 
@@ -35,7 +37,8 @@ export default function Offline() {
         <View style={{ flex: 1 }} />
         <Cta label={busy ? 'Trying…' : 'Retry connection'} style={{ width: '100%' }} onPress={() => {
           setBusy(true);
-          setTimeout(() => { setBusy(false); say('Still offline — nothing is lost'); }, 1100);
+          if (!currentUserId()) { setTimeout(() => { setBusy(false); say('Still offline — nothing is lost'); }, 1100); return; }
+          syncNow().then(ok => say(ok ? 'All synced' : 'Still offline — nothing is lost')).catch(() => say('Still offline — nothing is lost')).finally(() => setBusy(false));
         }} />
       </View>
     </Page>
