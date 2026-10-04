@@ -5,7 +5,7 @@ import { Animated, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { Breathe, Stars, usePop } from '../components/motion';
-import { buzz, Ring, say, Tap, Txt } from '../components/ui';
+import { buzz, Ring, say, Tap, Txt, useBack } from '../components/ui';
 import { DHIKR, mmss } from '../data/content';
 import { getState, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
@@ -36,6 +36,7 @@ function Beads({ count }: { count: number }) {
 function Tasbeeh() {
   const t = useT();
   const router = useRouter();
+  const back = useBack();
   const ins = useSafeAreaInsets();
   const params = useLocalSearchParams<{ goal?: string }>();
   const goalId = params.goal ? Number(params.goal) : null;
@@ -57,7 +58,8 @@ function Tasbeeh() {
     if (goal) {
       const prog = goal.prog + 1;
       set(s => ({ goals: s.goals.map(x => (x.id === goal.id ? { ...x, prog } : x)) }));
-      if (prog >= goal.target) {
+      // Celebrate once, when the target is reached; extra counts after that are just counted.
+      if (prog === goal.target) {
         buzz([30, 60, 30, 60, 90]);
         router.replace({ pathname: '/goal-done', params: { name: goal.name, target: String(goal.target) } });
       } else buzz(prog % 33 === 0 ? [20, 40, 20] : 8);
@@ -79,7 +81,7 @@ function Tasbeeh() {
       <StatusBar style="light" />
       <Stars style={{ top: 130 }} />
       <View style={{ paddingTop: ins.top + 6, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 4, zIndex: 2 }}>
-        <Tap onPress={() => { buzz(5); router.back(); }} accessibilityLabel="Back" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={() => { buzz(5); back(); }} accessibilityLabel="Back" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="back" color={t.tx} />
         </Tap>
         <View style={{ flex: 1, alignItems: 'center' }}>
@@ -129,7 +131,7 @@ function Tasbeeh() {
       </ScrollView>
       <View style={{ marginTop: 12, marginHorizontal: 16, marginBottom: ins.bottom + 30, borderRadius: 22, backgroundColor: 'rgba(40,41,50,0.7)', boxShadow: t.hair, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Txt style={{ flex: 1, fontSize: 13, lineHeight: 19.5, color: '#D8D6D2' }}>
-          {goal ? `${goal.target - goal.prog} remaining toward your goal · counts sync to your circle and community` : dh.note}
+          {goal ? `${Math.max(0, goal.target - goal.prog)} remaining toward your goal · counts sync to your circle and community` : dh.note}
         </Txt>
         {!goal && (
           <Tap onPress={() => { set({ tasN: 0 }); setSecs(0); say('Counter reset'); }} style={{ height: 40, paddingHorizontal: 14, borderRadius: 20, backgroundColor: t.ctl3, justifyContent: 'center' }}>

@@ -26,7 +26,7 @@ export default function Circles() {
       <BackBar title="My circles" />
       <View style={{ paddingTop: 10, paddingHorizontal: 22 }}><H1>Have an invite code?</H1></View>
       <View style={{ paddingTop: 16, paddingHorizontal: 22 }}>
-        <TextInput value={code} onChangeText={v => setCode(v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))} maxLength={8} autoCapitalize="characters" autoCorrect={false}
+        <TextInput value={code} onChangeText={v => setCode(v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))} autoCapitalize="characters" autoCorrect={false}
           placeholder="8-CHAR CODE" placeholderTextColor={t.t4} accessibilityLabel="Invite code"
           style={{ height: 64, borderRadius: 24, borderWidth: 1, borderColor: ok ? t.acc : t.bord, backgroundColor: t.sunk, textAlign: 'center', color: t.txw, fontSize: 24, fontWeight: '800', letterSpacing: 7, fontFamily: 'monospace' }} />
       </View>

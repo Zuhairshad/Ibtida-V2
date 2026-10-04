@@ -164,6 +164,8 @@ function goalTime(g: Goal, day: Date, fajr: Date): Date | null {
     if (!s.days[monIdx(day)]) return null;
     return at(day, to24(s.h, s.a), MINS15[s.m] ?? 0);
   }
+  // Frequency chosen in New goal (Every day / Weekdays / Fridays).
+  if (g.days && !g.days[monIdx(day)]) return null;
   const m = /^(\d{1,2}):(\d{2})\s*(am|pm)$/i.exec(g.remind.trim());
   if (m) return at(day, (Number(m[1]) % 12) + (m[3].toLowerCase() === 'pm' ? 12 : 0), Number(m[2]));
   if (/after fajr/i.test(g.remind)) return new Date(fajr.getTime() + 15 * MIN);
@@ -285,7 +287,7 @@ if (NATIVE) {
 function signature(s: Store) {
   return JSON.stringify([
     s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.notifs, s.wakeVerify, s.wake,
-    s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched]),
+    s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days]),
   ]);
 }
 

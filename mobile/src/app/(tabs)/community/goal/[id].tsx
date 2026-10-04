@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { joinGoal, useCommunityGoals } from '../../../../components/community';
 import { Avatar, BackBar, Cta, H1, Label, Ring, Screen, Txt } from '../../../../components/ui';
 import { fmt } from '../../../../data/content';
+import { useApp } from '../../../../state/store';
 import { useT } from '../../../../theme/ThemeProvider';
 import { FIXED } from '../../../../theme/tokens';
 
@@ -12,6 +13,8 @@ export default function CommunityGoal() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const cgs = useCommunityGoals();
   const c = cgs[Number(id)] || cgs[0];
+  // Count toward the personal goal linked to this community goal, if there is one.
+  const linked = useApp(s => s.goals.find(g => g.cg === c.name));
   const pct = c.done / c.total;
   return (
     <Screen top={54}>
@@ -48,7 +51,7 @@ export default function CommunityGoal() {
       <View style={{ paddingTop: 22, paddingHorizontal: 16 }}>
         <Cta label={c.joined ? 'Contribute with Tasbeeh' : 'Join & contribute'} onPress={() => {
           if (!c.joined) joinGoal(c.i);
-          router.push({ pathname: '/tasbeeh', params: { goal: '1' } });
+          router.push(linked ? { pathname: '/tasbeeh', params: { goal: String(linked.id) } } : '/tasbeeh');
         }} />
       </View>
     </Screen>

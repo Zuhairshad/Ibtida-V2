@@ -1,8 +1,8 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { Icon } from '../components/Icon';
-import { BackBar, buzz, Cta, H1, Page, say, Tap, Txt, WheelSet } from '../components/ui';
+import { BackBar, buzz, Cta, H1, Page, say, Tap, Txt, useBack, WheelSet } from '../components/ui';
 import { enableNotifications, previewReminder } from '../lib/notifications';
 import { getState, set, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
@@ -13,19 +13,20 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function GoalSchedule() {
   const t = useT();
-  const router = useRouter();
+  const back = useBack();
   const { goal } = useLocalSearchParams<{ goal?: string }>();
   const s = useApp(st => st.sched);
   const put = (p: Partial<typeof s>) => set(st => ({ sched: { ...st.sched, ...p } }));
-  // Editing a goal starts from that goal's own schedule when it has one.
+  // Editing a goal starts from that goal's own schedule, else its frequency days.
   useEffect(() => {
-    const own = goal ? getState().goals.find(g => g.id === Number(goal))?.sched : undefined;
-    if (own) set({ sched: own });
+    const g = goal ? getState().goals.find(x => x.id === Number(goal)) : undefined;
+    if (g?.sched) set({ sched: g.sched });
+    else if (g?.days) set(st => ({ sched: { ...st.sched, days: g.days!.slice() } }));
   }, [goal]);
   const save = () => {
     const label = `${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'pm' : 'am'}`;
-    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label, sched: { ...st.sched, days: st.sched.days.slice() } } : g)) }));
-    router.back();
+    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label, days: st.sched.days.slice(), sched: { ...st.sched, days: st.sched.days.slice() } } : g)) }));
+    back();
     say(`Reminder saved for ${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'PM' : 'AM'}`);
     if (getState().notifs[2]) enableNotifications();
   };

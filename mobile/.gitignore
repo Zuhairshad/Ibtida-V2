@@ -36,6 +36,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# web export / e2e
+dist-web/
+test-results/
+playwright-report/
+
 # generated native folders
 /ios
 /android

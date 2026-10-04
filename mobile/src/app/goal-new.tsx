@@ -1,15 +1,17 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { BackBar, buzz, Chips, Cta, H1, Option, Page, say, Seg, Tap, Txt } from '../components/ui';
+import { BackBar, buzz, Chips, Cta, H1, Option, Page, say, Seg, Tap, Txt, useBack } from '../components/ui';
 import { COMMUNITY_GOALS, fmt, GOAL_PRESETS } from '../data/content';
 import { set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
 
+/** Mon..Sun reminder days for Every day / Weekdays / Fridays. */
+const FREQ_DAYS = [[1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 1, 0, 0]];
+
 export default function GoalNew() {
   const t = useT();
-  const router = useRouter();
+  const back = useBack();
   const [mode, setMode] = useState(0);
   const [cg, setCg] = useState(0);
   const [preset, setPreset] = useState(0);
@@ -17,11 +19,11 @@ export default function GoalNew() {
   const [freq, setFreq] = useState(0);
   const create = () => {
     const name = GOAL_PRESETS[preset][0];
-    const g = { id: Date.now(), name, target, prog: 0, streak: 0, remind: '8:00 pm', week: [0, 0, 0, 0, 0, 0, 0], cg: mode === 1 ? COMMUNITY_GOALS[cg].name : null };
+    const g = { id: Date.now(), name, target, prog: 0, streak: 0, remind: '8:00 pm', week: [0, 0, 0, 0, 0, 0, 0], cg: mode === 1 ? COMMUNITY_GOALS[cg].name : null, days: FREQ_DAYS[freq] };
     buzz([10, 30, 16]);
     set(s => ({ goals: s.goals.concat([g]) }));
     say('Goal created · ' + name);
-    router.back();
+    back();
   };
   return (
     <Page bottom={34}>

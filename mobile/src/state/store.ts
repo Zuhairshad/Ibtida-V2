@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
+import { AppState as RNAppState } from 'react-native';
 import { CITIES, type City, type PrayerName } from '../data/content';
 import { isAyahRef } from '../data/surahs';
 
@@ -10,6 +11,8 @@ export type Goal = {
   remind: string; week: number[]; cg: string | null;
   /** Set once the user saves a schedule for this goal; older goals fall back to `remind`. */
   sched?: Sched;
+  /** Reminder days, Mon..Sun (1 = on). Missing means every day. */
+  days?: number[];
 };
 export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
@@ -139,12 +142,19 @@ export function set(patch: Partial<AppState> | ((s: AppState) => Partial<AppStat
   if (state.hydrated) {
     clearTimeout(saveT);
     // Counters write locally first and are debounced, so a burst of taps is never lost.
-    saveT = setTimeout(() => {
-      const { hydrated: _h, ...rest } = state;
-      AsyncStorage.setItem(KEY, JSON.stringify(rest)).catch(() => {});
-    }, 250);
+    saveT = setTimeout(save, 250);
   }
 }
+
+function save() {
+  clearTimeout(saveT);
+  saveT = undefined;
+  const { hydrated: _h, ...rest } = state;
+  AsyncStorage.setItem(KEY, JSON.stringify(rest)).catch(() => {});
+}
+
+// Flush a pending debounced save when the app is backgrounded, so the last taps survive the app being killed.
+RNAppState.addEventListener('change', s => { if (s !== 'active' && saveT !== undefined) save(); });
 
 export function subscribe(l: Listener) {
   listeners.add(l);

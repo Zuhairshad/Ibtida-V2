@@ -130,9 +130,10 @@ function Reader() {
   useEffect(() => {
     if (!surah || ready.current) return;
     const id = setTimeout(() => {
+      tries.current = 0;
       listRef.current?.scrollToIndex({ index: startAyah - 1, animated: false, viewPosition: 0 });
-      setTimeout(() => { ready.current = true; }, 400);
-    }, 60);
+      setTimeout(() => { ready.current = true; }, 1500);
+    }, 120);
     return () => clearTimeout(id);
   }, [surah, startAyah]);
 
@@ -151,10 +152,12 @@ function Reader() {
     saveT.current = setTimeout(() => recordReading(sur, a), 600);
   }).current;
 
+  // The target row isn't rendered yet: jump near it using the measured average height, then retry.
+  // Before any row has been measured the average is 0, so just wait for layout instead of giving up.
   const onScrollFail = useCallback((info: { index: number; averageItemLength: number }) => {
-    if (tries.current++ > 6) { ready.current = true; return; }
-    listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false });
-    setTimeout(() => listRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0 }), 120);
+    if (tries.current++ > 24) { ready.current = true; return; }
+    if (info.averageItemLength > 0) listRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: false });
+    setTimeout(() => listRef.current?.scrollToIndex({ index: info.index, animated: false, viewPosition: 0 }), 150);
   }, []);
 
   const juz = surah?.ayahs[current - 1]?.juz || juzOf(s, current);
