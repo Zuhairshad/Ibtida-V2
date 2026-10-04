@@ -1,11 +1,10 @@
-import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { useReducedMotion } from '../components/motion';
-import { buzz, Cta, say, Tap, Txt } from '../components/ui';
+import { buzz, Cta, say, Tap, Txt, useBack } from '../components/ui';
 import { usePrayerNow } from '../lib/hooks';
 import { fmtTime } from '../lib/prayer';
 import { Immersive, useT } from '../theme/ThemeProvider';
@@ -40,7 +39,7 @@ function Corner({ pos, color }: { pos: 'tl' | 'tr' | 'bl' | 'br'; color: string 
 
 function Scan() {
   const t = useT();
-  const router = useRouter();
+  const back = useBack();
   const ins = useSafeAreaInsets();
   const { times } = usePrayerNow();
   const [stage, setStage] = useState(1);
@@ -52,7 +51,7 @@ function Scan() {
     <View style={{ flex: 1, backgroundColor: '#07080A', experimental_backgroundImage: G.scan }}>
       <StatusBar style="light" />
       <View style={{ paddingTop: ins.top + 10, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Tap onPress={() => router.back()} accessibilityLabel="Close" style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={back} accessibilityLabel="Close" style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="x" color="#FFFFFF" />
         </Tap>
         <View style={{ paddingVertical: 9, paddingHorizontal: 14, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)' }}>
@@ -83,7 +82,7 @@ function Scan() {
       </View>
       <View style={{ paddingTop: 22, paddingHorizontal: 22, paddingBottom: ins.bottom + 36 }}>
         <Cta label={stage === 3 ? 'Done' : 'Simulate scan'} size={17} onPress={() => {
-          if (stage === 3) { router.back(); return; }
+          if (stage === 3) { back(); return; }
           buzz([30, 40, 30]);
           setStage(stage + 1);
           say(stage === 1 ? 'Wudu scan verified · 10 min to reach the mat' : 'Wake verified · alarm stopped');

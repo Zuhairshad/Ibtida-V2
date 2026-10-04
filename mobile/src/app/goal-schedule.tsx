@@ -1,7 +1,8 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { Icon } from '../components/Icon';
-import { BackBar, buzz, Cta, H1, Page, say, Tap, Txt, WheelSet } from '../components/ui';
+import { BackBar, buzz, Cta, H1, Page, say, Tap, Txt, useBack, WheelSet } from '../components/ui';
 import { set, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
@@ -11,14 +12,17 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function GoalSchedule() {
   const t = useT();
-  const router = useRouter();
+  const back = useBack();
   const { goal } = useLocalSearchParams<{ goal?: string }>();
   const s = useApp(st => st.sched);
   const put = (p: Partial<typeof s>) => set(st => ({ sched: { ...st.sched, ...p } }));
+  // Start from the goal's own reminder days rather than whatever was last picked for another goal.
+  const goalDays = useApp(st => st.goals.find(g => g.id === Number(goal))?.days);
+  useEffect(() => { if (goalDays) put({ days: goalDays }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const save = () => {
     const label = `${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'pm' : 'am'}`;
-    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label } : g)) }));
-    router.back();
+    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label, days: s.days } : g)) }));
+    back();
     say(`Reminder saved for ${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'PM' : 'AM'}`);
   };
   return (

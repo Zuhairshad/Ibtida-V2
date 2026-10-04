@@ -19,7 +19,9 @@ export default function CircleNew() {
     buzz([10, 30, 16]);
     set(s => ({ circles: s.circles.concat([c]) }));
     say('Circle created · share your code');
-    router.replace(`/community/circle/${c.id}`);
+    // Close this modal first so the circle opens on the Ummah stack and Back returns to Ummah, not Home.
+    if (router.canGoBack()) router.back();
+    router.push(`/community/circle/${c.id}`);
   };
   return (
     <Page>

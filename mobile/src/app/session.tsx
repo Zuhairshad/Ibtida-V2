@@ -5,7 +5,7 @@ import { Animated, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { FadeIn, usePop } from '../components/motion';
-import { buzz, Ring, say, Tap, Txt, UrduToggle } from '../components/ui';
+import { buzz, Ring, say, Tap, Txt, UrduToggle, useBack } from '../components/ui';
 import { SESS } from '../data/content';
 import { useUrdu } from '../lib/hooks';
 import { Immersive, useT } from '../theme/ThemeProvider';
@@ -14,6 +14,7 @@ import { G } from '../theme/tokens';
 function Session() {
   const t = useT();
   const router = useRouter();
+  const back = useBack();
   const ins = useSafeAreaInsets();
   const { cat = 'Evening' } = useLocalSearchParams<{ cat?: string }>();
   const [i, setI] = useState(0);
@@ -24,6 +25,8 @@ function Session() {
   const pct = ((i + Math.min(n, s.n) / s.n) / SESS.length) * 100;
 
   const tap = () => {
+    // Taps during the hand-off to the next dhikr must not re-trigger it (or finish the session twice).
+    if (n >= s.n) return;
     pop();
     const nn = n + 1;
     if (nn >= s.n) {
@@ -43,7 +46,7 @@ function Session() {
       style={{ flex: 1, experimental_backgroundImage: G.session, backgroundColor: t.bg }}>
       <StatusBar style="light" />
       <View style={{ paddingTop: ins.top + 6, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-        <Tap onPress={() => { buzz(5); router.back(); }} accessibilityLabel="Back" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+        <Tap onPress={() => { buzz(5); back(); }} accessibilityLabel="Back" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="back" color={t.tx} />
         </Tap>
         <Txt style={{ flex: 1, fontSize: 17, fontWeight: 700 }}>{cat} Adhkar</Txt>

@@ -23,11 +23,16 @@ export default function Auth() {
   const [magic, setMagic] = useState(false);
   const bad = touched && email.length > 0 && !EMAIL.test(email);
   const inputStyle = { height: 56, borderRadius: 20, borderWidth: 1, backgroundColor: t.sunk, paddingHorizontal: 18, color: t.txw, fontSize: 16, fontFamily: 'PlusJakartaSans_400Regular' } as const;
+  // Clear the onboarding screens underneath so Back on Home can't return to them.
+  const home = () => {
+    if (router.canDismiss()) router.dismissAll();
+    router.replace('/home');
+  };
   const enter = () => {
     buzz([10, 30, 10]);
     set({ onboarded: true, signedIn: true, email: email.trim() });
     say('Bismillah — welcome to Ibtida');
-    router.replace('/home');
+    home();
   };
   return (
     <Page top={60}>
@@ -65,7 +70,7 @@ export default function Auth() {
               <Txt style={{ fontSize: 13.5, lineHeight: 20, color: t.okTx }}>Check your inbox — we sent a sign-in link to {email}.</Txt>
             </FadeIn>
           )}
-          <Tap onPress={() => { set({ onboarded: true }); router.replace('/home'); }} style={{ height: 44, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
+          <Tap onPress={() => { set({ onboarded: true }); home(); }} style={{ height: 44, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
             <Txt style={{ fontSize: 14, fontWeight: 600, color: t.t3 }}>Continue without an account</Txt>
           </Tap>
         </FadeIn>

@@ -86,6 +86,7 @@ export function Cta({ label, onPress, style, kind = 'primary', height = 60, size
   return (
     <Tap
       onPress={onPress}
+      disabled={disabled}
       accessibilityState={{ disabled }}
       style={[
         { height, borderRadius: height / 2, backgroundColor: bg, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
@@ -139,10 +140,16 @@ export function H1({ children, style }: { children: ReactNode; style?: StyleProp
   return <Txt accessibilityRole="header" style={[{ fontSize: 30, fontWeight: 800, lineHeight: 34, letterSpacing: -0.75 }, style]}>{children}</Txt>;
 }
 
+/** Back that still works when the screen was opened directly (deep link / restored URL): falls back to Home. */
+export function useBack() {
+  const router = useRouter();
+  return () => { if (router.canGoBack()) router.back(); else router.replace('/(tabs)/home'); };
+}
+
 export function BackBar({ title, right, onBack, close }: { title?: string; right?: ReactNode; onBack?: () => void; close?: boolean }) {
   const t = useT();
-  const router = useRouter();
-  const back = onBack ?? (() => { buzz(5); if (router.canGoBack()) router.back(); else router.replace('/(tabs)/home'); });
+  const goBack = useBack();
+  const back = onBack ?? (() => { buzz(5); goBack(); });
   return (
     <View style={{ paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
       <Tap onPress={back} accessibilityLabel={close ? 'Close' : 'Back'} scale={0.9}
@@ -474,6 +481,7 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
       if (g.dy > 120 || g.vy > 1) onCloseRef.current();
       else Animated.spring(y, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
     },
+    onPanResponderTerminate: () => Animated.spring(y, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start(),
   })).current;
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;

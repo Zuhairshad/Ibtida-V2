@@ -50,12 +50,15 @@ function Lock() {
   const x = useRef(new Animated.Value(0)).current;
   const pan = useRef(PanResponder.create({
     onStartShouldSetPanResponder: () => true,
+    onPanResponderTerminationRequest: () => false,
     onPanResponderMove: (_, g) => x.setValue(Math.max(0, Math.min(maxX, g.dx))),
     onPanResponderRelease: (_, g) => {
       const hit = g.dx > maxX * 0.9;
       Animated.spring(x, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
       if (hit) { buzz([30, 30, 30]); setSheet(true); }
     },
+    // A cancelled drag must not leave the knob stranded mid-track.
+    onPanResponderTerminate: () => Animated.spring(x, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start(),
   })).current;
 
   if (!goal) return null;

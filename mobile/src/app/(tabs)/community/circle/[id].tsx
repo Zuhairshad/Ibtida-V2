@@ -1,6 +1,6 @@
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, Pressable, Share, View } from 'react-native';
+import { Alert, Platform, Pressable, Share, View } from 'react-native';
 import { Icon } from '../../../../components/Icon';
 import { Avatar, BackBar, Bar, buzz, Cta, H1, Label, ListCard, say, Screen, Tap, Txt } from '../../../../components/ui';
 import { code8, fmt } from '../../../../data/content';
@@ -28,13 +28,18 @@ export default function CircleDetail() {
   const upd = (fn: (x: Circle) => Circle) => set(s => ({ circles: s.circles.map(x => (x.id === c.id ? fn(x) : x)) }));
   const members: [string, string][] = [[me, owner ? 'Owner' : 'Member'], ['Amina Rahman', 'Member'], ['Samir Khan', owner ? 'Member' : 'Owner'], ['Maryam Ali', 'Member']];
   const leave = () => {
-    Alert.alert(owner ? 'Delete this circle?' : 'Leave this circle?', owner ? 'Members lose access and the invite code stops working.' : 'You can rejoin with an invite code.', [
+    const title = owner ? 'Delete this circle?' : 'Leave this circle?';
+    const msg = owner ? 'Members lose access and the invite code stops working.' : 'You can rejoin with an invite code.';
+    const go = () => {
+      set(s => ({ circles: s.circles.filter(x => x.id !== c.id) }));
+      say((owner ? 'Deleted ' : 'Left ') + c.name);
+      if (router.canGoBack()) router.back(); else router.replace('/community');
+    };
+    // Alert.alert is a no-op on react-native-web.
+    if (Platform.OS === 'web') { if (window.confirm(`${title}\n${msg}`)) go(); return; }
+    Alert.alert(title, msg, [
       { text: 'Cancel', style: 'cancel' },
-      { text: owner ? 'Delete' : 'Leave', style: 'destructive', onPress: () => {
-        set(s => ({ circles: s.circles.filter(x => x.id !== c.id) }));
-        say((owner ? 'Deleted ' : 'Left ') + c.name);
-        router.back();
-      } },
+      { text: owner ? 'Delete' : 'Leave', style: 'destructive', onPress: go },
     ]);
   };
   return (

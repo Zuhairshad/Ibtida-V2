@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { Icon, type IconName } from '../components/Icon';
 import { FadeIn, Glow } from '../components/motion';
-import { Chips, Label, Page, say, Tap, Txt } from '../components/ui';
+import { Chips, Label, Page, say, Tap, Txt, useBack } from '../components/ui';
 import { RESULTS } from '../data/content';
 import { useT } from '../theme/ThemeProvider';
 
@@ -11,6 +11,7 @@ import { useT } from '../theme/ThemeProvider';
 export default function Search() {
   const t = useT();
   const router = useRouter();
+  const back = useBack();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ export default function Search() {
   return (
     <Page bottom={0}>
       <View style={{ paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Back" style={{ width: 40, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable onPress={back} accessibilityRole="button" accessibilityLabel="Back" style={{ width: 40, height: 44, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="back" color={t.tx} />
         </Pressable>
         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 14, borderRadius: 26, backgroundColor: t.card }}>
