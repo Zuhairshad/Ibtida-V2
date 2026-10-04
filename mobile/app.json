@@ -71,7 +71,8 @@
         {
           "color": "#F2A65A"
         }
-      ]
+      ],
+      "./modules/ibadah-lock/plugin"
     ],
     "experiments": {
       "typedRoutes": false

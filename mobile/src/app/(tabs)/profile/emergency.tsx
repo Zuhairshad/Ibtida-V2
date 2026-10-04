@@ -21,7 +21,7 @@ export default function Emergency() {
           <View key={i} style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 16, paddingHorizontal: 18 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
               <Txt style={{ fontSize: 14.5, fontWeight: 700 }}>{e.when}</Txt>
-              <Txt style={{ fontSize: 12.5, color: t.t2 }}>{e.after}</Txt>
+              <Txt style={{ fontSize: 12.5, color: t.t2 }}>{e.after}{e.blocked ? ` · ${e.blocked} blocked` : ''}</Txt>
             </View>
             <Txt style={{ fontSize: 14, lineHeight: 21, color: t.t5, marginTop: 8 }}>“{e.reason}”</Txt>
           </View>

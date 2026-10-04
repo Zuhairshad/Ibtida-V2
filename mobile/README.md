@@ -29,6 +29,7 @@ eas build -p android --profile preview   # produces an installable .apk
 | `src/state/store.ts` | Single persisted store (AsyncStorage) — offline-first |
 | `src/lib/prayer.ts` | Real prayer times (adhan), Qibla, Hijri date |
 | `src/app/` | expo-router routes. `(tabs)/*` show the floating tab bar; everything else is full-screen |
+| `modules/ibadah-lock/` | Local Expo module: Ibadah Lock app shielding (Android AccessibilityService, iOS stub) and its config plugin. See its README |
 
 Counting, reading and lock screens (`session`, `tasbeeh`, `goal-done`, `focus-active`,
 `wake-scan`, `reader`, `splash`, `loading`) always render dark, as in the design.
@@ -59,14 +60,22 @@ Adhan sounds play the system default until audio files are added — see `ADHAN_
 On Android 12+ times are exact only if the user allows "Alarms & reminders"
 (`SCHEDULE_EXACT_ALARM`); otherwise Android may deliver them a few minutes late.
 
+**Ibadah Lock app shielding: real on Android, not on iOS.**
+- Android (development or EAS build, not Expo Go): after the user turns on the *Ibtida Ibadah Lock*
+  Accessibility service (the setup screen walks them through it), opening a locked app during a
+  session sends them straight back to the lock screen. Each attempt is counted and shown, and the
+  count is saved with any emergency unlock. The session survives the app being killed. Dialer,
+  emergency and SMS apps are never blocked.
+- iOS: needs Apple's FamilyControls entitlement, which Apple must approve. The native side is a
+  stub, and the lock runs inside Ibtida only. `modules/ibadah-lock/README.md` lists the exact steps.
+
 Not wired yet (UI is complete, needs native work or a backend):
-- **Ibadah Lock app shielding** — needs the FamilyControls (iOS) / Accessibility-service
-  (Android) native module from the handover; the lock session itself works.
+- **Ibadah Lock on iOS** — waiting on the FamilyControls entitlement (see above).
 - **Wake alarm ringing until stage 2** — the alarm notification opens the scan, but it
   does not keep ringing; a persistent alarm needs a native full-screen-intent module.
 - **Adhan audio** — no recordings bundled yet; notifications use the default sound.
 - **Focus / Community notifications** — toggles persist; Ibadah Lock start/end and circle
-  milestones need the lock module and backend push (TODOs in `notifications.ts`).
+  milestones need backend push (TODOs in `notifications.ts`).
 - **Accounts, community totals, feed, circles sync** — local sample data until Supabase is connected.
 - **Quran text** — reader shows a licensed-source placeholder; scripture is never generated.
 - Urdu translations were authored in the design phase and need scholarly review.

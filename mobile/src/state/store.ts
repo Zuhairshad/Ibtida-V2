@@ -14,7 +14,8 @@ export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
   goals: { name: string; done: number; total: number }[];
 };
-export type Emergency = { when: string; after: string; reason: string };
+/** `blocked`: locked-app openings intercepted during that session (older records may lack it). */
+export type Emergency = { when: string; after: string; reason: string; blocked: number };
 export type PrayerLog = 'prayed' | 'missed';
 /** One verified two-stage wake scan. `date` is the local day key, `at` epoch ms. */
 export type WakeEntry = { date: string; at: number };
@@ -100,8 +101,8 @@ const initial: AppState = {
   showTr: true,
   rTheme: 0,
   emergencies: [
-    { when: 'Thu 24 Sep · 9:42 pm', after: 'after 11 min', reason: 'Family call about travel plans' },
-    { when: 'Sat 19 Sep · 6:15 am', after: 'after 4 min', reason: 'Needed directions to the masjid' },
+    { when: 'Thu 24 Sep · 9:42 pm', after: 'after 11 min', reason: 'Family call about travel plans', blocked: 2 },
+    { when: 'Sat 19 Sep · 6:15 am', after: 'after 4 min', reason: 'Needed directions to the masjid', blocked: 0 },
   ],
   focus: { dur: 0, goal: 0, apps: [true, true, true, false, false, false] },
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },

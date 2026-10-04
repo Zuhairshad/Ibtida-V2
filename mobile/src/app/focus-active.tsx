@@ -8,6 +8,7 @@ import { Glow, usePop } from '../components/motion';
 import { buzz, Chips, Cta, Ring, say, Sheet, Txt } from '../components/ui';
 import { APPS, mmss } from '../data/content';
 import { DOW, fmtTime } from '../lib/prayer';
+import { appName, IbadahLock, lockPackages } from '../lib/shield';
 import { getState, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 import { G } from '../theme/tokens';
@@ -20,7 +21,8 @@ function Lock() {
   const router = useRouter();
   const ins = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { goal: gid } = useLocalSearchParams<{ goal?: string }>();
+  // `resume` is set by the shielding service's deep link: re-attach to the running native session.
+  const { goal: gid, resume } = useLocalSearchParams<{ goal?: string; resume?: string }>();
   const goal = useApp(s => s.goals.find(g => g.id === Number(gid)) || s.goals[0]);
   const focus = useApp(s => s.focus);
   const [secs, setSecs] = useState(0);
@@ -29,8 +31,43 @@ function Lock() {
   const [scale, pop] = usePop(0.97);
   const ended = useRef(false);
   const limit = DUR_SECS[focus.dur];
+  const [blocked, setBlocked] = useState(0);
+  const [shielding, setShielding] = useState(() => IbadahLock.isSupported() && IbadahLock.isPermissionGranted());
+  // Wall-clock based, so the timer stays right while Ibtida is in the background or was restarted.
+  const startedAt = useRef(Date.now());
+  // Native calls are chained so a quick unlock can't overtake a start() still in flight.
+  const native = useRef<Promise<unknown>>(Promise.resolve());
+  const stopShield = () => { native.current = native.current.then(() => IbadahLock.stop()).catch(() => {}); };
 
-  useEffect(() => { const id = setInterval(() => setSecs(x => x + 1), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => {
+    const tick = () => setSecs(Math.floor((Date.now() - startedAt.current) / 1000));
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Start shielding on mount (or re-attach after the service brought us back), and count blocked attempts.
+  useEffect(() => {
+    if (!goal) return;
+    const running = resume ? IbadahLock.getSession() : null;
+    if (running) {
+      startedAt.current = running.startedAt;
+      setSecs(Math.floor((Date.now() - running.startedAt) / 1000));
+      setBlocked(running.blocked);
+    } else {
+      native.current = IbadahLock.start({
+        packages: lockPackages(focus.apps),
+        endsAt: limit ? startedAt.current + limit * 1000 : null,
+        returnUrl: `ibtida://focus-active?goal=${goal.id}&resume=1`,
+      }).then(r => setShielding(r.shielding)).catch(() => setShielding(false));
+    }
+    const sub = IbadahLock.onBlockedAttempt(e => {
+      if (ended.current) return;
+      setBlocked(e.count);
+      buzz([60]);
+      say(`${appName(e.packageName)} is locked · finish your dhikr first`);
+    });
+    return () => sub.remove();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   // The lock is deliberately hard to leave: hardware back points to the emergency slider instead.
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => { say('Slide for emergency unlock'); return true; });
@@ -39,6 +76,7 @@ function Lock() {
   const finish = (msg: string) => {
     if (ended.current || !goal) return;
     ended.current = true;
+    stopShield();
     buzz([30, 60, 30, 60, 90]);
     say(msg);
     router.replace({ pathname: '/goal-done', params: { name: goal.name, target: String(goal.target) } });
@@ -79,7 +117,12 @@ function Lock() {
         </View>
         <Txt style={{ fontSize: 13, color: t.t2 }}>{limit ? `${mmss(Math.max(0, limit - secs))} left` : mmss(secs)}</Txt>
       </View>
-      <Txt style={{ fontSize: 14, color: t.t2, textAlign: 'center', marginTop: 14, paddingHorizontal: 24 }}>{apps.length ? `${apps.join(' · ')} locked` : 'Focus session'}</Txt>
+      <Txt style={{ fontSize: 14, color: t.t2, textAlign: 'center', marginTop: 14, paddingHorizontal: 24 }}>
+        {!apps.length ? 'Focus session' : shielding ? `${apps.join(' · ')} locked` : `${apps.join(' · ')} · shielding off`}
+      </Txt>
+      {blocked > 0 && (
+        <Txt style={{ fontSize: 12.5, color: t.t4, textAlign: 'center', marginTop: 4 }}>{blocked} {blocked === 1 ? 'attempt' : 'attempts'} blocked</Txt>
+      )}
       <Pressable onPress={tap} accessibilityLabel={`Count. ${n} of ${goal.target}`} accessibilityHint="Tap anywhere to count" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ width: 260, height: 260, alignItems: 'center', justifyContent: 'center', transform: [{ scale }] }}>
           <View style={{ position: 'absolute' }}>
@@ -116,8 +159,9 @@ function Lock() {
           <Cta label="Unlock" kind="secondary" color={t.rose} height={56} size={16} style={{ flex: 1 }} onPress={() => {
             const d = new Date();
             const day = DOW[d.getDay()];
-            const rec = { when: `${day[0]}${day.slice(1).toLowerCase()} ${d.getDate()} · ${fmtTime(d)}`, after: `after ${Math.max(1, Math.round(secs / 60))} min`, reason: REASONS[reason] };
+            const rec = { when: `${day[0]}${day.slice(1).toLowerCase()} ${d.getDate()} · ${fmtTime(d)}`, after: `after ${Math.max(1, Math.round(secs / 60))} min`, reason: REASONS[reason], blocked };
             ended.current = true;
+            stopShield();
             set(s => ({ emergencies: [rec].concat(s.emergencies) }));
             setSheet(false);
             say('Unlocked · logged privately');

@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["IbadahLockModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.ibadahlock.IbadahLockModule"]
+  }
+}

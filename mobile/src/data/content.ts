@@ -86,6 +86,15 @@ const AR_NUM = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 export const arNum = (n: number) => String(n).split('').map(d => AR_NUM[+d]).join('');
 
 export const APPS = ['Instagram', 'TikTok', 'YouTube', 'X', 'Snapchat', 'Facebook'];
+/** Android package ids for `APPS`, index-aligned. Used by the Ibadah Lock Accessibility service. */
+export const APP_PACKAGES = [
+  'com.instagram.android',
+  'com.zhiliaoapp.musically',
+  'com.google.android.youtube',
+  'com.twitter.android',
+  'com.snapchat.android',
+  'com.facebook.katana',
+];
 
 export const RESULTS = [
   { type: 'Quran', title: 'Surah Nuh · 71:10', sub: 'Verse text loads from Kalimat', tag: 'Quran', keys: 'istighfar forgiveness astaghfirullah استغفار' },
