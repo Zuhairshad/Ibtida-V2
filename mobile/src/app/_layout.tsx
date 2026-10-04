@@ -33,7 +33,8 @@ function Shell() {
         <Stack.Screen name="session" options={{ animation: 'fade_from_bottom' }} />
         <Stack.Screen name="tasbeeh" options={{ animation: 'fade_from_bottom' }} />
         <Stack.Screen name="goal-done" options={{ animation: 'fade', gestureEnabled: false }} />
-        <Stack.Screen name="focus-active" options={{ animation: 'fade', gestureEnabled: false }} />
+        {/* One lock screen at most: the shielding service re-opens ibtida://focus-active while it's already showing. */}
+        <Stack.Screen name="focus-active" getId={() => 'lock'} options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="wake-scan" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="goal-new" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="circle-new" options={{ animation: 'slide_from_bottom' }} />

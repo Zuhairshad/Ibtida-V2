@@ -52,7 +52,8 @@
         {
           "locationWhenInUsePermission": "Ibtida uses your location on-device to calculate prayer times and the Qibla direction."
         }
-      ]
+      ],
+      "./modules/ibadah-lock/plugin"
     ],
     "experiments": {
       "typedRoutes": false

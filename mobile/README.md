@@ -29,6 +29,7 @@ eas build -p android --profile preview   # produces an installable .apk
 | `src/state/store.ts` | Single persisted store (AsyncStorage) — offline-first |
 | `src/lib/prayer.ts` | Real prayer times (adhan), Qibla, Hijri date |
 | `src/app/` | expo-router routes. `(tabs)/*` show the floating tab bar; everything else is full-screen |
+| `modules/ibadah-lock/` | Local Expo module: Ibadah Lock app shielding (Android AccessibilityService, iOS stub) and its config plugin. See its README |
 
 Counting, reading and lock screens (`session`, `tasbeeh`, `goal-done`, `focus-active`,
 `wake-scan`, `reader`, `splash`, `loading`) always render dark, as in the design.
@@ -39,9 +40,17 @@ Real: prayer-time calculation for the chosen city/method/madhab, GPS city detect
 Qibla compass (device heading), prayer/goal/tasbeeh logging with persistence, haptics,
 scannable QR wake tags, clipboard/share, light/dark/auto theming.
 
+**Ibadah Lock app shielding: real on Android, not on iOS.**
+- Android (development or EAS build, not Expo Go): after the user turns on the *Ibtida Ibadah Lock*
+  Accessibility service (the setup screen walks them through it), opening a locked app during a
+  session sends them straight back to the lock screen. Each attempt is counted and shown, and the
+  count is saved with any emergency unlock. The session survives the app being killed. Dialer,
+  emergency and SMS apps are never blocked.
+- iOS: needs Apple's FamilyControls entitlement, which Apple must approve. The native side is a
+  stub, and the lock runs inside Ibtida only. `modules/ibadah-lock/README.md` lists the exact steps.
+
 Not wired yet (UI is complete, needs native work or a backend):
-- **Ibadah Lock app shielding** — needs the FamilyControls (iOS) / Accessibility-service
-  (Android) native module from the handover; the lock session itself works.
+- **Ibadah Lock on iOS** — waiting on the FamilyControls entitlement (see above).
 - **Wake-scan camera** — needs `expo-camera`; the scan step is simulated.
 - **Adhan / reminder notifications** — toggles persist; scheduling needs `expo-notifications`.
 - **Accounts, community totals, feed, circles sync** — local sample data until Supabase is connected.
