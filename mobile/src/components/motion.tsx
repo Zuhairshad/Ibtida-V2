@@ -156,3 +156,13 @@ export function useNow(intervalMs = 1000) {
   }, [intervalMs]);
   return now;
 }
+
+/** Tactile press "pop" used by counters (scale .94 → 1 in ~110ms). */
+export function usePop(to = 0.94) {
+  const v = useRef(new Animated.Value(1)).current;
+  const pop = () => {
+    v.setValue(to);
+    Animated.spring(v, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 8 }).start();
+  };
+  return [v, pop] as const;
+}
