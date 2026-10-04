@@ -12,6 +12,13 @@ npx expo start         # scan with a development build / Expo Go
 npm run typecheck
 ```
 
+## End-to-end smoke tests
+
+Web is only a test target: `npm run e2e` exports the app for web (`npm run web:export` → `dist-web/`),
+serves it statically and runs the Playwright specs in `e2e/` at a 393×852 phone viewport — the full
+onboarding, every route, the bottom sheets, logging, tasbeeh, goals, circles, appearance and search,
+failing on any uncaught page error or console error. State is seeded through localStorage (AsyncStorage on web).
+
 ## Get an APK
 
 ```bash
