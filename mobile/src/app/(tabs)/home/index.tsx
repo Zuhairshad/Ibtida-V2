@@ -7,6 +7,7 @@ import { InsightSheet } from '../../../components/InsightSheet';
 import { Breathe, FadeIn, PulseDot, Stars, useCountUp } from '../../../components/motion';
 import { buzz, IconBtn, PillShortcut, say, SerifTitle, Tap, Txt, UrduToggle } from '../../../components/ui';
 import { fmt, HADITH, IMPACT_TARGET, PH, type PrayerName } from '../../../data/content';
+import { SURAHS, surahPct } from '../../../data/surahs';
 import { firstName, fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hooks';
 import { DOW, fmtTime, hijri, MON, qibla } from '../../../lib/prayer';
 import { useApp } from '../../../state/store';
@@ -29,6 +30,7 @@ export default function Home() {
   const { now, next } = usePrayerNow();
   const city = useApp(s => s.city);
   const streak = useApp(s => s.streak);
+  const qLast = useApp(s => s.qLast);
   const [day, setDay] = useState(0);
   const [phase, setPhase] = useState<PrayerName | null>(null);
   const [car, setCar] = useState(0);
@@ -51,7 +53,7 @@ export default function Home() {
   const quick: { title: string; sub: string; icon: IconName; tint: string; ink: string; go: () => void }[] = [
     { title: 'Prayer times', sub: `${next.name} at ${fmtTime(next.at)}`, icon: 'prayer', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
     { title: 'Daily adhkar', sub: 'Evening · 8 min', icon: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: 'Evening' } }) },
-    { title: 'Quran', sub: 'Al-Baqarah · 72%', icon: 'book', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
+    { title: 'Quran', sub: qLast ? `${SURAHS[qLast.s - 1].name} · ${surahPct(qLast.s, qLast.a)}%` : 'Start reading', icon: 'book', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
     { title: 'Ibadah Lock', sub: 'Focus while you recite', icon: 'lock', tint: t.tLav, ink: t.lav, go: () => router.push('/focus-setup') },
   ];
 

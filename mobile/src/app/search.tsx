@@ -5,7 +5,10 @@ import { Icon, type IconName } from '../components/Icon';
 import { FadeIn, Glow } from '../components/motion';
 import { Chips, Label, Page, say, Tap, Txt } from '../components/ui';
 import { RESULTS } from '../data/content';
+import { parseRef, searchSurahs, SURAHS } from '../data/surahs';
 import { useT } from '../theme/ThemeProvider';
+
+type Result = { type: 'Quran' | 'Hadith' | 'Azkar'; title: string; sub: string; tag: string };
 
 /** Kalimat search across Quran, hadith and adhkar (transliteration + Arabic keys). */
 export default function Search() {
@@ -22,7 +25,13 @@ export default function Search() {
   }, [q]);
   const qq = q.trim().toLowerCase();
   const f = ['All', 'Quran', 'Hadith', 'Azkar'][filter];
-  const res = qq ? RESULTS.filter(r => (f === 'All' || r.type === f) && `${r.title} ${r.sub} ${r.keys}`.toLowerCase().includes(qq)) : [];
+  // Quran results carry a surah:ayah reference ("2:255") that opens the reader there.
+  const ref = parseRef(qq);
+  const quran: Result[] = !qq || (f !== 'All' && f !== 'Quran') ? [] : [
+    ...(ref ? [{ type: 'Quran' as const, title: `${SURAHS[ref.s - 1].name} · ${ref.s}:${ref.a}`, sub: 'Open in the reader', tag: 'Ayah' }] : []),
+    ...(qq.length >= 2 && !ref ? searchSurahs(qq).slice(0, 4).map(m => ({ type: 'Quran' as const, title: `Surah ${m.name} · ${m.n}:1`, sub: `${m.ayahs} ayat · ${m.place}`, tag: 'Surah' })) : []),
+  ];
+  const res: Result[] = qq ? [...quran, ...RESULTS.filter(r => (f === 'All' || r.type === f) && `${r.title} ${r.sub} ${r.keys}`.toLowerCase().includes(qq))] : [];
   const tint: Record<string, [string, string, IconName]> = { Quran: [t.tMint, t.mint, 'book'], Hadith: [t.tBlue, t.peri, 'shield'], Azkar: [t.tAmb, t.acc, 'beads'] };
   return (
     <Page bottom={0}>
@@ -71,7 +80,9 @@ export default function Search() {
                 return (
                   <FadeIn key={r.title} dur={300}>
                     <Tap scale={0.985} onPress={() => {
-                      if (r.type === 'Quran') router.push('/reader');
+                      const m = r.type === 'Quran' ? /(\d{1,3}):(\d{1,3})\s*$/.exec(r.title) : null;
+                      if (m) router.push({ pathname: '/reader', params: { surah: m[1], ayah: m[2] } });
+                      else if (r.type === 'Quran') router.push('/home/quran');
                       else if (r.type === 'Azkar') router.push({ pathname: '/session', params: { cat: r.title.split(' ')[0] === 'Morning' ? 'Morning' : r.title.startsWith('Before') ? 'Before Sleep' : 'Forgiveness' } });
                       else say(`Opening ${r.title}`);
                     }} style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 15, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 13 }}>

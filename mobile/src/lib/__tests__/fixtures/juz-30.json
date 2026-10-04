@@ -1,0 +1,76 @@
+{
+ "code": 200,
+ "status": "OK",
+ "data": {
+  "number": 30,
+  "ayahs": [
+   {
+    "number": 5673,
+    "text": "AR_TEXT_78_1",
+    "surah": {
+     "number": 78,
+     "name": "AR_NAME_78",
+     "englishName": "EN_NAME_78",
+     "englishNameTranslation": "EN_MEANING_78",
+     "revelationType": "Meccan",
+     "numberOfAyahs": 40
+    },
+    "numberInSurah": 1,
+    "juz": 30,
+    "manzil": 7,
+    "page": 582,
+    "ruku": 1,
+    "hizbQuarter": 233,
+    "sajda": false
+   },
+   {
+    "number": 5674,
+    "text": "AR_TEXT_78_2",
+    "surah": {
+     "number": 78,
+     "name": "AR_NAME_78",
+     "englishName": "EN_NAME_78",
+     "englishNameTranslation": "EN_MEANING_78",
+     "revelationType": "Meccan",
+     "numberOfAyahs": 40
+    },
+    "numberInSurah": 2,
+    "juz": 30,
+    "manzil": 7,
+    "page": 582,
+    "ruku": 1,
+    "hizbQuarter": 233,
+    "sajda": false
+   },
+   {
+    "number": 5675,
+    "text": "AR_TEXT_78_3",
+    "surah": {
+     "number": 78,
+     "name": "AR_NAME_78",
+     "englishName": "EN_NAME_78",
+     "englishNameTranslation": "EN_MEANING_78",
+     "revelationType": "Meccan",
+     "numberOfAyahs": 40
+    },
+    "numberInSurah": 3,
+    "juz": 30,
+    "manzil": 7,
+    "page": 582,
+    "ruku": 1,
+    "hizbQuarter": 233,
+    "sajda": false
+   }
+  ],
+  "surahs": {},
+  "edition": {
+   "identifier": "quran-uthmani",
+   "language": "ar",
+   "name": "EDITION_NAME",
+   "englishName": "Uthmani",
+   "format": "text",
+   "type": "quran",
+   "direction": "rtl"
+  }
+ }
+}
