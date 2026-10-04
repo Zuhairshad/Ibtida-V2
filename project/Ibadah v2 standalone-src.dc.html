@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#F8F7F3">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#F8F7F3"/>
+    <circle cx="600" cy="380" r="230" fill="#F3E7C9"/>
+    <circle cx="600" cy="380" r="180" fill="none" stroke="#D9BE86" stroke-width="14"/>
+    <circle cx="600" cy="380" r="128" fill="none" stroke="#8FA995" stroke-width="12"/>
+    <rect x="512" y="292" width="176" height="176" rx="24" fill="none" stroke="#24463A" stroke-width="12" transform="rotate(45 600 380)"/>
+    <circle cx="600" cy="380" r="26" fill="#24463A"/>
+    <rect x="470" y="660" width="260" height="26" rx="13" fill="#24463A"/>
+  </svg>
+</template>
+
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#EDEBE5; font-family:-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#3D73C9; } a:hover { color:#2F5CA3; }
+  ::-webkit-scrollbar { width:0; height:0; }
+  @keyframes ibIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  @keyframes ibSheet { from { transform:translateY(100%); } to { transform:none; } }
+  @keyframes ibGlow { 0%,100% { opacity:.35; transform:scale(1) } 50% { opacity:.7; transform:scale(1.05) } }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:40px;padding:44px 36px 60px">
+
+  <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:206px;flex:none;position:sticky;top:44px">
+      <div style="font:600 19px/1.1 -apple-system,'SF Pro Display',system-ui,sans-serif;color:#17201C;letter-spacing:-0.02em">Ibadah</div>
+      <div style="font:400 11.5px/1.5 -apple-system,system-ui,sans-serif;color:#8A928C;margin:4px 0 20px">v2 · spec-aligned · 21 screens</div>
+      <nav style="display:flex;flex-direction:column;gap:1px">
+        <sc-for list="{{ rail }}" as="item" hint-placeholder-count="21">
+          <button type="button" onClick="{{ item.go }}" style="appearance:none;text-align:left;border:0;background:transparent;padding:7px 9px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:9px;font:400 12.5px/1.2 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="background:rgba(23,32,28,0.05);color:#17201C">
+            <span style="width:15px;font:500 10px/1 ui-monospace,Menlo,monospace;color:#B9BEB7">{{ item.num }}</span>
+            <span>{{ item.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+      <div style="margin-top:20px;padding:12px 13px;border-radius:16px;background:#F3E7C9;border:1px solid rgba(217,190,134,0.5);font:400 11px/1.55 -apple-system,system-ui,sans-serif;color:#7A6741">Per content governance: no Quran, hadith or references are invented here. Verse bodies and long adhkar show a source-pending state instead of placeholder scripture.</div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:none;padding:11px;border-radius:58px;background:linear-gradient(160deg,#2B2A28,#191817);box-shadow:0 2px 4px rgba(0,0,0,0.18),0 40px 80px -30px rgba(23,32,28,0.5)">
+    <div style="position:relative;width:393px;height:852px;border-radius:47px;overflow:hidden;background:#F8F7F3;display:flex;flex-direction:column;color:#17201C">
+
+      <div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;pointer-events:none;color:{{ statusColor }}">
+        <span style="font:600 13.5px/1 -apple-system,system-ui,sans-serif">9:41</span>
+        <span style="display:flex;align-items:center;gap:5px">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor" opacity="0.3"/></svg>
+          <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="20" height="11" rx="3.2" stroke="currentColor" stroke-opacity="0.35"/><rect x="2" y="2" width="14" height="8" rx="2" fill="currentColor"/><path d="M22 4v4a2 2 0 0 0 0-4z" fill="currentColor" fill-opacity="0.35"/></svg>
+        </span>
+      </div>
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:104px;height:29px;border-radius:16px;background:#151413;z-index:41"></div>
+
+      <sc-if value="{{ isWelcome }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:0 24px 40px;background:linear-gradient(180deg,#FFFFFF 0%,#F8F7F3 55%,#F1F3EE 100%);animation:ibIn .45s ease both">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative">
+            <div style="position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.30),rgba(217,190,134,0) 68%);animation:ibGlow 7s ease-in-out infinite"></div>
+            <svg width="152" height="152" viewBox="0 0 152 152" fill="none">
+              <circle cx="76" cy="76" r="62" stroke="#D9BE86"/>
+              <circle cx="76" cy="76" r="44" stroke="#8FA995"/>
+              <rect x="32" y="32" width="88" height="88" rx="10" stroke="#24463A" stroke-opacity="0.55" transform="rotate(45 76 76)"/>
+              <circle cx="76" cy="76" r="6.5" fill="#D9BE86"/>
+            </svg>
+          </div>
+          <h1 style="font:600 34px/1.14 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em;margin:0 0 12px;text-wrap:pretty">Small steps.<br>Consistent worship.</h1>
+          <p style="font:400 16px/1.55 -apple-system,system-ui,sans-serif;color:#68716C;margin:0 0 28px;max-width:300px;text-wrap:pretty">A quiet record of your prayer, dhikr and reading. Everything private by default.</p>
+          <button type="button" onClick="{{ nav.intentions }}" style="appearance:none;border:0;width:100%;min-height:52px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer;box-shadow:0 10px 22px -12px rgba(36,70,58,0.7)" style-hover="background:#1B382E">Begin</button>
+          <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;margin-top:4px;min-height:48px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#8A928C;cursor:pointer" style-hover="color:#17201C">I already have an account</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isIntentions }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:66px 24px 40px;overflow-y:auto;animation:ibIn .35s ease both">
+          <h1 style="font:600 28px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0 0 8px">What would you like to be steady in?</h1>
+          <p style="font:400 15px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin:0 0 24px">Pick one or two. This only sets what Home shows first.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ intents }}" as="it" hint-placeholder-count="5">
+              <button type="button" onClick="{{ it.toggle }}" style="appearance:none;text-align:left;cursor:pointer;min-height:48px;padding:16px;border-radius:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFFFF;border:1px solid rgba(23,32,28,0.07);box-shadow:0 1px 2px rgba(23,32,28,0.03)" style-hover="border-color:rgba(23,32,28,0.2)">
+                <span style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 16px/1.2 -apple-system,system-ui,sans-serif">{{ it.title }}</span>
+                  <span style="font:400 13px/1.35 -apple-system,system-ui,sans-serif;color:#68716C">{{ it.sub }}</span>
+                </span>
+                <sc-if value="{{ it.on }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;width:24px;height:24px;border-radius:50%;background:#5EAA78;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.4l2.4 2.4L9.6 4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </sc-if>
+                <sc-if value="{{ it.off }}" hint-placeholder-val="{{ true }}">
+                  <span style="flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(23,32,28,0.15)"></span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:24px"></div>
+          <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;width:100%;min-height:52px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#1B382E">Continue</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHome }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#8A928C">Wednesday · 14 Rabi&rsquo; al-Awwal</div>
+              <h1 style="font:600 26px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:8px 0 0">Assalamu Alaikum</h1>
+            </div>
+            <button type="button" onClick="{{ nav.profile }}" style="appearance:none;border:0;flex:none;width:44px;height:44px;border-radius:50%;background:#F1F3EE;color:#24463A;font:600 15px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#E7EBE4">Y</button>
+          </div>
+
+          <div style="padding:20px 24px 0">
+            <button type="button" onClick="{{ nav.prayer }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:30px;padding:24px;background:linear-gradient(155deg,#FFFFFF 0%,#F7F4EC 100%);box-shadow:0 1px 2px rgba(23,32,28,0.03),0 18px 36px -22px rgba(23,32,28,0.28);position:relative;overflow:hidden" style-hover="border-color:rgba(23,32,28,0.12)">
+              <div style="position:absolute;right:-40px;top:-56px;width:186px;height:186px;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.26),rgba(217,190,134,0) 70%)"></div>
+              <svg width="150" height="150" viewBox="0 0 150 150" fill="none" style="position:absolute;right:-18px;bottom:-42px;opacity:0.35"><circle cx="75" cy="75" r="62" stroke="#D9BE86"/><rect x="27" y="27" width="96" height="96" rx="12" stroke="#8FA995" transform="rotate(45 75 75)"/></svg>
+              <div style="position:relative">
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#B0954F">Next prayer</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:12px;margin-top:12px">
+                  <span style="font:600 36px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em">Asr</span>
+                  <span style="font:500 18px/1 -apple-system,system-ui,sans-serif;color:#68716C">3:40 PM</span>
+                </div>
+                <div style="font:400 15px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:12px">23 min remaining</div>
+                <div style="height:4px;border-radius:2px;background:rgba(23,32,28,0.07);margin-top:18px;overflow:hidden"><div style="height:100%;width:78%;border-radius:2px;background:linear-gradient(90deg,#D9BE86,#E7D3A9)"></div></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font:400 12px/1 -apple-system,system-ui,sans-serif;color:#9AA09B"><span>Dhuhr 12:05 PM</span><span>Maghrib 6:33 PM</span></div>
+              </div>
+            </button>
+          </div>
+
+          <div style="padding:12px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF;box-shadow:0 1px 2px rgba(23,32,28,0.03)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Today&rsquo;s worship</span>
+                <button type="button" onClick="{{ nav.progress }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer;font:600 13px/1 -apple-system,system-ui,sans-serif;color:#3D73C9" style-hover="color:#2F5CA3">Details</button>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:16px">
+                <sc-for list="{{ prayers }}" as="p" hint-placeholder-count="5">
+                  <button type="button" onClick="{{ p.toggle }}" style="appearance:none;flex:1;cursor:pointer;border:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:48px">
+                    <sc-if value="{{ p.done }}" hint-placeholder-val="{{ false }}">
+                      <span style="width:100%;height:44px;border-radius:14px;background:#8FA995;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 12 12" fill="none"><path d="M2.4 6.3l2.5 2.5L9.7 3.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                    </sc-if>
+                    <sc-if value="{{ p.pending }}" hint-placeholder-val="{{ true }}">
+                      <span style="width:100%;height:44px;border-radius:14px;border:1.5px dashed rgba(23,32,28,0.16);background:#F8F7F3"></span>
+                    </sc-if>
+                    <span style="font:500 11.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">{{ p.short }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(23,32,28,0.06)">
+                <sc-for list="{{ todayRings }}" as="r" hint-placeholder-count="3">
+                  <div style="flex:1;display:flex;align-items:center;gap:10px">
+                    <span style="position:relative;width:38px;height:38px;flex:none">
+                      <svg width="38" height="38" viewBox="0 0 38 38" style="transform:rotate(-90deg)"><circle cx="19" cy="19" r="16" stroke="#F1F3EE" stroke-width="4" fill="none"/><circle cx="19" cy="19" r="16" stroke="{{ r.color }}" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="100.5" stroke-dashoffset="{{ r.offset }}"/></svg>
+                    </span>
+                    <span>
+                      <span style="display:block;font:600 13px/1 -apple-system,system-ui,sans-serif">{{ r.value }}</span>
+                      <span style="display:block;font:400 11.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:4px">{{ r.label }}</span>
+                    </span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:12px 24px 0">
+            <button type="button" onClick="{{ nav.tasbeeh }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF;box-shadow:0 1px 2px rgba(23,32,28,0.03)" style-hover="border-color:rgba(23,32,28,0.14)">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div>
+                  <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Primary goal</div>
+                  <div style="font:600 18px/1.2 -apple-system,system-ui,sans-serif;margin-top:9px">Durood Sharif</div>
+                  <div style="font:400 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:6px">{{ count }} of {{ target }} · 7 day streak</div>
+                </div>
+                <span style="position:relative;flex:none;width:64px;height:64px;display:flex;align-items:center;justify-content:center">
+                  <svg width="64" height="64" viewBox="0 0 64 64" style="position:absolute;transform:rotate(-90deg)"><circle cx="32" cy="32" r="28" stroke="#F1F3EE" stroke-width="5" fill="none"/><circle cx="32" cy="32" r="28" stroke="#D9BE86" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="175.9" stroke-dashoffset="{{ smallRing }}" style="transition:stroke-dashoffset .4s ease"/></svg>
+                  <span style="font:600 14px/1 -apple-system,system-ui,sans-serif;color:#17201C">{{ pctText }}</span>
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <div style="padding:24px 24px 0">
+            <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C;margin-bottom:12px">Continue worship</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ continueItems }}" as="c" hint-placeholder-count="3">
+                <button type="button" onClick="{{ c.go }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:22px;padding:16px;background:#FFFFFF;display:flex;align-items:center;gap:14px;min-height:48px" style-hover="border-color:rgba(23,32,28,0.14)">
+                  <span style="flex:none;width:46px;height:46px;border-radius:15px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;color:{{ c.ink }}" dangerouslySetInnerHTML="{{ c.icon }}"></span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font:600 15.5px/1.2 -apple-system,system-ui,sans-serif">{{ c.title }}</span>
+                    <span style="display:block;font:400 13px/1.3 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:4px">{{ c.sub }}</span>
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#B9BEB7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:24px 24px 0">
+            <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C;margin-bottom:12px">Recommended</div>
+            <button type="button" onClick="{{ nav.focusSetup }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(61,115,201,0.18);border-radius:24px;padding:20px;background:#DDEAF4" style-hover="border-color:rgba(61,115,201,0.35)">
+              <div style="font:600 16.5px/1.25 -apple-system,system-ui,sans-serif;color:#1F3E63">Ibadah Focus</div>
+              <div style="font:400 13.5px/1.5 -apple-system,system-ui,sans-serif;color:#3A5A7E;margin-top:6px;text-wrap:pretty">Finish your Durood with a quiet phone. 18 minutes, on average.</div>
+            </button>
+          </div>
+
+          <div style="padding:12px 24px 0">
+            <button type="button" onClick="{{ nav.community }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#F1F3EE" style-hover="border-color:rgba(23,32,28,0.14)">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#68716C">Community today</div>
+              <div style="font:600 28px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em;margin-top:12px">2,847,391</div>
+              <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:9px">dhikr counted · your contribution included</div>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPrayer }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Prayer</h1>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:9px;font:400 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.2 5-8a5 5 0 1 0-10 0c0 3.8 5 8 5 8z" stroke="#68716C" stroke-width="1.4"/><circle cx="8" cy="6.4" r="1.7" stroke="#68716C" stroke-width="1.4"/></svg>
+              <span>Manchester, UK</span><span style="color:#C4C8C2">·</span><span>Wed 27 Aug</span>
+            </div>
+          </div>
+          <div style="padding:18px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:28px;padding:24px;background:linear-gradient(155deg,#24463A,#1B3B31);color:#EFF3F0;position:relative;overflow:hidden;box-shadow:0 18px 36px -22px rgba(27,59,49,0.7)">
+              <div style="position:absolute;right:-50px;top:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.22),rgba(217,190,134,0) 70%)"></div>
+              <div style="position:relative">
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:rgba(239,243,240,0.55)">Next prayer</div>
+                <div style="display:flex;align-items:baseline;gap:12px;margin-top:12px">
+                  <span style="font:600 34px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em">Asr</span>
+                  <span style="font:500 18px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.7)">3:40 PM</span>
+                </div>
+                <div style="font:500 26px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:0.01em;margin-top:16px;color:#D9BE86">23:56</div>
+                <div style="font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.55);margin-top:7px">remaining</div>
+                <div style="height:4px;border-radius:2px;background:rgba(239,243,240,0.15);margin-top:18px;overflow:hidden"><div style="height:100%;width:78%;border-radius:2px;background:#D9BE86"></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 0;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ prayerRows }}" as="p" hint-placeholder-count="6">
+              <button type="button" onClick="{{ p.open }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid {{ p.border }};border-radius:22px;padding:15px 16px;background:{{ p.bg }};display:flex;align-items:center;gap:13px;min-height:48px" style-hover="border-color:rgba(23,32,28,0.2)">
+                <span style="flex:none;width:38px;height:38px;border-radius:13px;background:{{ p.chipBg }};display:flex;align-items:center;justify-content:center;color:{{ p.chipInk }}" dangerouslySetInnerHTML="{{ p.icon }}"></span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 16px/1.2 -apple-system,system-ui,sans-serif">{{ p.name }}</span>
+                  <span style="display:block;font:400 12.5px/1.3 -apple-system,system-ui,sans-serif;color:{{ p.noteInk }};margin-top:4px">{{ p.note }}</span>
+                </span>
+                <span style="font:500 16px/1 -apple-system,system-ui,sans-serif;color:#17201C">{{ p.time }}</span>
+                <sc-if value="{{ p.loggable }}" hint-placeholder-val="{{ true }}">
+                  <span onClick="{{ p.toggle }}" style="flex:none;width:44px;height:44px;border-radius:14px;border:1.5px dashed rgba(23,32,28,0.16);background:#F8F7F3;display:flex;align-items:center;justify-content:center;font:600 10.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C" style-hover="border-color:#8FA995;color:#24463A">Log</span>
+                </sc-if>
+                <sc-if value="{{ p.isDone }}" hint-placeholder-val="{{ false }}">
+                  <span onClick="{{ p.toggle }}" style="flex:none;width:44px;height:44px;border-radius:14px;background:#8FA995;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 12 12" fill="none"><path d="M2.4 6.3l2.5 2.5L9.7 3.6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="padding:16px 24px 0">
+            <button type="button" onClick="{{ nav.progress }}" style="appearance:none;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.06);border-radius:22px;padding:17px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;min-height:48px;font:600 15px/1 -apple-system,system-ui,sans-serif;color:#17201C" style-hover="border-color:rgba(23,32,28,0.18)">
+              <span>Qada &amp; missed prayers</span>
+              <span style="display:flex;align-items:center;gap:9px"><span style="font:500 12.5px/1 -apple-system,system-ui,sans-serif;color:#A24E4E;background:rgba(201,107,107,0.13);padding:6px 10px;border-radius:10px">4 outstanding</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#B9BEB7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+          <div style="padding:12px 24px 0">
+            <div style="border-radius:22px;padding:17px;background:#F1F3EE;font:400 12.5px/1.6 -apple-system,system-ui,sans-serif;color:#68716C">Times are calculated on device (Muslim World League · Hanafi Asr). Missed prayers move to Qada after midnight rather than disappearing.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPrayerDetail }}">
+        <div style="flex:1;position:relative;background:#F8F7F3">
+          <div style="position:absolute;inset:0;background:rgba(23,32,28,0.42);backdrop-filter:blur(3px)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#FFFFFF;border-radius:32px 32px 0 0;padding:12px 24px 34px;box-shadow:0 -20px 50px -20px rgba(23,32,28,0.4);animation:ibSheet .32s cubic-bezier(0.22,1,0.36,1) both">
+            <div style="width:38px;height:4px;border-radius:2px;background:rgba(23,32,28,0.14);margin:0 auto 20px"></div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div>
+                <h2 style="font:600 24px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.02em;margin:0">Asr</h2>
+                <div style="font:400 14px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:8px">3:40 PM · ends 6:33 PM</div>
+              </div>
+              <span style="font:500 12px/1 -apple-system,system-ui,sans-serif;color:#1F3E63;background:#DDEAF4;padding:8px 11px;border-radius:12px">Current</span>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:8px">
+              <sc-for list="{{ logModes }}" as="m" hint-placeholder-count="3">
+                <sc-if value="{{ m.on }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ m.pick }}" style="appearance:none;flex:1;min-height:48px;cursor:pointer;border:0;border-radius:14px;background:#24463A;color:#F8F7F3;font:600 13.5px/1 -apple-system,system-ui,sans-serif">{{ m.label }}</button>
+                </sc-if>
+                <sc-if value="{{ m.off }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ m.pick }}" style="appearance:none;flex:1;min-height:48px;cursor:pointer;border:1px solid rgba(23,32,28,0.1);border-radius:14px;background:#F8F7F3;color:#68716C;font:500 13.5px/1 -apple-system,system-ui,sans-serif" style-hover="border-color:rgba(23,32,28,0.24)">{{ m.label }}</button>
+                </sc-if>
+              </sc-for>
+            </div>
+            <div style="margin-top:10px;border:1px solid rgba(23,32,28,0.07);border-radius:20px;background:#F8F7F3;padding:16px">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#8A928C">Optional note</div>
+              <div style="font:400 14px/1.5 -apple-system,system-ui,sans-serif;color:#9AA09B;margin-top:10px">Prayed at the masjid with Yusuf&rsquo;s father.</div>
+            </div>
+            <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(23,32,28,0.07);border-radius:20px;background:#FFFFFF;padding:15px 16px">
+              <span style="font:500 15px/1 -apple-system,system-ui,sans-serif">Adhan notification</span>
+              <span style="width:48px;height:29px;border-radius:15px;background:#8FA995;position:relative"><span style="position:absolute;top:2.5px;right:2.5px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></span>
+            </div>
+            <button type="button" onClick="{{ markAsr }}" style="appearance:none;border:0;width:100%;min-height:52px;margin-top:16px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#1B382E">Mark as prayed</button>
+            <button type="button" onClick="{{ nav.prayer }}" style="appearance:none;border:0;background:transparent;width:100%;min-height:48px;margin-top:2px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#8A928C;cursor:pointer" style-hover="color:#17201C">Cancel</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdhkar }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Adhkar</h1>
+            <div style="display:flex;gap:4px;margin-top:16px;padding:4px;border-radius:14px;background:#F1F3EE">
+              <sc-for list="{{ adhkarModes }}" as="m" hint-placeholder-count="2">
+                <sc-if value="{{ m.on }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ m.pick }}" style="appearance:none;flex:1;min-height:44px;cursor:pointer;border:0;border-radius:11px;background:#FFFFFF;color:#17201C;font:600 14px/1 -apple-system,system-ui,sans-serif;box-shadow:0 1px 3px rgba(23,32,28,0.1)">{{ m.label }}</button>
+                </sc-if>
+                <sc-if value="{{ m.off }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ m.pick }}" style="appearance:none;flex:1;min-height:44px;cursor:pointer;border:0;border-radius:11px;background:transparent;color:#68716C;font:500 14px/1 -apple-system,system-ui,sans-serif" style-hover="color:#17201C">{{ m.label }}</button>
+                </sc-if>
+              </sc-for>
+            </div>
+            <div style="margin-top:12px;display:flex;align-items:center;gap:9px;padding:13px 15px;border-radius:14px;background:#FFFFFF;border:1px solid rgba(23,32,28,0.07);min-height:48px">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.6" stroke="#B9BEB7" stroke-width="1.5"/><path d="M10.6 10.6L14 14" stroke="#B9BEB7" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span style="font:400 14.5px/1 -apple-system,system-ui,sans-serif;color:#B0B5AF">Search English, Arabic, Urdu or transliteration</span>
+            </div>
+          </div>
+          <div style="padding:18px 24px 0">
+            <button type="button" onClick="{{ nav.adhkarSession }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:28px;padding:22px;background:linear-gradient(155deg,#FFFFFF,#F7F4EC);box-shadow:0 1px 2px rgba(23,32,28,0.03),0 16px 32px -22px rgba(23,32,28,0.26)" style-hover="border-color:rgba(23,32,28,0.13)">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#B0954F">Continue</div>
+              <div style="font:600 22px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.02em;margin-top:10px">Evening Adhkar</div>
+              <div style="font:400 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:7px">20 adhkar · about 8 minutes</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+                <span style="height:5px;flex:1;border-radius:3px;background:rgba(23,32,28,0.08);overflow:hidden"><span style="display:block;height:100%;width:30%;background:#8FA995;border-radius:3px"></span></span>
+                <span style="font:600 12.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">30% · 6 / 20</span>
+              </div>
+            </button>
+          </div>
+          <div style="padding:22px 24px 0">
+            <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C;margin-bottom:12px">Categories</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <sc-for list="{{ categories }}" as="c" hint-placeholder-count="8">
+                <button type="button" onClick="{{ nav.adhkarSession }}" style="appearance:none;text-align:left;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:22px;padding:16px;background:#FFFFFF;min-height:120px;display:flex;flex-direction:column;justify-content:space-between;gap:12px" style-hover="border-color:rgba(23,32,28,0.16)">
+                  <span dir="rtl" style="font:500 16px/1.4 'Noto Naskh Arabic',serif;color:#B0954F">{{ c.ar }}</span>
+                  <span>
+                    <span style="display:block;font:600 15px/1.2 -apple-system,system-ui,sans-serif">{{ c.name }}</span>
+                    <span style="display:block;font:400 12px/1.4 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:5px">{{ c.n }} adhkar · {{ c.mins }} min</span>
+                    <span style="display:block;height:4px;border-radius:2px;background:#F1F3EE;margin-top:10px;overflow:hidden"><span style="display:block;height:100%;border-radius:2px;background:#8FA995;width:{{ c.pct }}%"></span></span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdhkarSession }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFFFFF,#F1F3EE);animation:ibIn .28s ease both">
+          <div style="padding:60px 24px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <button type="button" onClick="{{ nav.adhkar }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Evening</button>
+            <span style="display:flex;gap:16px;align-items:center">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5h9v13l-4.5-3.4L4.5 15.5z" stroke="#68716C" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 9h13M9 2.5v13" stroke="#68716C" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </span>
+          </div>
+          <div style="padding:0 24px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="height:5px;flex:1;border-radius:3px;background:rgba(23,32,28,0.08);overflow:hidden"><span style="display:block;height:100%;width:30%;background:#8FA995;border-radius:3px"></span></span>
+              <span style="font:600 12.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">6 / 20</span>
+            </div>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:18px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:28px;padding:28px 22px;background:#FFFFFF;box-shadow:0 1px 2px rgba(23,32,28,0.03),0 18px 40px -26px rgba(23,32,28,0.28)">
+              <div dir="rtl" lang="ar" style="font-family:'Noto Naskh Arabic',serif;font-weight:500;line-height:2.1;color:#17201C;text-align:center;font-size:{{ arabicSize }}px">سُبْحَانَ اللهِ وَبِحَمْدِهِ</div>
+              <div style="height:1px;background:rgba(23,32,28,0.07);margin:24px 0"></div>
+              <div style="font:400 14px/1.5 -apple-system,system-ui,sans-serif;color:#8A928C;text-align:center">SubhanAllahi wa bihamdih</div>
+              <div style="font:400 17px/1.55 -apple-system,system-ui,sans-serif;color:#17201C;text-align:center;margin-top:12px;text-wrap:pretty">Glory be to Allah, and praise belongs to Him.</div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:22px">
+                <span style="font:500 11.5px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:7px 11px;border-radius:10px">Sahih al-Bukhari 6405</span>
+                <span style="font:500 11.5px/1 -apple-system,system-ui,sans-serif;color:#B0954F;background:#F3E7C9;padding:7px 11px;border-radius:10px">100 ×</span>
+              </div>
+            </div>
+            <div style="margin-top:12px;border-radius:22px;padding:16px;background:#F1F3EE;font:400 12.5px/1.6 -apple-system,system-ui,sans-serif;color:#68716C">Reference shown as recorded in the content set. Items awaiting review are labelled rather than displayed as established.</div>
+          </div>
+          <div style="padding:14px 24px 30px;background:linear-gradient(180deg,rgba(241,243,238,0),#F1F3EE 45%)">
+            <button type="button" onClick="{{ tapDhikr }}" style="appearance:none;border:0;width:100%;min-height:56px;padding:18px;border-radius:16px;background:#24463A;color:#F8F7F3;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 12px 26px -14px rgba(36,70,58,0.7)" style-hover="background:#1B382E" style-active="transform:scale(0.99)">
+              <span style="font:600 16px/1 -apple-system,system-ui,sans-serif">Continue</span>
+              <span style="font:500 16px/1 -apple-system,system-ui,sans-serif;color:rgba(248,247,243,0.55)">{{ dhikrReps }} / 100</span>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTasbeeh }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#FFFFFF 0%,#F8F7F3 45%,#F1F3EE 100%);animation:ibIn .28s ease both">
+          <div style="padding:60px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <button type="button" onClick="{{ nav.adhkar }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Adhkar</button>
+            <button type="button" onClick="{{ nav.goalNew }}" style="appearance:none;cursor:pointer;border:1px solid rgba(23,32,28,0.1);background:#FFFFFF;border-radius:12px;padding:9px 13px;min-height:44px;font:500 13px/1 -apple-system,system-ui,sans-serif;color:#17201C;display:flex;align-items:center;gap:7px" style-hover="border-color:rgba(23,32,28,0.24)">
+              <span>SubhanAllah</span>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 6.5L8 10.5 12 6.5" stroke="#68716C" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <button type="button" onClick="{{ tap }}" style="appearance:none;border:0;background:transparent;flex:1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px;-webkit-tap-highlight-color:transparent" style-active="transform:scale(0.994)">
+            <div style="position:relative;width:272px;height:272px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 38%,#FFFFFF,#F5F2E9);box-shadow:0 1px 2px rgba(23,32,28,0.05),0 30px 60px -30px rgba(23,32,28,0.3),inset 0 1px 0 rgba(255,255,255,0.9)"></div>
+              <svg width="272" height="272" viewBox="0 0 272 272" style="position:absolute;transform:rotate(-90deg)">
+                <circle cx="136" cy="136" r="124" stroke="rgba(23,32,28,0.06)" stroke-width="6" fill="none"/>
+                <circle cx="136" cy="136" r="124" stroke="#D9BE86" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="779.1" stroke-dashoffset="{{ ringOffset }}" style="transition:stroke-dashoffset .45s cubic-bezier(0.22,1,0.36,1)"/>
+              </svg>
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+                <div dir="rtl" lang="ar" style="font:500 20px/1 'Noto Naskh Arabic',serif;color:#B0954F;margin-bottom:16px">سُبْحَانَ اللهِ</div>
+                <div style="font:600 76px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.04em">{{ count }}</div>
+                <div style="font:500 17px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:6px">/ {{ target }}</div>
+                <div style="font:400 14px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:14px">SubhanAllah</div>
+              </div>
+            </div>
+            <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#B0B5AF;margin-top:26px">Tap anywhere to count</div>
+          </button>
+
+          <div style="padding:0 24px 34px">
+            <div style="display:flex;gap:10px">
+              <button type="button" onClick="{{ undo }}" style="appearance:none;flex:1;min-height:52px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;padding:15px;border-radius:16px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">Undo</button>
+              <button type="button" onClick="{{ plusFive }}" style="appearance:none;flex:1;min-height:52px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;padding:15px;border-radius:16px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">+5</button>
+              <button type="button" onClick="{{ reset }}" style="appearance:none;flex:1;min-height:52px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;padding:15px;border-radius:16px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">Reset</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font:400 12px/1 -apple-system,system-ui,sans-serif;color:#B0B5AF">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 5" stroke="#B0B5AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Counts saved on device · haptics on</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGoalComplete }}">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px 40px;background:linear-gradient(180deg,#FFFFFF 0%,#F7F4EC 60%,#F3E7C9 100%);animation:ibIn .5s ease both;text-align:center">
+          <div style="position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center">
+            <div style="position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.5),rgba(217,190,134,0) 68%);animation:ibGlow 5s ease-in-out infinite"></div>
+            <svg width="200" height="200" viewBox="0 0 200 200" style="position:absolute;transform:rotate(-90deg)"><circle cx="100" cy="100" r="90" stroke="rgba(23,32,28,0.06)" stroke-width="6" fill="none"/><circle cx="100" cy="100" r="90" stroke="#D9BE86" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+            <div style="position:relative">
+              <div style="font:600 46px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em">100</div>
+              <div style="font:500 15px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:8px">/ 100</div>
+            </div>
+          </div>
+          <h1 style="font:600 27px/1.25 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:34px 0 0">Goal complete</h1>
+          <div dir="rtl" lang="ar" style="font:500 24px/1.6 'Noto Naskh Arabic',serif;color:#24463A;margin-top:16px">اَلْحَمْدُ لِلَّهِ</div>
+          <p style="font:400 16px/1.6 -apple-system,system-ui,sans-serif;color:#68716C;margin:12px 0 0;max-width:280px;text-wrap:pretty">Alhamdulillah. May Allah accept your worship.</p>
+          <div style="width:100%;margin-top:40px;display:flex;flex-direction:column;gap:8px">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;width:100%;min-height:52px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#1B382E">Done</button>
+            <button type="button" onClick="{{ continueCounting }}" style="appearance:none;border:0;background:transparent;width:100%;min-height:48px;font:500 14.5px/1 -apple-system,system-ui,sans-serif;color:#68716C;cursor:pointer" style-hover="color:#17201C">Keep counting</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGoals }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Goals</h1>
+              <p style="font:400 13.5px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin:9px 0 0">Two active. That is usually enough.</p>
+            </div>
+            <button type="button" onClick="{{ nav.goalNew }}" style="appearance:none;flex:none;border:0;width:44px;height:44px;border-radius:14px;background:#24463A;color:#F8F7F3;cursor:pointer;font:400 22px/1 -apple-system,system-ui,sans-serif" style-hover="background:#1B382E">+</button>
+          </div>
+          <div style="padding:18px 24px 0;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ goals }}" as="g" hint-placeholder-count="2">
+              <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF;box-shadow:0 1px 2px rgba(23,32,28,0.03)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div>
+                    <div style="font:600 17px/1.2 -apple-system,system-ui,sans-serif">{{ g.name }}</div>
+                    <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:6px">{{ g.freq }} · reminder {{ g.remind }}</div>
+                  </div>
+                  <span style="flex:none;font:500 12px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:7px 10px;border-radius:10px">{{ g.streak }} days</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;margin-top:16px">
+                  <span style="height:6px;flex:1;border-radius:3px;background:#F1F3EE;overflow:hidden"><span style="display:block;height:100%;border-radius:3px;background:#8FA995;width:{{ g.pct }}%"></span></span>
+                  <span style="font:600 12.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">{{ g.progress }}</span>
+                </div>
+                <div style="display:flex;gap:4px;margin-top:16px">
+                  <sc-for list="{{ g.week }}" as="d" hint-placeholder-count="7">
+                    <sc-if value="{{ d.hit }}" hint-placeholder-val="{{ true }}"><span style="flex:1;height:22px;border-radius:7px;background:#8FA995"></span></sc-if>
+                    <sc-if value="{{ d.miss }}" hint-placeholder-val="{{ false }}"><span style="flex:1;height:22px;border-radius:7px;background:#F1F3EE"></span></sc-if>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:18px 24px 0">
+            <div style="border:1.5px dashed rgba(23,32,28,0.13);border-radius:24px;padding:28px 22px;text-align:center;background:transparent">
+              <div style="width:52px;height:52px;border-radius:18px;background:#F1F3EE;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#8FA995" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <div style="font:600 16px/1.3 -apple-system,system-ui,sans-serif">Room for one more</div>
+              <div style="font:400 13.5px/1.55 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:8px;text-wrap:pretty">Start with one small act of worship.</div>
+              <button type="button" onClick="{{ nav.goalNew }}" style="appearance:none;margin-top:16px;cursor:pointer;border:1px solid rgba(23,32,28,0.12);background:#FFFFFF;border-radius:14px;min-height:48px;padding:14px 22px;font:600 14px/1 -apple-system,system-ui,sans-serif;color:#17201C" style-hover="border-color:rgba(23,32,28,0.28)">Create goal</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGoalNew }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:60px 24px 30px;overflow-y:auto;animation:ibIn .28s ease both">
+          <button type="button" onClick="{{ nav.goals }}" style="appearance:none;border:0;background:transparent;padding:0;margin-bottom:14px;min-height:44px;cursor:pointer;align-self:flex-start;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C">Cancel</button>
+          <h1 style="font:600 27px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0 0 6px">Create goal</h1>
+          <p style="font:400 14px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin:0 0 20px">What would you like to recite?</p>
+          <div style="border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;overflow:hidden">
+            <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06)">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#8A928C">Dhikr</div>
+              <div style="font:500 17px/1 -apple-system,system-ui,sans-serif;margin-top:9px">Durood Sharif</div>
+              <div style="font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:7px">Arabic, translation and reference attach from the library</div>
+            </div>
+            <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#8A928C">Daily target</div>
+                <div style="font:500 17px/1 -apple-system,system-ui,sans-serif;margin-top:9px">{{ newTarget }}</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button type="button" onClick="{{ targetDown }}" style="appearance:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(23,32,28,0.1);background:#F8F7F3;cursor:pointer;font:400 19px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.26)">−</button>
+                <button type="button" onClick="{{ targetUp }}" style="appearance:none;width:44px;height:44px;border-radius:12px;border:1px solid rgba(23,32,28,0.1);background:#F8F7F3;cursor:pointer;font:400 19px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.26)">+</button>
+              </div>
+            </div>
+            <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06)">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#8A928C;margin-bottom:12px">Repeat</div>
+              <div style="display:flex;gap:8px">
+                <sc-for list="{{ freqs }}" as="f" hint-placeholder-count="3">
+                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ f.pick }}" style="appearance:none;flex:1;min-height:44px;cursor:pointer;padding:12px;border-radius:12px;border:0;background:#24463A;color:#F8F7F3;font:600 13.5px/1 -apple-system,system-ui,sans-serif">{{ f.label }}</button>
+                  </sc-if>
+                  <sc-if value="{{ f.off }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{ f.pick }}" style="appearance:none;flex:1;min-height:44px;cursor:pointer;padding:12px;border-radius:12px;border:1px solid rgba(23,32,28,0.1);background:#F8F7F3;color:#68716C;font:500 13.5px/1 -apple-system,system-ui,sans-serif" style-hover="border-color:rgba(23,32,28,0.26)">{{ f.label }}</button>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </div>
+            <div style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#8A928C">Reminder</div>
+                <div style="font:500 17px/1 -apple-system,system-ui,sans-serif;margin-top:9px">8:00 PM</div>
+              </div>
+              <span style="width:48px;height:29px;border-radius:15px;background:#8FA995;position:relative"><span style="position:absolute;top:2.5px;right:2.5px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></span>
+            </div>
+          </div>
+          <div style="margin-top:12px;border-radius:22px;padding:17px;background:#F1F3EE;font:400 12.5px/1.6 -apple-system,system-ui,sans-serif;color:#68716C">Private by default. Nothing about this goal leaves the device unless you attach it to a community goal.</div>
+          <div style="flex:1;min-height:20px"></div>
+          <button type="button" onClick="{{ nav.goals }}" style="appearance:none;border:0;width:100%;min-height:52px;margin-top:16px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#1B382E">Create goal</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProgress }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Progress</h1>
+            <div style="display:flex;gap:4px;margin-top:16px;padding:4px;border-radius:14px;background:#F1F3EE">
+              <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="4">
+                <sc-if value="{{ r.on }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ r.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:#FFFFFF;color:#17201C;font:600 13.5px/1 -apple-system,system-ui,sans-serif;box-shadow:0 1px 3px rgba(23,32,28,0.1)">{{ r.label }}</button>
+                </sc-if>
+                <sc-if value="{{ r.off }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ r.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:transparent;color:#68716C;font:500 13.5px/1 -apple-system,system-ui,sans-serif" style-hover="color:#17201C">{{ r.label }}</button>
+                </sc-if>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:18px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid rgba(23,32,28,0.05);border-radius:22px;padding:18px;background:#FFFFFF">
+                <div style="font:600 27px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em">{{ s.value }}</div>
+                <div style="font:400 12.5px/1.4 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:9px">{{ s.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:10px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Dhikr per day</div>
+              <div style="display:flex;align-items:flex-end;gap:5px;height:112px;margin-top:18px">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="14">
+                  <span style="flex:1;border-radius:5px;background:#D9BE86;height:{{ b.h }}%"></span>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:10px;font:400 11px/1 -apple-system,system-ui,sans-serif;color:#9AA09B"><span>2 weeks ago</span><span>Today</span></div>
+            </div>
+          </div>
+          <div style="padding:10px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C;margin-bottom:16px">Prayer consistency</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <sc-for list="{{ heat }}" as="d" hint-placeholder-count="84">
+                  <sc-if value="{{ d.full }}" hint-placeholder-val="{{ true }}"><span style="flex:1 0 26px;max-width:26px;height:26px;border-radius:8px;background:#8FA995"></span></sc-if>
+                  <sc-if value="{{ d.part }}" hint-placeholder-val="{{ false }}"><span style="flex:1 0 26px;max-width:26px;height:26px;border-radius:8px;background:#CBD8CE"></span></sc-if>
+                  <sc-if value="{{ d.none }}" hint-placeholder-val="{{ false }}"><span style="flex:1 0 26px;max-width:26px;height:26px;border-radius:8px;background:#F1F3EE"></span></sc-if>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;margin-top:16px;font:400 11px/1 -apple-system,system-ui,sans-serif;color:#8A928C">
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:4px;background:#8FA995"></span>All five</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:4px;background:#CBD8CE"></span>Some</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:4px;background:#F1F3EE"></span>None logged</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:10px 24px 0">
+            <div style="border-radius:24px;padding:20px;background:#F1F3EE">
+              <div style="font:500 17px/1.5 -apple-system,system-ui,sans-serif;color:#17201C;text-wrap:pretty">Your consistency is growing. Fajr has held 19 days running.</div>
+              <div style="font:400 13px/1.55 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:10px">Nothing here is shared, ranked or compared.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCommunity }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Community</h1>
+            <div style="display:flex;gap:4px;margin-top:16px;padding:4px;border-radius:14px;background:#F1F3EE">
+              <sc-for list="{{ commTabs }}" as="t" hint-placeholder-count="4">
+                <sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ t.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:#FFFFFF;color:#17201C;font:600 13px/1 -apple-system,system-ui,sans-serif;box-shadow:0 1px 3px rgba(23,32,28,0.1)">{{ t.label }}</button>
+                </sc-if>
+                <sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ t.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:transparent;color:#68716C;font:500 13px/1 -apple-system,system-ui,sans-serif" style-hover="color:#17201C">{{ t.label }}</button>
+                </sc-if>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:18px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:30px;padding:26px;background:linear-gradient(155deg,#FFFFFF,#F7F4EC);box-shadow:0 1px 2px rgba(23,32,28,0.03),0 16px 34px -24px rgba(23,32,28,0.26);text-align:center">
+              <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Today&rsquo;s community dhikr</div>
+              <div style="font:600 42px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.035em;margin-top:16px">2,847,391</div>
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 12px;border-radius:12px;background:#F1F3EE;font:500 12.5px/1 -apple-system,system-ui,sans-serif;color:#24463A">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 9.5V2.5M6 2.5L3 5.5M6 2.5l3 3" stroke="#5EAA78" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>+18,421 today</span>
+              </div>
+              <div style="font:400 14px/1.55 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:18px;padding-top:16px;border-top:1px solid rgba(23,32,28,0.06)">Your contribution is counted, never named.</div>
+            </div>
+          </div>
+          <div style="padding:22px 24px 0">
+            <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C;margin-bottom:12px">Community goals</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ commGoals }}" as="c" hint-placeholder-count="3">
+                <button type="button" onClick="{{ nav.communityGoal }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF" style-hover="border-color:rgba(23,32,28,0.15)">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                    <div>
+                      <div style="font:600 16.5px/1.2 -apple-system,system-ui,sans-serif">{{ c.name }}</div>
+                      <div style="font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:6px">{{ c.people }} participants · ends {{ c.ends }}</div>
+                    </div>
+                    <sc-if value="{{ c.joined }}" hint-placeholder-val="{{ false }}">
+                      <span style="flex:none;font:600 12px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:9px 12px;border-radius:12px">Joined</span>
+                    </sc-if>
+                    <sc-if value="{{ c.open }}" hint-placeholder-val="{{ true }}">
+                      <span onClick="{{ c.join }}" style="flex:none;font:600 12px/1 -apple-system,system-ui,sans-serif;color:#F8F7F3;background:#24463A;padding:9px 14px;border-radius:12px">Join</span>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:11px;margin-top:16px">
+                    <span style="height:6px;flex:1;border-radius:3px;background:#F1F3EE;overflow:hidden"><span style="display:block;height:100%;border-radius:3px;background:#D9BE86;width:{{ c.pct }}%"></span></span>
+                    <span style="font:600 12.5px/1 -apple-system,system-ui,sans-serif;color:#68716C">{{ c.pctText }}</span>
+                  </div>
+                  <div style="font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:10px">{{ c.done }} / {{ c.total }}</div>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:12px 24px 0">
+            <button type="button" onClick="{{ nav.circles }}" style="appearance:none;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.06);border-radius:24px;padding:18px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;min-height:48px" style-hover="border-color:rgba(23,32,28,0.18)">
+              <span style="text-align:left">
+                <span style="display:block;font:600 15.5px/1 -apple-system,system-ui,sans-serif">Your circles</span>
+                <span style="display:block;font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:6px">2 private groups</span>
+              </span>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#B9BEB7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCommunityGoal }}">
+        <div style="flex:1;overflow-y:auto;padding:60px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <button type="button" onClick="{{ nav.community }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Community</button>
+          </div>
+          <div style="padding:12px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:30px;padding:26px;background:linear-gradient(155deg,#FFFFFF,#F7F4EC);box-shadow:0 1px 2px rgba(23,32,28,0.03),0 16px 34px -24px rgba(23,32,28,0.26)">
+              <h1 style="font:600 26px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">10 Million Durood</h1>
+              <div style="display:flex;align-items:center;justify-content:center;margin-top:22px;position:relative;width:180px;height:180px;margin-left:auto;margin-right:auto">
+                <svg width="180" height="180" viewBox="0 0 180 180" style="position:absolute;transform:rotate(-90deg)"><circle cx="90" cy="90" r="80" stroke="#F1F3EE" stroke-width="8" fill="none"/><circle cx="90" cy="90" r="80" stroke="#D9BE86" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="502.7" stroke-dashoffset="177"/></svg>
+                <div style="position:relative;text-align:center">
+                  <div style="font:600 34px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.03em">64.8%</div>
+                  <div style="font:400 12.5px/1.4 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:8px">of the goal</div>
+                </div>
+              </div>
+              <div style="text-align:center;margin-top:18px">
+                <div style="font:500 17px/1 -apple-system,system-ui,sans-serif">6,483,291 / 10,000,000</div>
+                <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:9px">18,421 participants</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:12px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Your contribution</div>
+                <div style="font:600 24px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin-top:11px">1,240</div>
+              </div>
+              <span style="font:500 12px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:8px 11px;border-radius:12px">Milestone reached</span>
+            </div>
+          </div>
+          <div style="padding:12px 24px 0">
+            <div style="border-radius:22px;padding:17px;background:#F3E7C9;font:400 12.5px/1.6 -apple-system,system-ui,sans-serif;color:#7A6741">A shared total is company on the way, not a claim about reward. Ibadah makes no theological promise about what a number means.</div>
+          </div>
+          <div style="padding:14px 24px 0">
+            <button type="button" onClick="{{ nav.tasbeeh }}" style="appearance:none;border:0;width:100%;min-height:52px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer" style-hover="background:#1B382E">Contribute dhikr</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCircles }}">
+        <div style="flex:1;overflow-y:auto;padding:60px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <button type="button" onClick="{{ nav.community }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Community</button>
+            <button type="button" style="appearance:none;cursor:pointer;border:1px solid rgba(23,32,28,0.1);background:#FFFFFF;border-radius:12px;min-height:44px;padding:11px 14px;font:600 13px/1 -apple-system,system-ui,sans-serif;color:#17201C" style-hover="border-color:rgba(23,32,28,0.26)">New circle</button>
+          </div>
+          <div style="padding:14px 24px 0">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Circles</h1>
+            <p style="font:400 13.5px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin:9px 0 0">Private groups. Invite only unless you change it.</p>
+          </div>
+          <div style="padding:18px 24px 0;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ circles }}" as="c" hint-placeholder-count="2">
+              <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div>
+                    <div style="font:600 17px/1.2 -apple-system,system-ui,sans-serif">{{ c.name }}</div>
+                    <div style="font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:6px">{{ c.members }} members · {{ c.privacy }}</div>
+                  </div>
+                  <span style="display:flex">
+                    <sc-for list="{{ c.avatars }}" as="a" hint-placeholder-count="3">
+                      <span style="width:30px;height:30px;border-radius:50%;background:{{ a.bg }};border:2px solid #FFFFFF;margin-left:-8px;display:flex;align-items:center;justify-content:center;font:600 11px/1 -apple-system,system-ui,sans-serif;color:#24463A">{{ a.initial }}</span>
+                    </sc-for>
+                  </span>
+                </div>
+                <div style="margin-top:16px;padding:14px;border-radius:18px;background:#F8F7F3">
+                  <div style="font:600 13.5px/1 -apple-system,system-ui,sans-serif">{{ c.goal }}</div>
+                  <div style="display:flex;align-items:center;gap:11px;margin-top:12px">
+                    <span style="height:6px;flex:1;border-radius:3px;background:#F1F3EE;overflow:hidden"><span style="display:block;height:100%;border-radius:3px;background:#8FA995;width:{{ c.pct }}%"></span></span>
+                    <span style="font:600 12px/1 -apple-system,system-ui,sans-serif;color:#68716C">{{ c.pct }}%</span>
+                  </div>
+                </div>
+                <div style="font:400 12.5px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:14px">{{ c.activity }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isQuran }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:0">Quran</h1>
+          </div>
+          <div style="padding:18px 24px 0">
+            <button type="button" onClick="{{ nav.quranReader }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:30px;padding:24px;background:linear-gradient(155deg,#24463A,#1C3A30);color:#EFF3F0;position:relative;overflow:hidden;box-shadow:0 18px 36px -22px rgba(27,59,49,0.65)" style-hover="filter:brightness(1.07)">
+              <div style="position:absolute;right:-46px;bottom:-56px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.22),rgba(217,190,134,0) 70%)"></div>
+              <div style="position:relative">
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:rgba(239,243,240,0.55)">Continue reading</div>
+                <div style="font:600 24px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin-top:12px">Surah Al-Baqarah</div>
+                <div style="font:400 14.5px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.7);margin-top:8px">Ayah 183</div>
+                <div style="display:flex;align-items:center;gap:11px;margin-top:20px">
+                  <span style="height:5px;flex:1;border-radius:3px;background:rgba(239,243,240,0.16);overflow:hidden"><span style="display:block;height:100%;width:72%;background:#D9BE86;border-radius:3px"></span></span>
+                  <span style="font:600 12.5px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.8)">72%</span>
+                </div>
+              </div>
+            </button>
+          </div>
+          <div style="padding:12px 24px 0;display:flex;gap:4px;padding-bottom:0">
+            <div style="display:flex;gap:4px;padding:4px;border-radius:14px;background:#F1F3EE;width:100%">
+              <sc-for list="{{ quranTabs }}" as="t" hint-placeholder-count="5">
+                <sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ t.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:#FFFFFF;color:#17201C;font:600 12.5px/1 -apple-system,system-ui,sans-serif;box-shadow:0 1px 3px rgba(23,32,28,0.1)">{{ t.label }}</button>
+                </sc-if>
+                <sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ t.pick }}" style="appearance:none;flex:1;min-height:40px;cursor:pointer;border:0;border-radius:11px;background:transparent;color:#68716C;font:500 12.5px/1 -apple-system,system-ui,sans-serif" style-hover="color:#17201C">{{ t.label }}</button>
+                </sc-if>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:14px 24px 0;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ surahs }}" as="s" hint-placeholder-count="6">
+              <button type="button" onClick="{{ nav.quranReader }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(23,32,28,0.05);border-radius:20px;padding:15px 16px;background:#FFFFFF;display:flex;align-items:center;gap:14px;min-height:48px" style-hover="border-color:rgba(23,32,28,0.15)">
+                <span style="flex:none;width:38px;height:38px;border-radius:12px;background:#F1F3EE;display:flex;align-items:center;justify-content:center;font:600 13px/1 -apple-system,system-ui,sans-serif;color:#24463A">{{ s.n }}</span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 15.5px/1.2 -apple-system,system-ui,sans-serif">{{ s.name }}</span>
+                  <span style="display:block;font:400 12.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:5px">{{ s.meta }}</span>
+                </span>
+                <span dir="rtl" style="font:500 17px/1.5 'Noto Naskh Arabic',serif;color:#B0954F">{{ s.ar }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isQuranReader }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:#FBFAF6;animation:ibIn .28s ease both">
+          <div style="padding:60px 22px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(23,32,28,0.06)">
+            <button type="button" onClick="{{ nav.quran }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Quran</button>
+            <span style="font:600 14px/1 -apple-system,system-ui,sans-serif">Al-Baqarah</span>
+            <span style="display:flex;gap:14px;align-items:center">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 4h12M3 9h12M3 14h8" stroke="#68716C" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5h9v13l-4.5-3.4L4.5 15.5z" stroke="#68716C" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:20px 22px 0">
+            <sc-for list="{{ ayat }}" as="a" hint-placeholder-count="3">
+              <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:22px;background:#FFFFFF;margin-bottom:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <span style="font:600 12px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:7px 10px;border-radius:10px">2:{{ a.n }}</span>
+                  <span style="display:flex;gap:13px;align-items:center">
+                    <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5h9v13l-4.5-3.4L4.5 15.5z" stroke="#B9BEB7" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6.5" stroke="#B9BEB7" stroke-width="1.5"/><path d="M7.5 6.4l4 2.6-4 2.6z" fill="#B9BEB7"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="4" cy="9" r="1.4" fill="#B9BEB7"/><circle cx="9" cy="9" r="1.4" fill="#B9BEB7"/><circle cx="14" cy="9" r="1.4" fill="#B9BEB7"/></svg>
+                  </span>
+                </div>
+                <div dir="rtl" lang="ar" style="margin-top:18px;padding:20px;border-radius:18px;background:#F8F7F3;border:1px dashed rgba(23,32,28,0.14);text-align:center">
+                  <div style="font:500 13px/1.5 -apple-system,system-ui,sans-serif;color:#8A928C;direction:ltr">Arabic text loads from the licensed Mushaf source</div>
+                  <div style="font:400 11.5px/1.5 -apple-system,system-ui,sans-serif;color:#B0B5AF;margin-top:7px;direction:ltr">Not rendered here — scripture is never generated</div>
+                </div>
+                <div style="font:400 15.5px/1.65 -apple-system,system-ui,sans-serif;color:#17201C;margin-top:16px;text-wrap:pretty">{{ a.translationState }}</div>
+                <div style="font:400 11.5px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:12px">{{ a.source }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:12px 22px 28px;background:#FBFAF6;border-top:1px solid rgba(23,32,28,0.06);display:flex;align-items:center;gap:10px">
+            <button type="button" style="appearance:none;flex:1;min-height:48px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;border-radius:14px;font:500 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">Text size</button>
+            <button type="button" style="appearance:none;flex:1;min-height:48px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;border-radius:14px;font:500 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">Translation</button>
+            <button type="button" style="appearance:none;flex:1;min-height:48px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);background:#FFFFFF;border-radius:14px;font:500 13.5px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24)">Audio</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFocusSetup }}">
+        <div style="flex:1;overflow-y:auto;padding:60px 0 34px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C">Close</button>
+            <h1 style="font:600 27px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:12px 0 0">Ibadah Focus</h1>
+            <p style="font:400 15px/1.55 -apple-system,system-ui,sans-serif;color:#68716C;margin:9px 0 0;text-wrap:pretty">Choose your worship goal. Your phone stays quiet until you finish it.</p>
+          </div>
+          <div style="padding:18px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;overflow:hidden">
+              <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px">
+                <span style="font:500 15.5px/1 -apple-system,system-ui,sans-serif">Worship goal</span>
+                <span style="font:400 14px/1 -apple-system,system-ui,sans-serif;color:#68716C">Durood Sharif · 100</span>
+              </div>
+              <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px">
+                <span style="font:500 15.5px/1 -apple-system,system-ui,sans-serif">Focus duration</span>
+                <span style="font:400 14px/1 -apple-system,system-ui,sans-serif;color:#68716C">Until goal completed</span>
+              </div>
+              <div style="padding:16px 18px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font:500 15.5px/1 -apple-system,system-ui,sans-serif">Apps to restrict</span>
+                  <span style="font:400 14px/1 -apple-system,system-ui,sans-serif;color:#68716C">4 selected</span>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:14px">
+                  <sc-for list="{{ restrictApps }}" as="a" hint-placeholder-count="4">
+                    <span style="font:500 12.5px/1 -apple-system,system-ui,sans-serif;color:#24463A;background:#F1F3EE;padding:9px 12px;border-radius:12px">{{ a.name }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:12px 24px 0">
+            <div style="border-radius:24px;padding:20px;background:#DDEAF4;border:1px solid rgba(61,115,201,0.2)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.6" stroke="#2F5CA3" stroke-width="1.4"/><path d="M8 5.2v.1M8 7.4v3.4" stroke="#2F5CA3" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span style="font:600 13px/1 -apple-system,system-ui,sans-serif;color:#1F3E63">Platform capability</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="flex:none;font:600 11px/1 -apple-system,system-ui,sans-serif;color:#1F3E63;background:rgba(255,255,255,0.75);padding:6px 8px;border-radius:8px;min-width:52px;text-align:center">iOS</span>
+                  <span style="font:400 12.5px/1.55 -apple-system,system-ui,sans-serif;color:#3A5A7E">Screen Time authorisation required. Apple&rsquo;s own limiter shields the apps you choose.</span>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                  <span style="flex:none;font:600 11px/1 -apple-system,system-ui,sans-serif;color:#1F3E63;background:rgba(255,255,255,0.75);padding:6px 8px;border-radius:8px;min-width:52px;text-align:center">Android</span>
+                  <span style="font:400 12.5px/1.55 -apple-system,system-ui,sans-serif;color:#3A5A7E">Usage Access required. Fallback is a full-screen reminder when a restricted app opens.</span>
+                </div>
+              </div>
+              <div style="font:400 12.5px/1.55 -apple-system,system-ui,sans-serif;color:#3A5A7E;margin-top:14px;padding-top:13px;border-top:1px solid rgba(61,115,201,0.18)">Calls, messages and emergency services remain available on both platforms.</div>
+            </div>
+          </div>
+          <div style="padding:16px 24px 0">
+            <button type="button" onClick="{{ nav.focusActive }}" style="appearance:none;border:0;width:100%;min-height:52px;padding:16px;border-radius:16px;background:#24463A;color:#F8F7F3;font:600 16px/1 -apple-system,system-ui,sans-serif;cursor:pointer;box-shadow:0 12px 26px -14px rgba(36,70,58,0.65)" style-hover="background:#1B382E">Activate Focus</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFocusActive }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#20302A 0%,#16211D 100%);color:#EFF3F0;animation:ibIn .4s ease both">
+          <div style="padding:60px 26px 0;display:flex;align-items:center;justify-content:space-between">
+            <span style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:rgba(239,243,240,0.45)">Ibadah Focus</span>
+            <span style="font:500 12.5px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.45)">4 apps restricted</span>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px">
+            <div style="position:relative;width:236px;height:236px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(217,190,134,0.16),rgba(217,190,134,0) 70%);animation:ibGlow 6s ease-in-out infinite"></div>
+              <svg width="236" height="236" viewBox="0 0 236 236" style="position:absolute;transform:rotate(-90deg)">
+                <circle cx="118" cy="118" r="106" stroke="rgba(239,243,240,0.1)" stroke-width="4" fill="none"/>
+                <circle cx="118" cy="118" r="106" stroke="#D9BE86" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="666" stroke-dashoffset="{{ focusOffset }}" style="transition:stroke-dashoffset .5s ease"/>
+              </svg>
+              <div style="position:relative;text-align:center">
+                <div style="font:600 62px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.035em">{{ focusCount }}</div>
+                <div style="font:500 15px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.5);margin-top:8px">/ 100</div>
+                <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.42);margin-top:14px">{{ focusRemaining }} remaining</div>
+              </div>
+            </div>
+            <div style="font:500 17px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.85);margin-top:30px">Stay focused.</div>
+            <button type="button" onClick="{{ tapFocus }}" style="appearance:none;margin-top:20px;cursor:pointer;border:1px solid rgba(239,243,240,0.18);background:rgba(239,243,240,0.07);color:#EFF3F0;min-height:56px;padding:17px 46px;border-radius:16px;font:600 16px/1 -apple-system,system-ui,sans-serif;backdrop-filter:blur(20px)" style-hover="background:rgba(239,243,240,0.13)" style-active="transform:scale(0.985)">Continue Dhikr</button>
+            <div style="font:400 12.5px/1.55 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.4);margin-top:22px;text-align:center;max-width:250px;text-wrap:pretty">Calls and messages still reach you. Everything else waits.</div>
+          </div>
+          <div style="padding:0 26px 40px">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;width:100%;min-height:48px;cursor:pointer;font:500 14px/1 -apple-system,system-ui,sans-serif;color:rgba(239,243,240,0.5)" style-hover="color:#EFF3F0">End focus</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProfile }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px;display:flex;align-items:center;gap:16px">
+            <span style="flex:none;width:62px;height:62px;border-radius:50%;background:#F1F3EE;color:#24463A;display:flex;align-items:center;justify-content:center;font:600 22px/1 -apple-system,system-ui,sans-serif">Y</span>
+            <div>
+              <div style="font:600 22px/1.2 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.02em">Yusuf Rahman</div>
+              <div style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:7px">Private profile</div>
+            </div>
+          </div>
+          <div style="padding:20px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.05);border-radius:24px;padding:20px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;gap:14px">
+              <div>
+                <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Today&rsquo;s consistency</div>
+                <div style="font:600 24px/1 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin-top:11px">7 day streak</div>
+              </div>
+              <span style="position:relative;flex:none;width:56px;height:56px;display:flex;align-items:center;justify-content:center">
+                <svg width="56" height="56" viewBox="0 0 56 56" style="position:absolute;transform:rotate(-90deg)"><circle cx="28" cy="28" r="24" stroke="#F1F3EE" stroke-width="5" fill="none"/><circle cx="28" cy="28" r="24" stroke="#8FA995" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="150.8" stroke-dashoffset="30"/></svg>
+                <span style="font:600 13px/1 -apple-system,system-ui,sans-serif">80%</span>
+              </span>
+            </div>
+          </div>
+          <div style="padding:20px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;overflow:hidden">
+              <sc-for list="{{ profileRows }}" as="row" hint-placeholder-count="6">
+                <button type="button" onClick="{{ row.go }}" style="appearance:none;text-align:left;width:100%;min-height:52px;cursor:pointer;border:0;border-bottom:1px solid rgba(23,32,28,0.06);background:#FFFFFF;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px" style-hover="background:#F8F7F3">
+                  <span style="font:500 15.5px/1 -apple-system,system-ui,sans-serif;color:#17201C">{{ row.label }}</span>
+                  <span style="display:flex;align-items:center;gap:10px"><span style="font:400 13px/1 -apple-system,system-ui,sans-serif;color:#8A928C">{{ row.value }}</span><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#B9BEB7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:16px 24px 0">
+            <button type="button" onClick="{{ nav.error }}" style="appearance:none;width:100%;min-height:48px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);border-radius:16px;background:#FFFFFF;padding:15px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="border-color:rgba(23,32,28,0.24);color:#17201C">See offline &amp; error states</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPrivacy }}">
+        <div style="flex:1;overflow-y:auto;padding:60px 0 118px;animation:ibIn .3s ease both">
+          <div style="padding:0 24px">
+            <button type="button" onClick="{{ nav.profile }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Profile</button>
+            <h1 style="font:600 27px/1.15 -apple-system,'SF Pro Display',system-ui,sans-serif;letter-spacing:-0.025em;margin:12px 0 0">Privacy</h1>
+            <p style="font:400 13.5px/1.5 -apple-system,system-ui,sans-serif;color:#68716C;margin:9px 0 0">Everything starts private. You choose what leaves the device.</p>
+          </div>
+          <div style="padding:18px 24px 0">
+            <div style="border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;overflow:hidden">
+              <sc-for list="{{ privacy }}" as="row" hint-placeholder-count="8">
+                <div style="padding:16px 18px;border-bottom:1px solid rgba(23,32,28,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px">
+                  <div>
+                    <div style="font:500 15px/1.2 -apple-system,system-ui,sans-serif">{{ row.label }}</div>
+                    <div style="font:400 12.5px/1.4 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:5px">{{ row.sub }}</div>
+                  </div>
+                  <span style="flex:none;font:500 12.5px/1 -apple-system,system-ui,sans-serif;color:{{ row.ink }};background:{{ row.bg }};padding:8px 11px;border-radius:11px">{{ row.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:12px 24px 0;display:flex;flex-direction:column;gap:8px">
+            <button type="button" style="appearance:none;width:100%;min-height:52px;cursor:pointer;border:1px solid rgba(23,32,28,0.09);border-radius:16px;background:#FFFFFF;padding:16px;font:500 15px/1 -apple-system,system-ui,sans-serif;color:#17201C;text-align:left" style-hover="border-color:rgba(23,32,28,0.24)">Export my data</button>
+            <button type="button" style="appearance:none;width:100%;min-height:52px;cursor:pointer;border:1px solid rgba(201,107,107,0.3);border-radius:16px;background:#FFFFFF;padding:16px;font:500 15px/1 -apple-system,system-ui,sans-serif;color:#A24E4E;text-align:left" style-hover="border-color:#C96B6B">Delete account</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isError }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:62px 24px 34px;animation:ibIn .3s ease both">
+          <button type="button" onClick="{{ nav.profile }}" style="appearance:none;border:0;background:transparent;padding:0;min-height:44px;cursor:pointer;align-self:flex-start;font:500 14px/1 -apple-system,system-ui,sans-serif;color:#68716C" style-hover="color:#17201C">Back</button>
+          <div style="margin-top:14px;display:flex;align-items:center;gap:9px;padding:14px 16px;border-radius:16px;background:#F3E7C9;border:1px solid rgba(217,164,74,0.4)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.8l6 11.4H2z" stroke="#8A6B24" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.4v3M8 11.4v.1" stroke="#8A6B24" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span style="font:500 13.5px/1.4 -apple-system,system-ui,sans-serif;color:#8A6B24">Offline · your counts are still being saved</span>
+          </div>
+          <div style="margin-top:12px;border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;padding:24px;text-align:center">
+            <div style="width:54px;height:54px;border-radius:18px;background:#F1F3EE;display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 8a12 12 0 0 1 16 0M7.5 12a8 8 0 0 1 9 0M12 17.5v.1" stroke="#68716C" stroke-width="1.7" stroke-linecap="round"/><path d="M4 4l16 16" stroke="#C96B6B" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+            <div style="font:600 18px/1.3 -apple-system,system-ui,sans-serif">Something went wrong</div>
+            <div style="font:400 14.5px/1.6 -apple-system,system-ui,sans-serif;color:#68716C;margin-top:10px;text-wrap:pretty">Your progress is safe. We&rsquo;ll try again when you&rsquo;re connected.</div>
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;margin-top:18px;cursor:pointer;border:0;border-radius:14px;background:#24463A;color:#F8F7F3;min-height:48px;padding:15px 26px;font:600 14.5px/1 -apple-system,system-ui,sans-serif" style-hover="background:#1B382E">Try again</button>
+          </div>
+          <div style="margin-top:12px;border:1px solid rgba(23,32,28,0.06);border-radius:24px;background:#FFFFFF;padding:20px">
+            <div style="font:600 11px/1 -apple-system,system-ui,sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#8A928C">Skeleton loading</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+              <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:13px">
+                  <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#F1F3EE"></span>
+                  <span style="flex:1">
+                    <span style="display:block;height:12px;border-radius:6px;background:#F1F3EE;width:{{ s.w1 }}%"></span>
+                    <span style="display:block;height:10px;border-radius:5px;background:#F5F6F3;width:{{ s.w2 }}%;margin-top:8px"></span>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font:400 12.5px/1.55 -apple-system,system-ui,sans-serif;color:#8A928C;margin-top:16px">Local data paints first; remote totals fill in behind it.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:16px;right:16px;bottom:22px;z-index:30;padding:8px;border-radius:32px;background:rgba(255,255,255,0.82);backdrop-filter:blur(24px);border:1px solid rgba(23,32,28,0.06);box-shadow:0 12px 32px -14px rgba(23,32,28,0.32),0 2px 6px -2px rgba(23,32,28,0.1);display:flex;align-items:stretch;gap:2px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+            <button type="button" onClick="{{ t.go }}" style="appearance:none;flex:1;border:0;cursor:pointer;padding:8px 0;min-height:52px;border-radius:24px;background:{{ t.bg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:{{ t.ink }};transition:background .2s ease">
+              <span style="display:block" dangerouslySetInnerHTML="{{ t.icon }}"></span>
+              <span style="font:{{ t.font }};letter-spacing:0.01em">{{ t.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:1000},&quot;showRail&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;arabicSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:34,&quot;min&quot;:24,&quot;max&quot;:48,&quot;step&quot;:2,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Typography&quot;}}">
+const SVG = {
+  home: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+  prayer: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5.5 20v-8.5a6.5 6.5 0 0 1 13 0V20" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 20h18M12 4.4V2.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  adhkar: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.6" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="4.4" r="1.8" fill="currentColor"/></svg>',
+  community: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="9" r="3.1" stroke="currentColor" stroke-width="1.7"/><path d="M3.6 19c0-3 2.4-5 5.4-5s5.4 2 5.4 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M16.2 7.3a3 3 0 0 1 0 5.5M17.8 19c0-2.1-.8-3.8-1.9-4.9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  profile: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 20v-1a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.7"/></svg>',
+  beads: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.4" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="4.6" r="1.7" fill="currentColor"/></svg>',
+  book: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5z" stroke="currentColor" stroke-width="1.7"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5A1.5 1.5 0 0 0 20 18.5z" stroke="currentColor" stroke-width="1.7"/></svg>',
+  sun: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.4M12 19v2.4M2.6 12h2.4M19 12h2.4M5.4 5.4l1.7 1.7M16.9 16.9l1.7 1.7M18.6 5.4l-1.7 1.7M7.1 16.9l-1.7 1.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  moon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 14.6A8.4 8.4 0 0 1 9.4 4a8.4 8.4 0 1 0 10.6 10.6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+  timer: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.8V12l2.9 1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
+};
+
+const PRAYER_TIMES = [
+  { name: 'Fajr', short: 'Fajr', time: '4:10 AM', state: 'done' },
+  { name: 'Sunrise', short: 'Sunrise', time: '5:35 AM', state: 'sunrise' },
+  { name: 'Dhuhr', short: 'Dhuhr', time: '12:05 PM', state: 'done' },
+  { name: 'Asr', short: 'Asr', time: '3:40 PM', state: 'current' },
+  { name: 'Maghrib', short: 'Maghrib', time: '6:33 PM', state: 'upcoming' },
+  { name: 'Isha', short: 'Isha', time: '7:57 PM', state: 'upcoming' }
+];
+
+const SCREENS = [
+  ['welcome', 'Welcome'], ['intentions', 'Intentions'], ['home', 'Home'],
+  ['prayer', 'Prayer'], ['prayerDetail', 'Prayer detail sheet'],
+  ['adhkar', 'Adhkar'], ['adhkarSession', 'Adhkar session'], ['tasbeeh', 'Tasbeeh'],
+  ['goalComplete', 'Goal complete'], ['goals', 'Goals'], ['goalNew', 'Create goal'],
+  ['progress', 'Progress'], ['community', 'Community'], ['communityGoal', 'Community goal'],
+  ['circles', 'Circles'], ['quran', 'Quran'], ['quranReader', 'Quran reader'],
+  ['focusSetup', 'Focus setup'], ['focusActive', 'Focus active'],
+  ['profile', 'Profile'], ['privacy', 'Privacy'], ['error', 'Error / offline / loading']
+];
+
+const TABBED = ['home', 'prayer', 'adhkar', 'tasbeeh', 'goals', 'progress', 'community', 'communityGoal', 'circles', 'quran', 'profile', 'privacy'];
+const DARK_STATUS = ['focusActive'];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'welcome',
+    logged: { Fajr: true, Dhuhr: true, Asr: false, Maghrib: false, Isha: false },
+    count: 33,
+    focusCount: 73,
+    dhikrReps: 6,
+    intents: [true, true, false, false, false],
+    newTarget: 100,
+    freq: 0,
+    range: 2,
+    commTab: 0,
+    quranTab: 0,
+    adhkarMode: 0,
+    logMode: 1,
+    joined: [true, false, false]
+  };
+
+  go = (s) => () => this.setState({ screen: s });
+
+  renderVals() {
+    const st = this.state;
+    const target = 100;
+    const nav = {};
+    SCREENS.forEach(([id]) => { nav[id] = this.go(id); });
+
+    const frac = Math.min(st.count / target, 1);
+    const tabDefs = [
+      { label: 'Home', icon: SVG.home, key: 'home', match: ['home'] },
+      { label: 'Prayer', icon: SVG.prayer, key: 'prayer', match: ['prayer', 'prayerDetail'] },
+      { label: 'Adhkar', icon: SVG.adhkar, key: 'adhkar', match: ['adhkar', 'adhkarSession', 'tasbeeh', 'goals', 'goalNew', 'progress'] },
+      { label: 'Community', icon: SVG.community, key: 'community', match: ['community', 'communityGoal', 'circles'] },
+      { label: 'Profile', icon: SVG.profile, key: 'profile', match: ['profile', 'privacy'] }
+    ];
+
+    return {
+      showRail: this.props.showRail ?? true,
+      arabicSize: this.props.arabicSize ?? 34,
+      statusColor: DARK_STATUS.indexOf(st.screen) !== -1 ? '#EFF3F0' : '#17201C',
+      nav,
+      rail: SCREENS.map(([id, label], i) => ({ num: String(i + 1).padStart(2, '0'), label, go: this.go(id) })),
+
+      isWelcome: st.screen === 'welcome',
+      isIntentions: st.screen === 'intentions',
+      isHome: st.screen === 'home',
+      isPrayer: st.screen === 'prayer',
+      isPrayerDetail: st.screen === 'prayerDetail',
+      isAdhkar: st.screen === 'adhkar',
+      isAdhkarSession: st.screen === 'adhkarSession',
+      isTasbeeh: st.screen === 'tasbeeh',
+      isGoalComplete: st.screen === 'goalComplete',
+      isGoals: st.screen === 'goals',
+      isGoalNew: st.screen === 'goalNew',
+      isProgress: st.screen === 'progress',
+      isCommunity: st.screen === 'community',
+      isCommunityGoal: st.screen === 'communityGoal',
+      isCircles: st.screen === 'circles',
+      isQuran: st.screen === 'quran',
+      isQuranReader: st.screen === 'quranReader',
+      isFocusSetup: st.screen === 'focusSetup',
+      isFocusActive: st.screen === 'focusActive',
+      isProfile: st.screen === 'profile',
+      isPrivacy: st.screen === 'privacy',
+      isError: st.screen === 'error',
+      showTabs: TABBED.indexOf(st.screen) !== -1,
+
+      tabs: tabDefs.map(t => {
+        const active = t.match.indexOf(st.screen) !== -1;
+        return {
+          label: t.label,
+          icon: { __html: t.icon },
+          bg: active ? '#F1F3EE' : 'transparent',
+          ink: active ? '#24463A' : '#8A928C',
+          font: active ? "600 10.5px/1 -apple-system,system-ui,sans-serif" : "500 10.5px/1 -apple-system,system-ui,sans-serif",
+          go: this.go(t.key)
+        };
+      }),
+
+      count: st.count,
+      target,
+      pctText: Math.round(frac * 100) + '%',
+      smallRing: 175.9 * (1 - frac),
+      ringOffset: 779.1 * (1 - frac),
+      tap: () => this.setState(s => {
+        const n = s.count + 1;
+        return n >= target ? { count: n, screen: 'goalComplete' } : { count: n };
+      }),
+      plusFive: () => this.setState(s => ({ count: Math.min(s.count + 5, target) })),
+      undo: () => this.setState(s => ({ count: Math.max(s.count - 1, 0) })),
+      reset: () => this.setState({ count: 0 }),
+      continueCounting: () => this.setState({ count: 0, screen: 'tasbeeh' }),
+
+      focusCount: st.focusCount,
+      focusRemaining: Math.max(target - st.focusCount, 0),
+      focusOffset: 666 * (1 - Math.min(st.focusCount / target, 1)),
+      tapFocus: () => this.setState(s => ({ focusCount: Math.min(s.focusCount + 1, target) })),
+
+      prayers: PRAYER_TIMES.filter(p => p.state !== 'sunrise').map(p => ({
+        short: p.short,
+        done: !!st.logged[p.name],
+        pending: !st.logged[p.name],
+        toggle: () => this.setState(s => ({ logged: { ...s.logged, [p.name]: !s.logged[p.name] } }))
+      })),
+
+      todayRings: [
+        { value: '2 / 5', label: 'Prayers', color: '#8FA995', offset: 100.5 * 0.6 },
+        { value: '33', label: 'Dhikr', color: '#D9BE86', offset: 100.5 * 0.67 },
+        { value: '2 pg', label: 'Quran', color: '#3D73C9', offset: 100.5 * 0.5 }
+      ],
+
+      continueItems: [
+        { title: 'Durood Sharif', sub: '33 of 100 today', tint: '#F3E7C9', ink: '#B0954F', icon: { __html: SVG.beads }, go: this.go('tasbeeh') },
+        { title: 'Evening Adhkar', sub: '6 of 20 · about 5 min left', tint: '#F1F3EE', ink: '#24463A', icon: { __html: SVG.moon }, go: this.go('adhkar') },
+        { title: 'Al-Baqarah, Ayah 183', sub: '72% of your reading plan', tint: '#DDEAF4', ink: '#2F5CA3', icon: { __html: SVG.book }, go: this.go('quran') }
+      ],
+
+      prayerRows: PRAYER_TIMES.map(p => {
+        const done = !!st.logged[p.name];
+        const current = p.state === 'current';
+        const sunrise = p.state === 'sunrise';
+        return {
+          name: p.name,
+          time: p.time,
+          note: sunrise ? 'Not a prayer time' : done ? 'Logged' : current ? 'Current · 23 min remaining' : 'Upcoming · adhan on',
+          noteInk: current ? '#2F5CA3' : '#8A928C',
+          bg: current ? '#DDEAF4' : '#FFFFFF',
+          border: current ? 'rgba(61,115,201,0.25)' : 'rgba(23,32,28,0.05)',
+          chipBg: sunrise ? '#F3E7C9' : done ? '#F1F3EE' : current ? 'rgba(255,255,255,0.7)' : '#F1F3EE',
+          chipInk: sunrise ? '#B0954F' : current ? '#2F5CA3' : '#24463A',
+          icon: { __html: sunrise ? SVG.sun : p.name === 'Isha' || p.name === 'Maghrib' ? SVG.moon : SVG.prayer },
+          isDone: !sunrise && done,
+          loggable: !sunrise && !done,
+          open: sunrise ? undefined : this.go('prayerDetail'),
+          toggle: sunrise ? undefined : () => this.setState(s => ({ logged: { ...s.logged, [p.name]: !s.logged[p.name] } }))
+        };
+      }),
+
+      logModes: ['Missed', 'On time', 'In jama&rsquo;ah'].map((label, i) => ({
+        label: label.replace('&rsquo;', '\u2019'), on: st.logMode === i, off: st.logMode !== i,
+        pick: () => this.setState({ logMode: i })
+      })),
+      markAsr: () => this.setState(s => ({ logged: { ...s.logged, Asr: true }, screen: 'prayer' })),
+
+      adhkarModes: ['Adhkar', 'Tasbeeh'].map((label, i) => ({
+        label, on: st.adhkarMode === i, off: st.adhkarMode !== i,
+        pick: () => i === 1 ? this.setState({ adhkarMode: 1, screen: 'tasbeeh' }) : this.setState({ adhkarMode: 0 })
+      })),
+      categories: [
+        { name: 'Morning', ar: 'أذكار الصباح', n: 18, mins: 7, pct: 100 },
+        { name: 'Evening', ar: 'أذكار المساء', n: 20, mins: 8, pct: 30 },
+        { name: 'After Salah', ar: 'بعد الصلاة', n: 9, mins: 3, pct: 66 },
+        { name: 'Protection', ar: 'الحفظ', n: 7, mins: 3, pct: 0 },
+        { name: 'Forgiveness', ar: 'الاستغفار', n: 6, mins: 2, pct: 0 },
+        { name: 'Gratitude', ar: 'الشكر', n: 5, mins: 2, pct: 40 },
+        { name: 'Before Sleep', ar: 'قبل النوم', n: 8, mins: 4, pct: 0 },
+        { name: 'Travel', ar: 'السفر', n: 5, mins: 2, pct: 0 }
+      ],
+      dhikrReps: st.dhikrReps,
+      tapDhikr: () => this.setState(s => ({ dhikrReps: Math.min(s.dhikrReps + 1, 100) })),
+
+      goals: [
+        { name: 'Durood Sharif', freq: '100 daily', remind: '8:00 PM', streak: 7, pct: 33, progress: '33 / 100', week: [1, 1, 1, 1, 0, 1, 1] },
+        { name: 'Morning Adhkar', freq: 'Every day', remind: '7:00 AM', streak: 12, pct: 100, progress: 'Done', week: [1, 1, 1, 1, 1, 1, 1] }
+      ].map(g => ({ ...g, week: g.week.map(v => ({ hit: !!v, miss: !v })) })),
+
+      newTarget: st.newTarget,
+      targetUp: () => this.setState(s => ({ newTarget: s.newTarget + 10 })),
+      targetDown: () => this.setState(s => ({ newTarget: Math.max(s.newTarget - 10, 10) })),
+      freqs: ['Every day', 'Weekdays', 'Custom'].map((label, i) => ({
+        label, on: st.freq === i, off: st.freq !== i, pick: () => this.setState({ freq: i })
+      })),
+
+      intents: [
+        { title: 'The five daily prayers', sub: 'Track and catch up on what I miss' },
+        { title: 'Daily dhikr', sub: 'A count I keep without thinking about it' },
+        { title: 'Reading Quran', sub: 'A few pages, most days' },
+        { title: 'Morning and evening adhkar', sub: 'Two short habits, book-ending the day' },
+        { title: 'Less time on my phone', sub: 'Worship before scrolling' }
+      ].map((it, i) => ({
+        ...it, on: st.intents[i], off: !st.intents[i],
+        toggle: () => this.setState(s => { const n = s.intents.slice(); n[i] = !n[i]; return { intents: n }; })
+      })),
+
+      ranges: ['Today', 'Week', 'Month', 'Year'].map((label, i) => ({
+        label, on: st.range === i, off: st.range !== i, pick: () => this.setState({ range: i })
+      })),
+      stats: [
+        { value: '129', label: 'Prayers logged' },
+        { value: '18,340', label: 'Dhikr counted' },
+        { value: '41', label: 'Quran pages' },
+        { value: '26', label: 'Adhkar sessions' }
+      ],
+      bars: [38, 52, 44, 61, 70, 48, 33, 58, 77, 66, 82, 59, 74, 91].map(h => ({ h })),
+      heat: Array.from({ length: 84 }, (_, i) => {
+        const r = (i * 37) % 11;
+        const full = r > 3, part = r === 2 || r === 3;
+        return { full, part: !full && part, none: !full && !part };
+      }),
+
+      commTabs: ['Overview', 'Goals', 'Circles', 'Feed'].map((label, i) => ({
+        label, on: st.commTab === i, off: st.commTab !== i,
+        pick: () => i === 2 ? this.setState({ commTab: 2, screen: 'circles' }) : this.setState({ commTab: i })
+      })),
+      commGoals: [
+        { name: '10 Million Durood', people: '18,421', ends: 'in 6 days', pct: 65, pctText: '64.8%', done: '6,483,291', total: '10,000,000' },
+        { name: 'Fajr together, 30 days', people: '9,117', ends: 'in 21 days', pct: 34, pctText: '33.5%', done: 'day 10', total: 'day 30' },
+        { name: 'A juz a day', people: '4,880', ends: 'in 12 days', pct: 52, pctText: '52%', done: '15', total: '30 juz' }
+      ].map((c, i) => ({
+        ...c, joined: st.joined[i], open: !st.joined[i],
+        join: () => this.setState(s => { const n = s.joined.slice(); n[i] = true; return { joined: n }; })
+      })),
+      circles: [
+        { name: 'Rahman family', members: 6, privacy: 'Invite only', goal: 'Fajr together this month', pct: 72, activity: 'Your father completed morning adhkar.', avatars: [{ initial: 'A', bg: '#F1F3EE' }, { initial: 'S', bg: '#DDEAF4' }, { initial: 'M', bg: '#F3E7C9' }] },
+        { name: 'Thursday Quran group', members: 14, privacy: 'Private', goal: 'One juz a week', pct: 45, activity: '9 members read today.', avatars: [{ initial: 'H', bg: '#F3E7C9' }, { initial: 'K', bg: '#F1F3EE' }, { initial: 'Z', bg: '#DDEAF4' }] }
+      ],
+
+      quranTabs: ['Surahs', 'Juz', 'Bookmarks', 'History', 'Search'].map((label, i) => ({
+        label, on: st.quranTab === i, off: st.quranTab !== i, pick: () => this.setState({ quranTab: i })
+      })),
+      surahs: [
+        { n: 1, name: 'Al-Fatihah', meta: '7 ayat · Makkah', ar: 'الفاتحة' },
+        { n: 2, name: 'Al-Baqarah', meta: '286 ayat · Madinah', ar: 'البقرة' },
+        { n: 3, name: 'Ali \u2018Imran', meta: '200 ayat · Madinah', ar: 'آل عمران' },
+        { n: 4, name: 'An-Nisa', meta: '176 ayat · Madinah', ar: 'النساء' },
+        { n: 18, name: 'Al-Kahf', meta: '110 ayat · Makkah', ar: 'الكهف' },
+        { n: 36, name: 'Ya-Sin', meta: '83 ayat · Makkah', ar: 'يس' }
+      ],
+      ayat: [
+        { n: 183, translationState: 'Translation loads from the selected licensed translation.', source: 'Translation · pending source selection' },
+        { n: 184, translationState: 'Translation loads from the selected licensed translation.', source: 'Translation · pending source selection' },
+        { n: 185, translationState: 'Translation loads from the selected licensed translation.', source: 'Translation · pending source selection' }
+      ],
+
+      restrictApps: [{ name: 'Instagram' }, { name: 'TikTok' }, { name: 'YouTube' }, { name: 'Facebook' }],
+
+      profileRows: [
+        { label: 'Goals', value: '2 active', go: this.go('goals') },
+        { label: 'Bookmarks', value: '14', go: this.go('quran') },
+        { label: 'History', value: 'All time', go: this.go('progress') },
+        { label: 'Circles', value: '2', go: this.go('circles') },
+        { label: 'Settings', value: 'MWL · Hanafi', go: this.go('privacy') },
+        { label: 'Privacy', value: 'Private', go: this.go('privacy') }
+      ],
+      privacy: [
+        { label: 'Profile visibility', sub: 'Who can see your name', value: 'Private', ink: '#24463A', bg: '#F1F3EE' },
+        { label: 'Activity visibility', sub: 'Prayer, dhikr and reading', value: 'Private', ink: '#24463A', bg: '#F1F3EE' },
+        { label: 'Community participation', sub: 'Anonymous contribution to totals', value: 'On', ink: '#3B7A52', bg: 'rgba(94,170,120,0.15)' },
+        { label: 'Goal visibility', sub: 'Shown inside your circles only', value: 'Circles', ink: '#24463A', bg: '#F1F3EE' },
+        { label: 'Location', sub: 'For prayer times only', value: 'While in use', ink: '#24463A', bg: '#F1F3EE' },
+        { label: 'Analytics', sub: 'Crashes and feature use, never content', value: 'Off', ink: '#68716C', bg: '#F1F3EE' },
+        { label: 'Notifications', sub: 'Six categories, each separate', value: '3 on', ink: '#24463A', bg: '#F1F3EE' },
+        { label: 'Data export', sub: 'A file you keep', value: 'Ready', ink: '#24463A', bg: '#F1F3EE' }
+      ],
+      skeletons: [{ w1: 62, w2: 40 }, { w1: 48, w2: 55 }, { w1: 70, w2: 34 }]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

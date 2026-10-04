@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#EFEDE7; font-family:"DM Sans",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#6B7F99; } a:hover { color:#55677E; }
+  ::-webkit-scrollbar { width:0; height:0; }
+  @keyframes ibFade { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes ibBreathe { 0%,100% { transform:scale(1); opacity:.5 } 50% { transform:scale(1.06); opacity:.85 } }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;gap:44px;padding:48px 40px 64px">
+
+  <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+    <aside style="width:214px;flex:none;position:sticky;top:48px">
+      <div style="font:500 20px/1.1 Newsreader,serif;color:#1F1D1A;letter-spacing:-0.01em">Ibadah</div>
+      <div style="font:400 11.5px/1.5 'DM Sans',sans-serif;color:#9A948C;margin:5px 0 22px">Tap-through prototype · 16 screens</div>
+      <nav style="display:flex;flex-direction:column;gap:2px">
+        <sc-for list="{{ rail }}" as="item" hint-placeholder-count="16">
+          <button type="button" onClick="{{ item.go }}" style="appearance:none;text-align:left;border:0;background:transparent;padding:7px 9px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:9px;font:400 12.5px/1.2 'DM Sans',sans-serif;color:#6B6660" style-hover="background:rgba(31,29,26,0.05);color:#1F1D1A">
+            <span style="width:15px;font:500 10px/1 ui-monospace,Menlo,monospace;color:#C4BEB4">{{ item.num }}</span>
+            <span>{{ item.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+      <div style="margin-top:22px;padding:12px 13px;border-radius:12px;background:rgba(201,169,106,0.10);border:1px solid rgba(201,169,106,0.22);font:400 11px/1.55 'DM Sans',sans-serif;color:#7A6741">Arabic shown is limited to well-established short dhikr. Longer supplications and hadith sources are marked pending verification rather than invented.</div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:none;padding:11px;border-radius:58px;background:linear-gradient(160deg,#2B2A28,#191817);box-shadow:0 2px 4px rgba(0,0,0,0.18),0 40px 80px -30px rgba(31,29,26,0.55)">
+    <div style="position:relative;width:393px;height:852px;border-radius:47px;overflow:hidden;background:#FAF8F4;display:flex;flex-direction:column;color:#1F1D1A">
+
+      <div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:30;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 8px;pointer-events:none">
+        <span style="font:600 13.5px/1 'DM Sans',sans-serif;letter-spacing:0.01em">9:41</span>
+        <span style="display:flex;align-items:center;gap:5px">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="none"><rect x="0" y="7" width="3" height="4" rx="1" fill="#1F1D1A"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#1F1D1A"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#1F1D1A"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#1F1D1A" opacity="0.3"/></svg>
+          <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="20" height="11" rx="3.2" stroke="#1F1D1A" stroke-opacity="0.35"/><rect x="2" y="2" width="14" height="8" rx="2" fill="#1F1D1A"/><path d="M22 4v4a2 2 0 0 0 0-4z" fill="#1F1D1A" fill-opacity="0.35"/></svg>
+        </span>
+      </div>
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:104px;height:29px;border-radius:16px;background:#151413;z-index:31"></div>
+
+      <sc-if value="{{ isOnb1 }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:0 30px 40px;background:linear-gradient(180deg,#FBF9F5 0%,#F4F1EA 62%,#EEEDE6 100%);animation:ibFade .5s ease both">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative">
+            <div style="position:absolute;width:230px;height:230px;border-radius:50%;background:radial-gradient(circle,rgba(201,169,106,0.20),rgba(201,169,106,0) 70%);animation:ibBreathe 7s ease-in-out infinite"></div>
+            <svg width="150" height="150" viewBox="0 0 150 150" fill="none">
+              <circle cx="75" cy="75" r="61" stroke="#C9A96A" stroke-opacity="0.45"/>
+              <circle cx="75" cy="75" r="43" stroke="#7C9083" stroke-opacity="0.5"/>
+              <path d="M75 32 L118 75 L75 118 L32 75 Z" stroke="#1F1D1A" stroke-opacity="0.5"/>
+              <path d="M46 46 L104 104 M104 46 L46 104" stroke="#1F1D1A" stroke-opacity="0.13"/>
+              <circle cx="75" cy="75" r="7" fill="#C9A96A" fill-opacity="0.8"/>
+            </svg>
+          </div>
+          <h1 style="font:300 41px/1.08 Newsreader,serif;letter-spacing:-0.025em;margin:0 0 14px;text-wrap:pretty">Small steps.<br>Consistent worship.<br>Big change.</h1>
+          <p style="font:400 15px/1.6 'DM Sans',sans-serif;color:#6B6660;margin:0 0 30px;max-width:300px;text-wrap:pretty">Ibadah keeps a quiet record of your prayer, dhikr and reading — so consistency, not intensity, is what you build.</p>
+          <button type="button" onClick="{{ nav.onb2 }}" style="appearance:none;border:0;width:100%;padding:17px;border-radius:17px;background:#1F1D1A;color:#FBF9F5;font:600 15.5px/1 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 10px 24px -12px rgba(31,29,26,0.6)" style-hover="background:#33302B">Begin</button>
+          <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;margin-top:6px;padding:13px;font:500 13.5px/1 'DM Sans',sans-serif;color:#9A948C;cursor:pointer" style-hover="color:#1F1D1A">I already have an account</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOnb2 }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:66px 30px 40px;overflow-y:auto;animation:ibFade .4s ease both">
+          <div style="display:flex;gap:5px;margin-bottom:34px"><span style="flex:1;height:3px;border-radius:2px;background:#1F1D1A"></span><span style="flex:1;height:3px;border-radius:2px;background:#1F1D1A"></span><span style="flex:1;height:3px;border-radius:2px;background:rgba(31,29,26,0.13)"></span></div>
+          <h1 style="font:300 31px/1.18 Newsreader,serif;letter-spacing:-0.02em;margin:0 0 10px">What would you like to be steady in?</h1>
+          <p style="font:400 14px/1.55 'DM Sans',sans-serif;color:#8B857D;margin:0 0 26px">Choose one or two. You can change this whenever you like.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ intents }}" as="it" hint-placeholder-count="5">
+              <button type="button" onClick="{{ it.toggle }}" style="appearance:none;text-align:left;cursor:pointer;padding:16px 17px;border-radius:17px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFFFF;border:1px solid rgba(31,29,26,0.07);box-shadow:0 1px 2px rgba(31,29,26,0.03)" style-hover="border-color:rgba(31,29,26,0.18)">
+                <span style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font:600 15px/1.2 'DM Sans',sans-serif;color:#1F1D1A">{{ it.title }}</span>
+                  <span style="font:400 12.5px/1.35 'DM Sans',sans-serif;color:#8B857D">{{ it.sub }}</span>
+                </span>
+                <sc-if value="{{ it.on }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;width:23px;height:23px;border-radius:50%;background:#7C9083;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.4l2.4 2.4L9.6 4" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </sc-if>
+                <sc-if value="{{ it.off }}" hint-placeholder-val="{{ true }}">
+                  <span style="flex:none;width:23px;height:23px;border-radius:50%;border:1.5px solid rgba(31,29,26,0.14)"></span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:26px"></div>
+          <button type="button" onClick="{{ nav.onb3 }}" style="appearance:none;border:0;width:100%;padding:17px;border-radius:17px;background:#1F1D1A;color:#FBF9F5;font:600 15.5px/1 'DM Sans',sans-serif;cursor:pointer" style-hover="background:#33302B">Continue</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOnb3 }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:66px 30px 40px;overflow-y:auto;animation:ibFade .4s ease both">
+          <div style="display:flex;gap:5px;margin-bottom:34px"><span style="flex:1;height:3px;border-radius:2px;background:#1F1D1A"></span><span style="flex:1;height:3px;border-radius:2px;background:#1F1D1A"></span><span style="flex:1;height:3px;border-radius:2px;background:#1F1D1A"></span></div>
+          <h1 style="font:300 31px/1.18 Newsreader,serif;letter-spacing:-0.02em;margin:0 0 10px">Your worship stays on your device</h1>
+          <p style="font:400 14px/1.6 'DM Sans',sans-serif;color:#8B857D;margin:0 0 24px">Nothing below is shared unless you turn it on yourself.</p>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div style="padding:17px;border-radius:18px;background:#FFFFFF;border:1px solid rgba(31,29,26,0.07)">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="flex:none;width:34px;height:34px;border-radius:11px;background:#E9EEF4;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.2 5-8a5 5 0 1 0-10 0c0 3.8 5 8 5 8z" stroke="#6B7F99" stroke-width="1.4"/><circle cx="8" cy="6.4" r="1.8" stroke="#6B7F99" stroke-width="1.4"/></svg></span>
+                <div>
+                  <div style="font:600 14.5px/1.3 'DM Sans',sans-serif">Location</div>
+                  <div style="font:400 12.5px/1.5 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">Used only to calculate prayer times. Never uploaded — you can also enter a city by hand.</div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:17px;border-radius:18px;background:#FFFFFF;border:1px solid rgba(31,29,26,0.07)">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="flex:none;width:34px;height:34px;border-radius:11px;background:#E8EEE9;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 6a4.5 4.5 0 0 1 9 0c0 4 1.5 5 1.5 5H2s1.5-1 1.5-5z" stroke="#7C9083" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 13.2a1.8 1.8 0 0 0 3.2 0" stroke="#7C9083" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+                <div>
+                  <div style="font:600 14.5px/1.3 'DM Sans',sans-serif">Notifications</div>
+                  <div style="font:400 12.5px/1.5 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">Adhan and one gentle reminder a day. Every category can be turned off separately.</div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:17px;border-radius:18px;background:#FFFFFF;border:1px solid rgba(31,29,26,0.07)">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="flex:none;width:34px;height:34px;border-radius:11px;background:#F3EADA;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2.6" y="6.8" width="10.8" height="7.2" rx="2" stroke="#C9A96A" stroke-width="1.4"/><path d="M5.4 6.8V5a2.6 2.6 0 0 1 5.2 0v1.8" stroke="#C9A96A" stroke-width="1.4"/></svg></span>
+                <div>
+                  <div style="font:600 14.5px/1.3 'DM Sans',sans-serif">Community</div>
+                  <div style="font:400 12.5px/1.5 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">Off by default. If you join a shared goal, only your contribution total is counted — never named.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-height:22px"></div>
+          <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;width:100%;padding:17px;border-radius:17px;background:#1F1D1A;color:#FBF9F5;font:600 15.5px/1 'DM Sans',sans-serif;cursor:pointer" style-hover="background:#33302B">Allow location &amp; continue</button>
+          <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;margin-top:4px;padding:13px;font:500 13.5px/1 'DM Sans',sans-serif;color:#9A948C;cursor:pointer" style-hover="color:#1F1D1A">Enter my city instead</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHome }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div>
+                <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C;letter-spacing:0.03em">Wednesday · 14 Rabi&rsquo; al-Awwal 1448</div>
+                <h1 style="font:300 29px/1.15 Newsreader,serif;letter-spacing:-0.02em;margin:9px 0 0">Assalamu Alaikum,<br>Yusuf</h1>
+              </div>
+              <button type="button" onClick="{{ nav.profile }}" style="appearance:none;border:0;flex:none;width:40px;height:40px;border-radius:50%;background:#E8EEE9;color:#5F7367;font:600 14px/1 'DM Sans',sans-serif;cursor:pointer;margin-top:4px" style-hover="background:#DCE6DE">Y</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:9px;font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.2 5-8a5 5 0 1 0-10 0c0 3.8 5 8 5 8z" stroke="#9A948C" stroke-width="1.4"/><circle cx="8" cy="6.4" r="1.7" stroke="#9A948C" stroke-width="1.4"/></svg>
+              <span>Manchester, UK</span>
+            </div>
+          </div>
+
+          <div style="padding:22px 22px 0">
+            <button type="button" onClick="{{ nav.prayer }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:26px;padding:22px;background:linear-gradient(158deg,#FFFFFF 0%,#FBF7EF 100%);box-shadow:0 1px 2px rgba(31,29,26,0.03),0 16px 34px -20px rgba(31,29,26,0.28);position:relative;overflow:hidden" style-hover="border-color:rgba(31,29,26,0.14)">
+              <div style="position:absolute;right:-46px;top:-46px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(201,169,106,0.20),rgba(201,169,106,0) 70%)"></div>
+              <div style="position:relative">
+                <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#B09455">Next prayer</div>
+                <div style="display:flex;align-items:baseline;gap:11px;margin-top:11px">
+                  <span style="font:300 38px/1 Newsreader,serif;letter-spacing:-0.02em">Asr</span>
+                  <span style="font:500 17px/1 'DM Sans',sans-serif;color:#6B6660">16:42</span>
+                </div>
+                <div style="font:400 14px/1 'DM Sans',sans-serif;color:#8B857D;margin-top:11px">in 1 hr 12 min</div>
+                <div style="height:3px;border-radius:2px;background:rgba(31,29,26,0.08);margin-top:17px;overflow:hidden"><div style="height:100%;width:64%;border-radius:2px;background:linear-gradient(90deg,#C9A96A,#DCC38F)"></div></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font:400 11px/1 'DM Sans',sans-serif;color:#ADA69C"><span>Dhuhr 13:18</span><span>Maghrib 19:04</span></div>
+              </div>
+            </button>
+          </div>
+
+          <div style="padding:14px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:18px;background:#FFFFFF;box-shadow:0 1px 2px rgba(31,29,26,0.03)">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C">Today</span>
+                <span style="font:500 12px/1 'DM Sans',sans-serif;color:#6B6660">{{ doneCount }} of 5 logged</span>
+              </div>
+              <div style="display:flex;gap:7px;margin-top:15px">
+                <sc-for list="{{ prayers }}" as="p" hint-placeholder-count="5">
+                  <button type="button" onClick="{{ p.toggle }}" style="appearance:none;flex:1;cursor:pointer;border:0;background:transparent;padding:0;display:flex;flex-direction:column;align-items:center;gap:8px">
+                    <sc-if value="{{ p.done }}" hint-placeholder-val="{{ false }}">
+                      <span style="width:100%;height:46px;border-radius:13px;background:#7C9083;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 12 12" fill="none"><path d="M2.4 6.3l2.5 2.5L9.7 3.6" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                    </sc-if>
+                    <sc-if value="{{ p.pending }}" hint-placeholder-val="{{ true }}">
+                      <span style="width:100%;height:46px;border-radius:13px;border:1.5px dashed rgba(31,29,26,0.15);background:#FCFBF8"></span>
+                    </sc-if>
+                    <span style="font:500 11px/1 'DM Sans',sans-serif;color:#8B857D">{{ p.short }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:26px 22px 0">
+            <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:12px">Pick up where you left off</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button type="button" onClick="{{ nav.tasbeeh }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:16px;background:#FFFFFF;display:flex;align-items:center;gap:14px" style-hover="border-color:rgba(31,29,26,0.16)">
+                <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#F3EADA;display:flex;align-items:center;justify-content:center;font:500 13px/1 'Noto Naskh Arabic',serif;color:#B09455">٣٣</span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 14.5px/1.2 'DM Sans',sans-serif">Durood Sharif</span>
+                  <span style="display:block;font:400 12.5px/1.3 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">{{ count }} of {{ target }} today · 9-day streak</span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#C4BEB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button type="button" onClick="{{ nav.adhkar }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:16px;background:#FFFFFF;display:flex;align-items:center;gap:14px" style-hover="border-color:rgba(31,29,26,0.16)">
+                <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#E9EEF4;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="4" stroke="#6B7F99" stroke-width="1.5"/><path d="M10 1.5v2.2M10 16.3v2.2M1.5 10h2.2M16.3 10h2.2M4 4l1.6 1.6M14.4 14.4L16 16M16 4l-1.6 1.6M5.6 14.4L4 16" stroke="#6B7F99" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 14.5px/1.2 'DM Sans',sans-serif">Evening Adhkar</span>
+                  <span style="display:block;font:400 12.5px/1.3 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">Best read after Asr · 11 items, about 6 min</span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#C4BEB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button type="button" onClick="{{ nav.focusSetup }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:16px;background:#FFFFFF;display:flex;align-items:center;gap:14px" style-hover="border-color:rgba(31,29,26,0.16)">
+                <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#E8EEE9;display:flex;align-items:center;justify-content:center"><svg width="19" height="19" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.2" stroke="#7C9083" stroke-width="1.5"/><path d="M10 5.8V10l2.8 1.7" stroke="#7C9083" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 14.5px/1.2 'DM Sans',sans-serif">Start a focus session</span>
+                  <span style="display:block;font:400 12.5px/1.3 'DM Sans',sans-serif;color:#8B857D;margin-top:3px">Quieten your phone while you finish your dhikr</span>
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#C4BEB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="padding:26px 22px 0">
+            <div style="border-radius:22px;padding:19px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05)">
+              <div style="font:400 17px/1.55 Newsreader,serif;color:#3A3630;text-wrap:pretty">&ldquo;The most beloved deeds to Allah are those done consistently, even if small.&rdquo;</div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:12px">
+                <span style="font:400 11.5px/1 'DM Sans',sans-serif;color:#9A948C">Narration · source shown in full in the Library</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPrayer }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Prayer</h1>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+              <span style="font:400 13px/1 'DM Sans',sans-serif;color:#8B857D">Muslim World League · Hanafi Asr</span>
+              <button type="button" onClick="{{ nav.prayerStats }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer;font:600 13px/1 'DM Sans',sans-serif;color:#6B7F99" style-hover="color:#55677E">History</button>
+            </div>
+          </div>
+          <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ prayerRows }}" as="p" hint-placeholder-count="6">
+              <div style="border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:15px 16px;background:#FFFFFF;display:flex;align-items:center;gap:14px;box-shadow:0 1px 2px rgba(31,29,26,0.03)">
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font:600 16px/1.2 'DM Sans',sans-serif">{{ p.name }}</span>
+                  <span style="display:block;font:400 12.5px/1.3 'DM Sans',sans-serif;color:#8B857D;margin-top:4px">{{ p.note }}</span>
+                </span>
+                <span style="font:500 16px/1 'DM Sans',sans-serif;color:#3A3630;letter-spacing:0.01em">{{ p.time }}</span>
+                <sc-if value="{{ p.loggable }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ p.toggle }}" style="appearance:none;flex:none;width:46px;height:46px;border-radius:15px;cursor:pointer;border:1.5px dashed rgba(31,29,26,0.15);background:#FCFBF8;font:500 10px/1.1 'DM Sans',sans-serif;color:#9A948C" style-hover="border-color:#7C9083;color:#5F7367">Log</button>
+                </sc-if>
+                <sc-if value="{{ p.isDone }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ p.toggle }}" style="appearance:none;flex:none;width:46px;height:46px;border-radius:15px;cursor:pointer;border:0;background:#7C9083;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 12 12" fill="none"><path d="M2.4 6.3l2.5 2.5L9.7 3.6" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                </sc-if>
+                <sc-if value="{{ p.isSunrise }}" hint-placeholder-val="{{ false }}">
+                  <span style="flex:none;width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M3 15h14M6.5 15a3.5 3.5 0 0 1 7 0M10 4.5v3M5.4 6.4l1.5 1.5M14.6 6.4l-1.5 1.5" stroke="#C9A96A" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:20px 22px 0">
+            <div style="border-radius:20px;padding:17px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05);display:flex;align-items:flex-start;gap:12px">
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="none" style="flex:none;margin-top:1px"><circle cx="8" cy="8" r="6.6" stroke="#8B857D" stroke-width="1.3"/><path d="M8 5.2v.1M8 7.4v3.4" stroke="#8B857D" stroke-width="1.4" stroke-linecap="round"/></svg>
+              <div style="font:400 12.5px/1.55 'DM Sans',sans-serif;color:#6B6660">Times are calculated on your device from your location and the method above. Missed prayers move to <span style="color:#3A3630;font-weight:600">Qada</span> after midnight rather than disappearing.</div>
+            </div>
+          </div>
+          <div style="padding:14px 22px 0">
+            <button type="button" onClick="{{ nav.prayerStats }}" style="appearance:none;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.07);border-radius:20px;padding:16px;background:#FFFFFF;display:flex;align-items:center;justify-content:space-between;font:600 14.5px/1 'DM Sans',sans-serif;color:#1F1D1A" style-hover="border-color:rgba(31,29,26,0.18)">
+              <span>Qada &amp; missed prayers</span>
+              <span style="display:flex;align-items:center;gap:8px"><span style="font:500 12.5px/1 'DM Sans',sans-serif;color:#B06A55;background:rgba(176,106,85,0.10);padding:5px 9px;border-radius:8px">4 outstanding</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#C4BEB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPrayerStats }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <button type="button" onClick="{{ nav.prayer }}" style="appearance:none;border:0;background:transparent;padding:0;margin-bottom:14px;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 13px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="color:#1F1D1A"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Prayer</button>
+            <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Consistency</h1>
+            <p style="font:400 13px/1.5 'DM Sans',sans-serif;color:#8B857D;margin:9px 0 0">Last 12 weeks. Each mark is one logged prayer — there is no score and no comparison with anyone else.</p>
+          </div>
+          <div style="padding:22px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:19px;background:#FFFFFF">
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <sc-for list="{{ heat }}" as="d" hint-placeholder-count="84">
+                  <sc-if value="{{ d.full }}" hint-placeholder-val="{{ true }}"><span style="width:100%;max-width:26px;flex:1 0 26px;height:26px;border-radius:7px;background:#7C9083"></span></sc-if>
+                  <sc-if value="{{ d.part }}" hint-placeholder-val="{{ false }}"><span style="width:100%;max-width:26px;flex:1 0 26px;height:26px;border-radius:7px;background:#C3D2C6"></span></sc-if>
+                  <sc-if value="{{ d.none }}" hint-placeholder-val="{{ false }}"><span style="width:100%;max-width:26px;flex:1 0 26px;height:26px;border-radius:7px;background:#EFEDE7"></span></sc-if>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;margin-top:16px;font:400 11px/1 'DM Sans',sans-serif;color:#9A948C">
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:3px;background:#7C9083"></span>All five</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:3px;background:#C3D2C6"></span>Some</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="width:11px;height:11px;border-radius:3px;background:#EFEDE7"></span>None logged</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:12px 22px 0;display:flex;gap:10px">
+            <div style="flex:1;border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:17px;background:#FFFFFF">
+              <div style="font:300 30px/1 Newsreader,serif">86<span style="font:400 15px/1 'DM Sans',sans-serif;color:#9A948C">%</span></div>
+              <div style="font:400 12px/1.35 'DM Sans',sans-serif;color:#8B857D;margin-top:7px">Logged this month</div>
+            </div>
+            <div style="flex:1;border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:17px;background:#FFFFFF">
+              <div style="font:300 30px/1 Newsreader,serif">19</div>
+              <div style="font:400 12px/1.35 'DM Sans',sans-serif;color:#8B857D;margin-top:7px">Days in a row with Fajr</div>
+            </div>
+          </div>
+          <div style="padding:12px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:19px;background:#FFFFFF">
+              <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:15px">Where you slip</div>
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <sc-for list="{{ byPrayer }}" as="b" hint-placeholder-count="5">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font:500 13px/1 'DM Sans',sans-serif;color:#3A3630"><span>{{ b.name }}</span><span style="color:#9A948C">{{ b.pct }}%</span></div>
+                    <div style="height:6px;border-radius:3px;background:#EFEDE7;margin-top:7px;overflow:hidden"><div style="height:100%;border-radius:3px;background:#7C9083;width:{{ b.pct }}%"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font:400 12.5px/1.55 'DM Sans',sans-serif;color:#6B6660;margin-top:16px;padding-top:15px;border-top:1px solid rgba(31,29,26,0.06)">Asr is the one you miss most, usually between 15:00 and 17:00. Would you like a reminder 20 minutes earlier?</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdhkar }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Adhkar</h1>
+            <div style="margin-top:16px;display:flex;align-items:center;gap:9px;padding:12px 15px;border-radius:15px;background:#FFFFFF;border:1px solid rgba(31,29,26,0.07)">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.6" stroke="#B3ADA3" stroke-width="1.5"/><path d="M10.6 10.6L14 14" stroke="#B3ADA3" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <span style="font:400 14px/1 'DM Sans',sans-serif;color:#B3ADA3">Search Arabic, English or Urdu</span>
+            </div>
+          </div>
+          <div style="padding:20px 22px 0">
+            <button type="button" onClick="{{ nav.adhkarRead }}" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:24px;padding:20px;background:linear-gradient(155deg,#FFFFFF,#F6F3EC);box-shadow:0 1px 2px rgba(31,29,26,0.03),0 14px 30px -20px rgba(31,29,26,0.25)" style-hover="border-color:rgba(31,29,26,0.14)">
+              <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#B09455">Suggested now</div>
+              <div style="font:300 25px/1.2 Newsreader,serif;margin-top:10px">Evening Adhkar</div>
+              <div style="font:400 13px/1.45 'DM Sans',sans-serif;color:#8B857D;margin-top:7px">11 items · about 6 minutes · read after Asr until Maghrib</div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:15px">
+                <span style="height:4px;flex:1;border-radius:2px;background:rgba(31,29,26,0.08);overflow:hidden"><span style="display:block;height:100%;width:27%;background:#7C9083;border-radius:2px"></span></span>
+                <span style="font:500 11.5px/1 'DM Sans',sans-serif;color:#8B857D">3 / 11</span>
+              </div>
+            </button>
+          </div>
+          <div style="padding:24px 22px 0">
+            <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:12px">Collections</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <sc-for list="{{ collections }}" as="c" hint-placeholder-count="10">
+                <button type="button" onClick="{{ nav.adhkarRead }}" style="appearance:none;text-align:left;cursor:pointer;border:1px solid rgba(31,29,26,0.06);border-radius:18px;padding:15px;background:#FFFFFF;min-height:92px;display:flex;flex-direction:column;justify-content:space-between" style-hover="border-color:rgba(31,29,26,0.18)">
+                  <span style="font:500 15px/1.25 'Noto Naskh Arabic',serif;color:#C9A96A">{{ c.ar }}</span>
+                  <span>
+                    <span style="display:block;font:600 14px/1.2 'DM Sans',sans-serif">{{ c.name }}</span>
+                    <span style="display:block;font:400 11.5px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:4px">{{ c.n }} items</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:18px 22px 0">
+            <div style="border-radius:18px;padding:15px;background:rgba(201,169,106,0.09);border:1px solid rgba(201,169,106,0.2);font:400 12px/1.55 'DM Sans',sans-serif;color:#7A6741">Every item carries its Arabic, translation and full reference. Anything not yet checked against a primary source is labelled <span style="font-weight:600">pending verification</span> rather than shown as established.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAdhkarRead }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#FBF9F5,#F4F1EA);animation:ibFade .3s ease both">
+          <div style="padding:60px 22px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <button type="button" onClick="{{ nav.adhkar }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 13px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="color:#1F1D1A"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Evening</button>
+            <span style="font:500 12px/1 'DM Sans',sans-serif;color:#9A948C">{{ dhikrPos }} of 11</span>
+            <span style="display:flex;gap:14px">
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M4.5 2.5h9v13l-4.5-3.4L4.5 15.5z" stroke="#8B857D" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M9 12V3M9 3L5.8 6.2M9 3l3.2 3.2M3 12v2.5h12V12" stroke="#8B857D" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:8px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:26px;padding:26px 22px;background:#FFFFFF;box-shadow:0 1px 2px rgba(31,29,26,0.03),0 18px 40px -26px rgba(31,29,26,0.3)">
+              <div dir="rtl" style="font-family:'Noto Naskh Arabic',serif;font-weight:500;line-height:2.05;color:#1F1D1A;text-align:center;font-size:{{ arabicSize }}px">سُبْحَانَ اللهِ وَبِحَمْدِهِ</div>
+              <div style="height:1px;background:rgba(31,29,26,0.07);margin:22px 0"></div>
+              <div style="font:400 13.5px/1.5 'DM Sans',sans-serif;color:#8B857D;font-style:italic;text-align:center">SubhanAllahi wa bihamdih</div>
+              <div style="font:400 16px/1.6 Newsreader,serif;color:#3A3630;text-align:center;margin-top:12px;text-wrap:pretty">Glory be to Allah, and praise belongs to Him.</div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px">
+                <span style="font:500 11px/1 'DM Sans',sans-serif;color:#5F7367;background:#E8EEE9;padding:6px 10px;border-radius:8px">Sahih al-Bukhari</span>
+                <span style="font:500 11px/1 'DM Sans',sans-serif;color:#8B857D;background:#F1EFEA;padding:6px 10px;border-radius:8px">Repeat 100×</span>
+              </div>
+            </div>
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+              <button type="button" style="appearance:none;text-align:left;cursor:pointer;border:1px dashed rgba(31,29,26,0.14);border-radius:18px;padding:15px;background:transparent;font:400 13px/1 'DM Sans',sans-serif;color:#9A948C" style-hover="border-color:rgba(31,29,26,0.3);color:#6B6660">Add a private note</button>
+            </div>
+          </div>
+          <div style="padding:14px 22px 26px;background:linear-gradient(180deg,rgba(244,241,234,0),#F4F1EA 40%)">
+            <button type="button" onClick="{{ tapDhikr }}" style="appearance:none;border:0;width:100%;padding:20px;border-radius:20px;background:#1F1D1A;color:#FBF9F5;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 12px 26px -14px rgba(31,29,26,0.7)" style-hover="background:#33302B" style-active="transform:scale(0.985)">
+              <span style="font:600 15.5px/1 'DM Sans',sans-serif">Count</span>
+              <span style="font:500 15.5px/1 'DM Sans',sans-serif;color:rgba(251,249,245,0.55)">{{ dhikrReps }} / 100</span>
+            </button>
+            <div style="display:flex;gap:10px;margin-top:9px">
+              <button type="button" onClick="{{ nav.adhkar }}" style="appearance:none;flex:1;cursor:pointer;border:1px solid rgba(31,29,26,0.1);background:#FFFFFF;padding:14px;border-radius:16px;font:500 13.5px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.22)">Previous</button>
+              <button type="button" onClick="{{ nextDhikr }}" style="appearance:none;flex:1;cursor:pointer;border:1px solid rgba(31,29,26,0.1);background:#FFFFFF;padding:14px;border-radius:16px;font:500 13.5px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.22)">Next</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTasbeeh }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#FBF9F5 0%,#F2EFE7 100%);animation:ibFade .3s ease both">
+          <div style="padding:60px 22px 0;display:flex;align-items:center;justify-content:space-between">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;font:500 13px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="color:#1F1D1A"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3.5L5.5 8 10 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</button>
+            <span style="font:500 13px/1 'DM Sans',sans-serif;color:#3A3630">Durood Sharif</span>
+            <button type="button" onClick="{{ nav.goals }}" style="appearance:none;border:0;background:transparent;padding:0;cursor:pointer"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="4" r="1.5" fill="#8B857D"/><circle cx="10" cy="10" r="1.5" fill="#8B857D"/><circle cx="10" cy="16" r="1.5" fill="#8B857D"/></svg></button>
+          </div>
+
+          <button type="button" onClick="{{ tap }}" style="appearance:none;border:0;background:transparent;flex:1;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 22px;-webkit-tap-highlight-color:transparent" style-active="transform:scale(0.992)">
+            <div style="position:relative;width:268px;height:268px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 40%,#FFFFFF,#F6F2E9);box-shadow:0 1px 2px rgba(31,29,26,0.05),0 30px 60px -30px rgba(31,29,26,0.35),inset 0 1px 0 rgba(255,255,255,0.9)"></div>
+              <svg width="268" height="268" viewBox="0 0 268 268" style="position:absolute;transform:rotate(-90deg)">
+                <circle cx="134" cy="134" r="122" stroke="rgba(31,29,26,0.06)" stroke-width="5" fill="none"/>
+                <circle cx="134" cy="134" r="122" stroke="#C9A96A" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="766.5" stroke-dashoffset="{{ ringOffset }}" style="transition:stroke-dashoffset .45s cubic-bezier(0.22,1,0.36,1)"/>
+              </svg>
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+                <div dir="rtl" style="font:500 19px/1 'Noto Naskh Arabic',serif;color:#B09455;margin-bottom:14px">اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ</div>
+                <div style="font:300 82px/1 Newsreader,serif;letter-spacing:-0.03em;color:#1F1D1A">{{ count }}</div>
+                <div style="font:400 13px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:10px">{{ remaining }} to reach {{ target }}</div>
+              </div>
+            </div>
+            <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#B3ADA3;margin-top:30px">Tap anywhere to count</div>
+          </button>
+
+          <div style="padding:0 22px 34px">
+            <sc-if value="{{ complete }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:20px;padding:17px;background:#E8EEE9;border:1px solid rgba(124,144,131,0.3);text-align:center;margin-bottom:12px">
+                <div style="font:400 18px/1.35 Newsreader,serif;color:#3F5246">Today&rsquo;s goal is complete.</div>
+                <div style="font:400 12.5px/1.5 'DM Sans',sans-serif;color:#5F7367;margin-top:5px">May Allah accept our remembrance.</div>
+              </div>
+            </sc-if>
+            <div style="display:flex;gap:10px">
+              <button type="button" onClick="{{ undo }}" style="appearance:none;flex:1;cursor:pointer;border:1px solid rgba(31,29,26,0.1);background:#FFFFFF;padding:15px;border-radius:16px;font:500 13.5px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.24)">Undo</button>
+              <button type="button" onClick="{{ plusFive }}" style="appearance:none;flex:1;cursor:pointer;border:1px solid rgba(31,29,26,0.1);background:#FFFFFF;padding:15px;border-radius:16px;font:500 13.5px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.24)">+5</button>
+              <button type="button" onClick="{{ reset }}" style="appearance:none;flex:1;cursor:pointer;border:1px solid rgba(31,29,26,0.1);background:#FFFFFF;padding:15px;border-radius:16px;font:500 13.5px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.24)">Reset</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;font:400 11.5px/1 'DM Sans',sans-serif;color:#B3ADA3">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.9 4.2 4.6.5-3.4 3.1.9 4.5L8 11.6l-4 2.2.9-4.5L1.5 6.2l4.6-.5z" stroke="#B3ADA3" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              <span>9-day streak · counts saved offline</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGoals }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Goals</h1>
+              <p style="font:400 13px/1.5 'DM Sans',sans-serif;color:#8B857D;margin:9px 0 0">Three active. Two is usually enough.</p>
+            </div>
+            <button type="button" onClick="{{ nav.goalNew }}" style="appearance:none;flex:none;border:0;width:40px;height:40px;border-radius:14px;background:#1F1D1A;color:#FBF9F5;cursor:pointer;font:400 21px/1 'DM Sans',sans-serif" style-hover="background:#33302B">+</button>
+          </div>
+          <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ goals }}" as="g" hint-placeholder-count="3">
+              <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:18px;background:#FFFFFF;box-shadow:0 1px 2px rgba(31,29,26,0.03)">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div>
+                    <div style="font:600 16px/1.2 'DM Sans',sans-serif">{{ g.name }}</div>
+                    <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:5px">{{ g.freq }} · reminder {{ g.remind }}</div>
+                  </div>
+                  <span style="font:500 11.5px/1 'DM Sans',sans-serif;color:#5F7367;background:#E8EEE9;padding:6px 9px;border-radius:8px;flex:none">{{ g.streak }}d</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;margin-top:16px">
+                  <span style="height:6px;flex:1;border-radius:3px;background:#EFEDE7;overflow:hidden"><span style="display:block;height:100%;border-radius:3px;background:#7C9083;width:{{ g.pct }}%"></span></span>
+                  <span style="font:500 12.5px/1 'DM Sans',sans-serif;color:#6B6660">{{ g.progress }}</span>
+                </div>
+                <div style="display:flex;gap:3px;margin-top:15px">
+                  <sc-for list="{{ g.week }}" as="d" hint-placeholder-count="7">
+                    <sc-if value="{{ d.hit }}" hint-placeholder-val="{{ true }}"><span style="flex:1;height:22px;border-radius:6px;background:#7C9083"></span></sc-if>
+                    <sc-if value="{{ d.miss }}" hint-placeholder-val="{{ false }}"><span style="flex:1;height:22px;border-radius:6px;background:#EFEDE7"></span></sc-if>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:18px 22px 0">
+            <div style="border-radius:20px;padding:17px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05);font:400 12.5px/1.6 'DM Sans',sans-serif;color:#6B6660">A goal you miss twice in a week gets quietly offered a smaller target instead of a red mark. Consistency is the point.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGoalNew }}">
+        <div style="flex:1;display:flex;flex-direction:column;padding:60px 22px 30px;animation:ibFade .3s ease both">
+          <button type="button" onClick="{{ nav.goals }}" style="appearance:none;border:0;background:transparent;padding:0;margin-bottom:18px;cursor:pointer;align-self:flex-start;font:500 13px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="color:#1F1D1A">Cancel</button>
+          <h1 style="font:300 29px/1.15 Newsreader,serif;letter-spacing:-0.02em;margin:0 0 22px">New goal</h1>
+          <div style="border:1px solid rgba(31,29,26,0.07);border-radius:20px;background:#FFFFFF;overflow:hidden">
+            <div style="padding:15px 17px;border-bottom:1px solid rgba(31,29,26,0.06)">
+              <div style="font:500 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#9A948C">What</div>
+              <div style="font:500 16px/1 'DM Sans',sans-serif;margin-top:8px">Istighfar</div>
+            </div>
+            <div style="padding:15px 17px;border-bottom:1px solid rgba(31,29,26,0.06);display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font:500 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#9A948C">Target</div>
+                <div style="font:500 16px/1 'DM Sans',sans-serif;margin-top:8px">{{ newTarget }} times</div>
+              </div>
+              <div style="display:flex;gap:7px">
+                <button type="button" onClick="{{ targetDown }}" style="appearance:none;width:38px;height:38px;border-radius:12px;border:1px solid rgba(31,29,26,0.1);background:#FCFBF8;cursor:pointer;font:400 18px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.24)">−</button>
+                <button type="button" onClick="{{ targetUp }}" style="appearance:none;width:38px;height:38px;border-radius:12px;border:1px solid rgba(31,29,26,0.1);background:#FCFBF8;cursor:pointer;font:400 18px/1 'DM Sans',sans-serif;color:#6B6660" style-hover="border-color:rgba(31,29,26,0.24)">+</button>
+              </div>
+            </div>
+            <div style="padding:15px 17px">
+              <div style="font:500 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.09em;text-transform:uppercase;color:#9A948C;margin-bottom:11px">How often</div>
+              <div style="display:flex;gap:7px">
+                <sc-for list="{{ freqs }}" as="f" hint-placeholder-count="3">
+                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ f.pick }}" style="appearance:none;flex:1;cursor:pointer;padding:12px;border-radius:13px;border:0;background:#1F1D1A;color:#FBF9F5;font:600 13px/1 'DM Sans',sans-serif">{{ f.label }}</button>
+                  </sc-if>
+                  <sc-if value="{{ f.off }}" hint-placeholder-val="{{ false }}">
+                    <button type="button" onClick="{{ f.pick }}" style="appearance:none;flex:1;cursor:pointer;padding:12px;border-radius:13px;border:1px solid rgba(31,29,26,0.1);background:#FCFBF8;color:#6B6660;font:500 13px/1 'DM Sans',sans-serif" style-hover="border-color:rgba(31,29,26,0.24)">{{ f.label }}</button>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px;border:1px solid rgba(31,29,26,0.07);border-radius:20px;background:#FFFFFF;padding:15px 17px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font:500 15px/1 'DM Sans',sans-serif">Remind me</div>
+              <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:6px">After Isha, once</div>
+            </div>
+            <span style="width:48px;height:29px;border-radius:15px;background:#7C9083;position:relative"><span style="position:absolute;top:2.5px;right:2.5px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></span>
+          </div>
+          <div style="margin-top:12px;border-radius:20px;padding:16px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05);font:400 12.5px/1.6 'DM Sans',sans-serif;color:#6B6660">This goal is private. Nothing about it leaves your device unless you attach it to a community goal.</div>
+          <div style="flex:1;min-height:20px"></div>
+          <button type="button" onClick="{{ nav.goals }}" style="appearance:none;border:0;width:100%;padding:17px;border-radius:17px;background:#1F1D1A;color:#FBF9F5;font:600 15.5px/1 'DM Sans',sans-serif;cursor:pointer" style-hover="background:#33302B">Create goal</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFocusSetup }}">
+        <div style="flex:1;overflow-y:auto;padding:60px 0 30px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;padding:0;margin-bottom:16px;cursor:pointer;font:500 13px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="color:#1F1D1A">Close</button>
+            <h1 style="font:300 31px/1.14 Newsreader,serif;letter-spacing:-0.02em;margin:0">Ibadah Focus</h1>
+            <p style="font:400 14px/1.6 'DM Sans',sans-serif;color:#8B857D;margin:10px 0 0;text-wrap:pretty">Set a worship intention, and your phone stays quiet until you finish it.</p>
+          </div>
+          <div style="padding:22px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.07);border-radius:22px;background:#FFFFFF;overflow:hidden">
+              <div style="padding:16px 17px;border-bottom:1px solid rgba(31,29,26,0.06);display:flex;align-items:center;justify-content:space-between">
+                <span style="font:500 15px/1 'DM Sans',sans-serif">Intention</span>
+                <span style="font:400 14px/1 'DM Sans',sans-serif;color:#8B857D">Durood Sharif · 100</span>
+              </div>
+              <div style="padding:16px 17px;border-bottom:1px solid rgba(31,29,26,0.06);display:flex;align-items:center;justify-content:space-between">
+                <span style="font:500 15px/1 'DM Sans',sans-serif">Session length</span>
+                <span style="font:400 14px/1 'DM Sans',sans-serif;color:#8B857D">Until complete, max 25 min</span>
+              </div>
+              <div style="padding:16px 17px;display:flex;align-items:center;justify-content:space-between">
+                <span style="font:500 15px/1 'DM Sans',sans-serif">Quieten</span>
+                <span style="font:400 14px/1 'DM Sans',sans-serif;color:#8B857D">Social &amp; video · 6 apps</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:14px 22px 0">
+            <div style="border-radius:20px;padding:17px;background:#E9EEF4;border:1px solid rgba(107,127,153,0.22)">
+              <div style="display:flex;align-items:center;gap:8px">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.6" stroke="#5B7089" stroke-width="1.3"/><path d="M8 5.2v.1M8 7.4v3.4" stroke="#5B7089" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span style="font:600 12.5px/1 'DM Sans',sans-serif;color:#4E627A">What this actually does</span>
+              </div>
+              <div style="font:400 12.5px/1.6 'DM Sans',sans-serif;color:#4E627A;margin-top:10px">Ibadah cannot lock apps by itself. On iOS it asks Screen Time for permission and hands your chosen apps to Apple&rsquo;s own limiter; on Android it needs Usage Access and shows a full-screen reminder when a quietened app opens.</div>
+              <div style="display:flex;gap:8px;margin-top:13px">
+                <span style="font:500 11px/1 'DM Sans',sans-serif;color:#4E627A;background:rgba(255,255,255,0.7);padding:6px 9px;border-radius:8px">iOS · Screen Time authorised</span>
+                <span style="font:500 11px/1 'DM Sans',sans-serif;color:#4E627A;background:rgba(255,255,255,0.7);padding:6px 9px;border-radius:8px">Android · reminder only</span>
+              </div>
+            </div>
+          </div>
+          <div style="padding:12px 22px 0">
+            <div style="border-radius:20px;padding:16px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05);display:flex;align-items:flex-start;gap:11px">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex:none;margin-top:2px"><path d="M8 1.8l5.6 2.4v4c0 3.4-2.4 5.3-5.6 6-3.2-.7-5.6-2.6-5.6-6v-4z" stroke="#8B857D" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              <div style="font:400 12.5px/1.6 'DM Sans',sans-serif;color:#6B6660">Calls, messages and emergency services are never restricted. You can end a session at any time — it is recorded honestly, not punished.</div>
+            </div>
+          </div>
+          <div style="padding:20px 22px 0">
+            <button type="button" onClick="{{ nav.focusActive }}" style="appearance:none;border:0;width:100%;padding:18px;border-radius:18px;background:#1F1D1A;color:#FBF9F5;font:600 15.5px/1 'DM Sans',sans-serif;cursor:pointer;box-shadow:0 12px 26px -14px rgba(31,29,26,0.6)" style-hover="background:#33302B">Begin focus session</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFocusActive }}">
+        <div style="flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,#2A2C2B 0%,#1B1D1C 100%);color:#F2F0EB;animation:ibFade .4s ease both">
+          <div style="padding:60px 26px 0;display:flex;align-items:center;justify-content:space-between">
+            <span style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:rgba(242,240,235,0.45)">Focus active</span>
+            <span style="font:500 12.5px/1 'DM Sans',sans-serif;color:rgba(242,240,235,0.45)">6 apps quietened</span>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px">
+            <div style="position:relative;width:230px;height:230px;display:flex;align-items:center;justify-content:center">
+              <div style="position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(201,169,106,0.16),rgba(201,169,106,0) 70%);animation:ibBreathe 6s ease-in-out infinite"></div>
+              <svg width="230" height="230" viewBox="0 0 230 230" style="position:absolute;transform:rotate(-90deg)">
+                <circle cx="115" cy="115" r="104" stroke="rgba(242,240,235,0.10)" stroke-width="3" fill="none"/>
+                <circle cx="115" cy="115" r="104" stroke="#C9A96A" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="653.5" stroke-dashoffset="{{ focusOffset }}" style="transition:stroke-dashoffset .5s ease"/>
+              </svg>
+              <div style="position:relative;text-align:center">
+                <div style="font:300 62px/1 Newsreader,serif;letter-spacing:-0.02em">{{ count }}</div>
+                <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:rgba(242,240,235,0.5);margin-top:9px">of {{ target }} Durood</div>
+              </div>
+            </div>
+            <button type="button" onClick="{{ tap }}" style="appearance:none;margin-top:34px;cursor:pointer;border:1px solid rgba(242,240,235,0.18);background:rgba(242,240,235,0.06);color:#F2F0EB;padding:16px 44px;border-radius:18px;font:600 15px/1 'DM Sans',sans-serif;backdrop-filter:blur(8px)" style-hover="background:rgba(242,240,235,0.12)" style-active="transform:scale(0.98)">Count</button>
+            <div style="font:400 12.5px/1.6 'DM Sans',sans-serif;color:rgba(242,240,235,0.42);margin-top:26px;text-align:center;max-width:250px;text-wrap:pretty">Calls and messages still reach you. Everything else waits.</div>
+          </div>
+          <div style="padding:0 26px 40px">
+            <button type="button" onClick="{{ nav.home }}" style="appearance:none;border:0;background:transparent;width:100%;padding:15px;cursor:pointer;font:500 13.5px/1 'DM Sans',sans-serif;color:rgba(242,240,235,0.5)" style-hover="color:#F2F0EB">End session early</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCommunity }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Together</h1>
+            <p style="font:400 13px/1.5 'DM Sans',sans-serif;color:#8B857D;margin:9px 0 0">Totals only. No names, no ranking, no profiles.</p>
+          </div>
+          <div style="padding:22px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:26px;padding:24px;background:linear-gradient(158deg,#FFFFFF,#F7F4ED);box-shadow:0 1px 2px rgba(31,29,26,0.03),0 16px 34px -22px rgba(31,29,26,0.26);text-align:center">
+              <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C">Dhikr counted today</div>
+              <div style="font:300 46px/1 Newsreader,serif;letter-spacing:-0.03em;margin-top:14px">2,847,391</div>
+              <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#8B857D;margin-top:12px">by 41,208 people in 74 countries</div>
+              <div style="font:400 15px/1.5 Newsreader,serif;color:#5F7367;margin-top:18px;padding-top:16px;border-top:1px solid rgba(31,29,26,0.06)">May Allah accept our remembrance.</div>
+            </div>
+          </div>
+          <div style="padding:24px 22px 0">
+            <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:12px">Open goals</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ commGoals }}" as="c" hint-placeholder-count="3">
+                <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:18px;background:#FFFFFF">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                    <div>
+                      <div style="font:600 15.5px/1.2 'DM Sans',sans-serif">{{ c.name }}</div>
+                      <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:5px">{{ c.people }} participating · ends {{ c.ends }}</div>
+                    </div>
+                    <sc-if value="{{ c.joined }}" hint-placeholder-val="{{ false }}">
+                      <span style="flex:none;font:600 11.5px/1 'DM Sans',sans-serif;color:#5F7367;background:#E8EEE9;padding:8px 11px;border-radius:10px">Joined</span>
+                    </sc-if>
+                    <sc-if value="{{ c.open }}" hint-placeholder-val="{{ true }}">
+                      <button type="button" onClick="{{ c.join }}" style="appearance:none;flex:none;cursor:pointer;border:1px solid rgba(31,29,26,0.12);background:#FCFBF8;padding:8px 13px;border-radius:10px;font:600 11.5px/1 'DM Sans',sans-serif;color:#3A3630" style-hover="border-color:rgba(31,29,26,0.28)">Join</button>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:11px;margin-top:16px">
+                    <span style="height:6px;flex:1;border-radius:3px;background:#EFEDE7;overflow:hidden"><span style="display:block;height:100%;border-radius:3px;background:#C9A96A;width:{{ c.pct }}%"></span></span>
+                    <span style="font:500 12px/1 'DM Sans',sans-serif;color:#6B6660">{{ c.pct }}%</span>
+                  </div>
+                  <div style="font:400 12px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:9px">{{ c.done }} of {{ c.total }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:18px 22px 0">
+            <div style="border-radius:20px;padding:17px;background:rgba(201,169,106,0.09);border:1px solid rgba(201,169,106,0.2);font:400 12.5px/1.6 'DM Sans',sans-serif;color:#7A6741">A shared goal is a way to keep each other company, not a claim about reward. Ibadah makes no theological promise about what a total means.</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProgress }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px">
+            <h1 style="font:300 31px/1.1 Newsreader,serif;letter-spacing:-0.02em;margin:0">Your month</h1>
+            <p style="font:400 13px/1.5 'DM Sans',sans-serif;color:#8B857D;margin:9px 0 0">August 1448 · private to this device</p>
+          </div>
+          <div style="padding:22px 22px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid rgba(31,29,26,0.06);border-radius:20px;padding:17px;background:#FFFFFF">
+                <div style="font:300 29px/1 Newsreader,serif;letter-spacing:-0.02em">{{ s.value }}</div>
+                <div style="font:400 12px/1.4 'DM Sans',sans-serif;color:#8B857D;margin-top:8px">{{ s.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding:12px 22px 0">
+            <div style="border:1px solid rgba(31,29,26,0.06);border-radius:22px;padding:19px;background:#FFFFFF">
+              <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C">Dhikr per day</div>
+              <div style="display:flex;align-items:flex-end;gap:5px;height:118px;margin-top:18px">
+                <sc-for list="{{ bars }}" as="b" hint-placeholder-count="14">
+                  <span style="flex:1;border-radius:5px 5px 3px 3px;background:#C9A96A;opacity:0.85;height:{{ b.h }}%"></span>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:10px;font:400 10.5px/1 'DM Sans',sans-serif;color:#ADA69C"><span>2 weeks ago</span><span>Today</span></div>
+            </div>
+          </div>
+          <div style="padding:12px 22px 0">
+            <div style="border-radius:22px;padding:19px;background:#F4F1EA;border:1px solid rgba(31,29,26,0.05)">
+              <div style="font:400 17px/1.5 Newsreader,serif;color:#3A3630;text-wrap:pretty">Your steadiest week this year. Fajr held 19 days running.</div>
+              <div style="font:400 12.5px/1.55 'DM Sans',sans-serif;color:#8B857D;margin-top:10px">Weekends are where consistency drops. Nothing here is shared, compared or scored.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProfile }}">
+        <div style="flex:1;overflow-y:auto;padding:62px 0 96px;animation:ibFade .35s ease both">
+          <div style="padding:0 22px;display:flex;align-items:center;gap:15px">
+            <span style="flex:none;width:60px;height:60px;border-radius:50%;background:#E8EEE9;color:#5F7367;display:flex;align-items:center;justify-content:center;font:500 22px/1 Newsreader,serif">Y</span>
+            <div>
+              <div style="font:300 25px/1.15 Newsreader,serif;letter-spacing:-0.01em">Yusuf Rahman</div>
+              <div style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C;margin-top:6px">Member since Ramadan 1447</div>
+            </div>
+          </div>
+          <div style="padding:24px 22px 0">
+            <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:12px">Privacy</div>
+            <div style="border:1px solid rgba(31,29,26,0.07);border-radius:20px;background:#FFFFFF;overflow:hidden">
+              <sc-for list="{{ privacy }}" as="row" hint-placeholder-count="4">
+                <div style="padding:15px 17px;border-bottom:1px solid rgba(31,29,26,0.06);display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <div>
+                    <div style="font:500 14.5px/1.2 'DM Sans',sans-serif">{{ row.label }}</div>
+                    <div style="font:400 12px/1.4 'DM Sans',sans-serif;color:#9A948C;margin-top:4px">{{ row.sub }}</div>
+                  </div>
+                  <span style="flex:none;font:500 12px/1 'DM Sans',sans-serif;color:#6B6660;background:#F1EFEA;padding:7px 10px;border-radius:9px">{{ row.value }}</span>
+                </div>
+              </sc-for>
+              <div style="padding:15px 17px;font:400 12px/1.55 'DM Sans',sans-serif;color:#8B857D">Worship data is stored on this device. Sync is off; turning it on encrypts before upload.</div>
+            </div>
+          </div>
+          <div style="padding:22px 22px 0">
+            <div style="font:600 10.5px/1 'DM Sans',sans-serif;letter-spacing:0.11em;text-transform:uppercase;color:#9A948C;margin-bottom:12px">Settings</div>
+            <div style="border:1px solid rgba(31,29,26,0.07);border-radius:20px;background:#FFFFFF;overflow:hidden">
+              <sc-for list="{{ settings }}" as="row" hint-placeholder-count="6">
+                <button type="button" style="appearance:none;text-align:left;width:100%;cursor:pointer;border:0;border-bottom:1px solid rgba(31,29,26,0.06);background:#FFFFFF;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px" style-hover="background:#FCFBF8">
+                  <span style="font:500 14.5px/1 'DM Sans',sans-serif;color:#1F1D1A">{{ row.label }}</span>
+                  <span style="display:flex;align-items:center;gap:9px"><span style="font:400 12.5px/1 'DM Sans',sans-serif;color:#9A948C">{{ row.value }}</span><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M6 3.5L10.5 8 6 12.5" stroke="#C4BEB4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="padding:22px 22px 0">
+            <button type="button" onClick="{{ nav.onb1 }}" style="appearance:none;width:100%;cursor:pointer;border:1px solid rgba(31,29,26,0.1);border-radius:18px;background:#FFFFFF;padding:16px;font:500 14px/1 'DM Sans',sans-serif;color:#8B857D" style-hover="border-color:rgba(31,29,26,0.24);color:#3A3630">Restart the walkthrough</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;left:0;right:0;bottom:0;z-index:20;padding:8px 14px 26px;background:linear-gradient(180deg,rgba(250,248,244,0),rgba(250,248,244,0.94) 34%);backdrop-filter:blur(14px);border-top:1px solid rgba(31,29,26,0.05)">
+          <div style="display:flex;align-items:stretch;justify-content:space-between">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+              <button type="button" onClick="{{ t.go }}" style="appearance:none;flex:1;border:0;background:transparent;cursor:pointer;padding:8px 0;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:48px">
+                <sc-if value="{{ t.active }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:flex;flex-direction:column;align-items:center;gap:5px;color:#1F1D1A"><span style="display:block" dangerouslySetInnerHTML="{{ t.icon }}"></span><span style="font:600 10.5px/1 'DM Sans',sans-serif">{{ t.label }}</span></span>
+                </sc-if>
+                <sc-if value="{{ t.idle }}" hint-placeholder-val="{{ true }}">
+                  <span style="display:flex;flex-direction:column;align-items:center;gap:5px;color:#B3ADA3"><span style="display:block" dangerouslySetInnerHTML="{{ t.icon }}"></span><span style="font:500 10.5px/1 'DM Sans',sans-serif">{{ t.label }}</span></span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:1000},&quot;showRail&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;arabicSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:34,&quot;min&quot;:24,&quot;max&quot;:48,&quot;step&quot;:2,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Typography&quot;}}">
+const ICONS = {
+  home: '<svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  prayer: '<svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M5 20V11a7 7 0 0 1 14 0v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 20h18M12 4V2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  dhikr: '<svg width="23" height="23" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="4" r="1.7" fill="currentColor"/></svg>',
+  comm: '<svg width="23" height="23" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="9" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 7.2a3 3 0 0 1 0 5.6M17.5 19c0-2.2-.8-3.9-2-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  you: '<svg width="23" height="23" viewBox="0 0 24 24" fill="none"><path d="M5 20v-1a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="8" r="3.6" stroke="currentColor" stroke-width="1.6"/></svg>'
+};
+
+const PRAYERS = [
+  { name: 'Fajr', short: 'Fajr', time: '04:58', note: 'Logged 05:12' },
+  { name: 'Dhuhr', short: 'Dhuhr', time: '13:18', note: 'Logged 13:40' },
+  { name: 'Asr', short: 'Asr', time: '16:42', note: 'Next · in 1 hr 12 min' },
+  { name: 'Maghrib', short: 'Maghrib', time: '19:04', note: 'Not yet due' },
+  { name: 'Isha', short: 'Isha', time: '20:41', note: 'Not yet due' }
+];
+
+const SCREENS = [
+  ['onb1', 'Welcome'], ['onb2', 'Intentions'], ['onb3', 'Privacy'],
+  ['home', 'Home'], ['prayer', 'Prayer times'], ['prayerStats', 'Prayer consistency'],
+  ['adhkar', 'Adhkar'], ['adhkarRead', 'Adhkar reader'], ['tasbeeh', 'Tasbeeh counter'],
+  ['goals', 'Goals'], ['goalNew', 'New goal'], ['focusSetup', 'Focus setup'],
+  ['focusActive', 'Focus session'], ['community', 'Together'], ['progress', 'Your month'],
+  ['profile', 'Profile & privacy']
+];
+
+const TABS_ON = ['home', 'prayer', 'adhkar', 'goals', 'community', 'progress', 'profile'];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'onb1',
+    logged: { Fajr: true, Dhuhr: true, Asr: false, Maghrib: false, Isha: false },
+    count: 33,
+    dhikrReps: 27,
+    dhikrPos: 4,
+    intents: [false, true, false, true, false],
+    newTarget: 100,
+    freq: 0,
+    joined: [true, false, false]
+  };
+
+  go = (s) => () => this.setState({ screen: s });
+
+  renderVals() {
+    const st = this.state;
+    const target = 100;
+    const nav = {};
+    SCREENS.forEach(([id]) => { nav[id] = this.go(id); });
+
+    const circ = 2 * Math.PI * 122;
+    const focusCirc = 2 * Math.PI * 104;
+    const frac = Math.min(st.count / target, 1);
+
+    return {
+      showRail: this.props.showRail ?? true,
+      arabicSize: this.props.arabicSize ?? 34,
+      nav,
+      rail: SCREENS.map(([id, label], i) => ({
+        num: String(i + 1).padStart(2, '0'), label, go: this.go(id)
+      })),
+      isOnb1: st.screen === 'onb1',
+      isOnb2: st.screen === 'onb2',
+      isOnb3: st.screen === 'onb3',
+      isHome: st.screen === 'home',
+      isPrayer: st.screen === 'prayer',
+      isPrayerStats: st.screen === 'prayerStats',
+      isAdhkar: st.screen === 'adhkar',
+      isAdhkarRead: st.screen === 'adhkarRead',
+      isTasbeeh: st.screen === 'tasbeeh',
+      isGoals: st.screen === 'goals',
+      isGoalNew: st.screen === 'goalNew',
+      isFocusSetup: st.screen === 'focusSetup',
+      isFocusActive: st.screen === 'focusActive',
+      isCommunity: st.screen === 'community',
+      isProgress: st.screen === 'progress',
+      isProfile: st.screen === 'profile',
+      showTabs: TABS_ON.indexOf(st.screen) !== -1,
+
+      tabs: [
+        { label: 'Home', icon: { __html: ICONS.home }, key: 'home' },
+        { label: 'Prayer', icon: { __html: ICONS.prayer }, key: 'prayer' },
+        { label: 'Dhikr', icon: { __html: ICONS.dhikr }, key: 'adhkar' },
+        { label: 'Together', icon: { __html: ICONS.comm }, key: 'community' },
+        { label: 'You', icon: { __html: ICONS.you }, key: 'profile' }
+      ].map(t => ({
+        ...t,
+        active: st.screen === t.key,
+        idle: st.screen !== t.key,
+        go: this.go(t.key)
+      })),
+
+      doneCount: Object.keys(st.logged).filter(k => st.logged[k]).length,
+      prayers: PRAYERS.map(p => ({
+        short: p.short,
+        done: !!st.logged[p.name],
+        pending: !st.logged[p.name],
+        toggle: () => this.setState(s => ({ logged: { ...s.logged, [p.name]: !s.logged[p.name] } }))
+      })),
+      prayerRows: [
+        PRAYERS[0],
+        { name: 'Sunrise', time: '06:41', note: 'Not a prayer time', sunrise: true },
+        PRAYERS[1], PRAYERS[2], PRAYERS[3], PRAYERS[4]
+      ].map(p => ({
+        name: p.name,
+        time: p.time,
+        note: p.note,
+        isSunrise: !!p.sunrise,
+        isDone: !p.sunrise && !!st.logged[p.name],
+        loggable: !p.sunrise && !st.logged[p.name],
+        toggle: p.sunrise ? undefined : () => this.setState(s => ({ logged: { ...s.logged, [p.name]: !s.logged[p.name] } }))
+      })),
+
+      heat: Array.from({ length: 84 }, (_, i) => {
+        const r = (i * 37 % 11);
+        const full = r > 3, part = r === 2 || r === 3;
+        return { full, part: !full && part, none: !full && !part };
+      }),
+      byPrayer: [
+        { name: 'Fajr', pct: 91 }, { name: 'Dhuhr', pct: 88 },
+        { name: 'Asr', pct: 64 }, { name: 'Maghrib', pct: 95 }, { name: 'Isha', pct: 82 }
+      ],
+
+      collections: [
+        { name: 'Morning', ar: 'أذكار الصباح', n: 14 },
+        { name: 'Evening', ar: 'أذكار المساء', n: 11 },
+        { name: 'After Salah', ar: 'بعد الصلاة', n: 9 },
+        { name: 'Before Sleep', ar: 'قبل النوم', n: 8 },
+        { name: 'Protection', ar: 'الحفظ', n: 7 },
+        { name: 'Gratitude', ar: 'الشكر', n: 5 },
+        { name: 'Forgiveness', ar: 'الاستغفار', n: 6 },
+        { name: 'Travel', ar: 'السفر', n: 5 },
+        { name: 'Difficulty', ar: 'الهم والحزن', n: 6 },
+        { name: 'My collection', ar: 'مختاراتي', n: 3 }
+      ],
+      dhikrPos: st.dhikrPos,
+      dhikrReps: st.dhikrReps,
+      tapDhikr: () => this.setState(s => ({ dhikrReps: Math.min(s.dhikrReps + 1, 100) })),
+      nextDhikr: () => this.setState(s => ({ dhikrPos: Math.min(s.dhikrPos + 1, 11), dhikrReps: 0 })),
+
+      count: st.count,
+      target,
+      remaining: Math.max(target - st.count, 0),
+      complete: st.count >= target,
+      ringOffset: circ * (1 - frac),
+      focusOffset: focusCirc * (1 - frac),
+      tap: () => this.setState(s => ({ count: s.count + 1 })),
+      plusFive: () => this.setState(s => ({ count: s.count + 5 })),
+      undo: () => this.setState(s => ({ count: Math.max(s.count - 1, 0) })),
+      reset: () => this.setState({ count: 0 }),
+
+      goals: [
+        { name: 'Durood Sharif', freq: '100 daily', remind: 'after Isha', streak: 9, pct: 33, progress: '33 / 100', week: [1, 1, 1, 1, 0, 1, 1] },
+        { name: 'Morning Adhkar', freq: 'Every day', remind: '07:00', streak: 4, pct: 100, progress: 'Done', week: [1, 0, 1, 1, 1, 1, 1] },
+        { name: 'Quran', freq: '4 pages daily', remind: 'after Fajr', streak: 12, pct: 50, progress: '2 / 4 pages', week: [1, 1, 1, 1, 1, 0, 1] }
+      ].map(g => ({ ...g, week: g.week.map(v => ({ hit: !!v, miss: !v })) })),
+
+      newTarget: st.newTarget,
+      targetUp: () => this.setState(s => ({ newTarget: s.newTarget + 10 })),
+      targetDown: () => this.setState(s => ({ newTarget: Math.max(s.newTarget - 10, 10) })),
+      freqs: ['Daily', 'Weekly', 'Custom'].map((label, i) => ({
+        label, on: st.freq === i, off: st.freq !== i, pick: () => this.setState({ freq: i })
+      })),
+
+      intents: [
+        { title: 'The five daily prayers', sub: 'Track and catch up on what I miss' },
+        { title: 'Daily dhikr', sub: 'A count I keep without thinking about it' },
+        { title: 'Reading Quran', sub: 'A few pages, most days' },
+        { title: 'Less time on my phone', sub: 'Worship before scrolling' },
+        { title: 'Morning and evening adhkar', sub: 'Two short habits, book-ending the day' }
+      ].map((it, i) => ({
+        ...it, on: st.intents[i], off: !st.intents[i],
+        toggle: () => this.setState(s => {
+          const n = s.intents.slice(); n[i] = !n[i]; return { intents: n };
+        })
+      })),
+
+      commGoals: [
+        { name: '10 million Durood', people: '18,402', ends: 'in 6 days', pct: 71, done: '7.1m', total: '10m' },
+        { name: 'Fajr together, 30 days', people: '9,117', ends: 'in 21 days', pct: 34, done: 'day 10', total: 'day 30' },
+        { name: 'A juz a day in Rabi al-Awwal', people: '4,880', ends: 'in 12 days', pct: 52, done: '15', total: '30 juz' }
+      ].map((c, i) => ({
+        ...c, joined: st.joined[i], open: !st.joined[i],
+        join: () => this.setState(s => { const n = s.joined.slice(); n[i] = true; return { joined: n }; })
+      })),
+
+      stats: [
+        { value: '129', label: 'Prayers logged' },
+        { value: '18,340', label: 'Dhikr counted' },
+        { value: '41', label: 'Quran pages read' },
+        { value: '11', label: 'Focus sessions finished' }
+      ],
+      bars: [38, 52, 44, 61, 70, 48, 33, 58, 77, 66, 82, 59, 74, 91].map(h => ({ h })),
+
+      privacy: [
+        { label: 'Worship data', sub: 'Prayer, dhikr, goals, reading', value: 'This device' },
+        { label: 'Community totals', sub: 'Your counts added anonymously', value: 'On' },
+        { label: 'Location', sub: 'For prayer times only', value: 'While in use' },
+        { label: 'Analytics', sub: 'Crashes and feature use, never content', value: 'Off' }
+      ],
+      settings: [
+        { label: 'Calculation method', value: 'MWL' },
+        { label: 'Asr madhhab', value: 'Hanafi' },
+        { label: 'Notifications', value: '3 of 7 on' },
+        { label: 'Language', value: 'English' },
+        { label: 'Text size & motion', value: 'System' },
+        { label: 'Content sources', value: 'View' }
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

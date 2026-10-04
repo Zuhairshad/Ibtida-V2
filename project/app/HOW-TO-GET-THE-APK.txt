@@ -1,0 +1,17 @@
+IBTIDA — turn this folder into an Android APK (free, ~10 minutes)
+
+1. HOST IT
+   Go to https://app.netlify.com/drop and drag this whole 'app' folder onto the page.
+   You get a link like https://something.netlify.app
+
+2. MAKE THE APK
+   Go to https://www.pwabuilder.com, paste the link, press Start.
+   Package for stores -> Android -> Generate -> Download.
+   The zip contains an .apk (install directly) and an .aab (Google Play).
+   KEEP the signing key file — every future update needs it.
+
+3. INSTALL
+   Copy the .apk to your phone, open it, allow 'Install unknown apps'.
+
+Works: every screen, counters, goals, circles, light/dark, Urdu toggles, Android back button, offline after first open.
+Needs the native build: real app blocking (Ibadah Lock), camera QR scan, live compass, alarm-grade adhan.
