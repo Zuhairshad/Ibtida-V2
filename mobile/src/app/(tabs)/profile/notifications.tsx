@@ -1,5 +1,6 @@
 import type { IconName } from '../../../components/Icon';
 import { BackBar, ListCard, Screen, Statement, SwitchRow } from '../../../components/ui';
+import { enableNotifications } from '../../../lib/notifications';
 import { set, useApp } from '../../../state/store';
 
 const ROWS: [string, string, IconName][] = [
@@ -18,7 +19,7 @@ export default function Notifications() {
       <BackBar title="Notifications" />
       <Statement a="Gentle reminders." b="Never noise." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
       <ListCard style={{ marginTop: 18 }}>
-        {ROWS.map(([l, s, ic], i) => <SwitchRow key={l} label={l} sub={s} icon={ic} on={n[i]} onToggle={() => { const a = n.slice(); a[i] = !a[i]; set({ notifs: a }); }} />)}
+        {ROWS.map(([l, s, ic], i) => <SwitchRow key={l} label={l} sub={s} icon={ic} on={n[i]} onToggle={() => { const a = n.slice(); a[i] = !a[i]; set({ notifs: a }); if (a[i]) enableNotifications(); }} />)}
       </ListCard>
     </Screen>
   );

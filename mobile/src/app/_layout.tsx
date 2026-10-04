@@ -15,6 +15,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '../components/ui';
+import { useNotifications } from '../lib/notifications';
 import { hydrate, useApp } from '../state/store';
 import { ThemeProvider, useT } from '../theme/ThemeProvider';
 
@@ -22,6 +23,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Shell() {
   const t = useT();
+  useNotifications();
   useEffect(() => { SystemUI.setBackgroundColorAsync(t.bg).catch(() => {}); }, [t.bg]);
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>

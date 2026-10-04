@@ -3,6 +3,7 @@ import { Icon } from '../../../components/Icon';
 import { View } from 'react-native';
 import { BackBar, Cta, ListCard, Screen, Statement, SwitchRow, Txt, say } from '../../../components/ui';
 import { PH, PRAYER_META } from '../../../data/content';
+import { enableNotifications } from '../../../lib/notifications';
 import { addDays, dayKey, fmtTime } from '../../../lib/prayer';
 import { set, useApp, type WakeEntry } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
@@ -37,7 +38,7 @@ export default function WakeAlarm() {
       <ListCard style={{ marginTop: 10 }}>
         {PH.map((p, i) => (
           <SwitchRow key={p} label={p} sub={wake[i] ? 'Two-stage scan required' : 'Standard adhan only'} icon={PRAYER_META[p].ic} on={wake[i]}
-            onToggle={() => { const a = wake.slice(); a[i] = !a[i]; set({ wakeVerify: a }); say(`${p} wake verification ${a[i] ? 'on' : 'off'}`); }} />
+            onToggle={() => { const a = wake.slice(); a[i] = !a[i]; set({ wakeVerify: a }); say(`${p} wake verification ${a[i] ? 'on' : 'off'}`); if (a[i]) enableNotifications(); }} />
         ))}
       </ListCard>
       <View style={{ paddingTop: 12, paddingHorizontal: 16, flexDirection: 'row', gap: 10 }}>

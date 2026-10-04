@@ -2,9 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { CITIES, type City, type PrayerName } from '../data/content';
 
+/** Reminder time from the goal-schedule wheels: h indexes 1–12, m indexes 00/15/30/45, a 0=AM 1=PM, days Mon…Sun. */
+export type Sched = { h: number; m: number; a: number; days: number[] };
 export type Goal = {
   id: number; name: string; target: number; prog: number; streak: number;
   remind: string; week: number[]; cg: string | null;
+  /** Set once the user saves a schedule for this goal; older goals fall back to `remind`. */
+  sched?: Sched;
 };
 export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
@@ -51,7 +55,7 @@ export type AppState = {
   rTheme: number;
   emergencies: Emergency[];
   focus: { dur: number; goal: number; apps: boolean[] };
-  sched: { h: number; m: number; a: number; days: number[] };
+  sched: Sched;
   streak: number;
 };
 

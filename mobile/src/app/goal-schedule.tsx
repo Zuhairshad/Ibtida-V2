@@ -1,8 +1,10 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { Icon } from '../components/Icon';
 import { BackBar, buzz, Cta, H1, Page, say, Tap, Txt, WheelSet } from '../components/ui';
-import { set, useApp } from '../state/store';
+import { enableNotifications, previewReminder } from '../lib/notifications';
+import { getState, set, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
 const HRS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -15,11 +17,17 @@ export default function GoalSchedule() {
   const { goal } = useLocalSearchParams<{ goal?: string }>();
   const s = useApp(st => st.sched);
   const put = (p: Partial<typeof s>) => set(st => ({ sched: { ...st.sched, ...p } }));
+  // Editing a goal starts from that goal's own schedule when it has one.
+  useEffect(() => {
+    const own = goal ? getState().goals.find(g => g.id === Number(goal))?.sched : undefined;
+    if (own) set({ sched: own });
+  }, [goal]);
   const save = () => {
     const label = `${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'pm' : 'am'}`;
-    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label } : g)) }));
+    if (goal) set(st => ({ goals: st.goals.map(g => (g.id === Number(goal) ? { ...g, remind: label, sched: { ...st.sched, days: st.sched.days.slice() } } : g)) }));
     router.back();
     say(`Reminder saved for ${HRS[s.h]}:${MINS[s.m]} ${s.a ? 'PM' : 'AM'}`);
+    if (getState().notifs[2]) enableNotifications();
   };
   return (
     <Page>
@@ -44,7 +52,7 @@ export default function GoalSchedule() {
           );
         })}
       </View>
-      <Tap onPress={() => { buzz([20, 80, 20]); say('Playing gentle chime'); }}
+      <Tap onPress={() => { buzz([20, 80, 20]); previewReminder(); }}
         style={{ marginTop: 18, marginHorizontal: 22, height: 52, borderRadius: 26, backgroundColor: t.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <Icon name="bell" color={t.acc} />
         <Txt style={{ fontSize: 14.5, fontWeight: 700 }}>Preview reminder tone</Txt>

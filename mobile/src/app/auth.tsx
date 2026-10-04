@@ -4,6 +4,7 @@ import { ScrollView, TextInput, View } from 'react-native';
 import { GoogleG } from '../components/Icon';
 import { FadeIn } from '../components/motion';
 import { BackBar, buzz, Cta, H1, Page, say, Seg, Tap, Txt } from '../components/ui';
+import { enableNotifications } from '../lib/notifications';
 import { set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
@@ -28,6 +29,8 @@ export default function Auth() {
     set({ onboarded: true, signedIn: true, email: email.trim() });
     say('Bismillah — welcome to Ibtida');
     router.replace('/home');
+    // Entering the app is when reminders start to matter, so ask now rather than at launch.
+    enableNotifications();
   };
   return (
     <Page top={60}>
@@ -65,7 +68,7 @@ export default function Auth() {
               <Txt style={{ fontSize: 13.5, lineHeight: 20, color: t.okTx }}>Check your inbox — we sent a sign-in link to {email}.</Txt>
             </FadeIn>
           )}
-          <Tap onPress={() => { set({ onboarded: true }); router.replace('/home'); }} style={{ height: 44, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
+          <Tap onPress={() => { set({ onboarded: true }); router.replace('/home'); enableNotifications(); }} style={{ height: 44, marginTop: 10, alignItems: 'center', justifyContent: 'center' }}>
             <Txt style={{ fontSize: 14, fontWeight: 600, color: t.t3 }}>Continue without an account</Txt>
           </Tap>
         </FadeIn>

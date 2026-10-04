@@ -10,6 +10,7 @@ import { buzz, Chips, Cta, IconBtn, IconChip, Label, Ring, say, Screen, SerifTit
 import { METHODS, PRAYER_META, type PrayerName } from '../../../data/content';
 import { clock, setLog, usePrayerNow } from '../../../lib/hooks';
 import { watchHeading } from '../../../lib/location';
+import { enableNotifications } from '../../../lib/notifications';
 import { addDays, dayKey, fmtTime, qibla, timesFor } from '../../../lib/prayer';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
@@ -174,7 +175,7 @@ export default function Prayer() {
                   </View>
                   <Txt style={{ fontSize: 15.5, fontWeight: 600, color: t.t5 }}>{fmtTime(r.at)}</Txt>
                   <Tap scale={0.9} accessibilityLabel={`Adhan for ${n}`} accessibilityState={{ checked: adhan[n] }}
-                    onPress={() => { buzz(5); set(s => ({ adhan: { ...s.adhan, [n]: !s.adhan[n] } })); say(`Adhan ${adhan[n] ? 'off' : 'on'} for ${n}`); }}
+                    onPress={() => { buzz(5); set(s => ({ adhan: { ...s.adhan, [n]: !s.adhan[n] } })); say(`Adhan ${adhan[n] ? 'off' : 'on'} for ${n}`); if (!adhan[n]) enableNotifications(); }}
                     style={{ width: 36, height: 44, alignItems: 'center', justifyContent: 'center' }}>
                     <Icon name="bell" color={adhan[n] ? t.acc : t.t4} />
                   </Tap>

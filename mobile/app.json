@@ -18,6 +18,9 @@
       "bundleIdentifier": "app.ibtida",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Ibtida uses your location on-device to calculate prayer times and the Qibla direction."
+      },
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
       }
     },
     "android": {
@@ -29,7 +32,8 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "VIBRATE"
+        "VIBRATE",
+        "SCHEDULE_EXACT_ALARM"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -60,6 +64,12 @@
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#F2A65A"
         }
       ]
     ],

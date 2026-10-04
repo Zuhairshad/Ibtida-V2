@@ -47,12 +47,26 @@ saved to `wakeLog` and shown on Prayer → Wake alarm. The route opens cold from
 `ibtida://wake-scan` (closing goes to `/home`). "Simulate scan" exists only in `__DEV__`.
 The camera is a native module, so it needs a development build (not Expo Go).
 
+Local notifications (`src/lib/notifications.ts`, `expo-notifications`): adhan at each prayer
+with its bell on, the wake alarm for prayers with wake verification on (max-importance
+channel, opens `/wake-scan`), morning/evening adhkar after Fajr/Asr, goal reminders at
+each goal's saved time and weekdays (opens that goal's tasbeeh), and a Quran nudge 20 min
+after Fajr. All are one-shot date triggers for the next 7 days, recomputed when settings
+change and on every app foreground, capped at the 60 soonest (iOS allows 64 pending).
+Permission is asked when entering the app after onboarding and when a reminder is
+switched on. Test on a development build, since the config plugin and permissions only apply there.
+Adhan sounds play the system default until audio files are added — see `ADHAN_AUDIO`.
+On Android 12+ times are exact only if the user allows "Alarms & reminders"
+(`SCHEDULE_EXACT_ALARM`); otherwise Android may deliver them a few minutes late.
+
 Not wired yet (UI is complete, needs native work or a backend):
 - **Ibadah Lock app shielding** — needs the FamilyControls (iOS) / Accessibility-service
   (Android) native module from the handover; the lock session itself works.
-- **Wake alarm ringing** — the scan flow is real, but the alarm that opens it and keeps
-  ringing until stage 2 needs `expo-notifications` (see below).
-- **Adhan / reminder notifications** — toggles persist; scheduling needs `expo-notifications`.
+- **Wake alarm ringing until stage 2** — the alarm notification opens the scan, but it
+  does not keep ringing; a persistent alarm needs a native full-screen-intent module.
+- **Adhan audio** — no recordings bundled yet; notifications use the default sound.
+- **Focus / Community notifications** — toggles persist; Ibadah Lock start/end and circle
+  milestones need the lock module and backend push (TODOs in `notifications.ts`).
 - **Accounts, community totals, feed, circles sync** — local sample data until Supabase is connected.
 - **Quran text** — reader shows a licensed-source placeholder; scripture is never generated.
 - Urdu translations were authored in the design phase and need scholarly review.
