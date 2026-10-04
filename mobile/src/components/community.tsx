@@ -3,6 +3,7 @@ import { Animated, Easing, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 import { COMMUNITY_GOALS, FEED, fmt } from '../data/content';
 import { buzz } from '../lib/feedback';
+import { endsIn, useLive, type LiveFeedItem } from '../lib/live';
 import { set, useApp, type Circle } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
@@ -35,9 +36,23 @@ export function Sparkline() {
   );
 }
 
+/** Community goals: live totals when signed in and online, otherwise the bundled sample. */
 export function useCommunityGoals() {
   const joined = useApp(s => s.joined);
-  return COMMUNITY_GOALS.map((c, i) => ({ ...c, i, joined: joined[i], done: c.done + (i === 0 && joined[0] ? 1240 : 0) }));
+  const on = useLive(l => l.on);
+  const goals = useLive(l => l.goals);
+  return COMMUNITY_GOALS.map((c, i) => {
+    const g = on ? goals[c.name] : undefined;
+    if (g) return { ...c, i, joined: joined[i], done: g.total, total: g.target, people: g.people, ends: endsIn(g.endsAt, c.ends), mine: g.mine, hour: g.thisHour, live: true };
+    return { ...c, i, joined: joined[i], done: c.done + (i === 0 && joined[0] ? 1240 : 0), mine: joined[i] ? 1240 : 0, hour: 18421, live: false };
+  });
+}
+
+/** Feed items: live (with Ameen counts) when available, otherwise the sample feed. */
+export function useFeed(): LiveFeedItem[] {
+  const on = useLive(l => l.on);
+  const feed = useLive(l => l.feed);
+  return on && feed ? feed : FEED;
 }
 
 export function joinGoal(i: number) {
@@ -53,8 +68,10 @@ export function joinGoal(i: number) {
 /** Feed row — the only reaction is "Ameen"; no likes, no ranks. */
 export function FeedRow({ k }: { k: string }) {
   const t = useT();
-  const f = FEED.find(x => x.k === k)!;
+  const liveItem = useLive(l => l.feed?.find(x => x.k === k));
+  const f = liveItem || FEED.find(x => x.k === k);
   const on = useApp(s => !!s.ameen[k]);
+  if (!f) return null;
   const tint = { amb: [t.tAmb, t.acc], mint: [t.tMint, t.mint], blue: [t.tBlue, t.peri], lav: [t.tLav, t.lav] }[f.tint];
   return (
     <View style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 14, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', gap: 13 }}>

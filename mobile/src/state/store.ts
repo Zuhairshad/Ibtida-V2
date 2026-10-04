@@ -16,7 +16,9 @@ export type Goal = {
 };
 export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
-  goals: { name: string; done: number; total: number }[];
+  goals: { name: string; done: number; total: number; id?: string }[];
+  /** Server uuid when the circle comes from Supabase (signed in); absent for local sample circles. */
+  remoteId?: string;
 };
 /** `blocked`: locked-app openings intercepted during that session (older records may lack it). */
 export type Emergency = { when: string; after: string; reason: string; blocked: number };
@@ -177,6 +179,14 @@ export async function hydrate() {
     // Corrupt storage falls back to defaults rather than blocking launch.
   }
   set({ hydrated: true });
+}
+
+/** Writes that come from the server (pull/merge), so the sync layer does not echo them back. */
+let remoteDepth = 0;
+export const isRemoteWrite = () => remoteDepth > 0;
+export function setFromRemote(patch: Partial<AppState> | ((s: AppState) => Partial<AppState>)) {
+  remoteDepth++;
+  try { set(patch); } finally { remoteDepth--; }
 }
 
 export async function resetAll() {

@@ -1,4 +1,5 @@
-import { button, expect, stored, test } from './fixtures';
+import { TEST_USER } from './supabaseMock';
+import { button, storedWhen, expect, stored, test } from './fixtures';
 
 test('first launch walks the onboarding and lands on Home', async ({ page, errors }) => {
   await page.goto('/');
@@ -60,18 +61,25 @@ test('first launch walks the onboarding and lands on Home', async ({ page, error
   expect(errors).toEqual([]);
 });
 
-test('"I already have an account" opens sign-in and signs in', async ({ page }) => {
+test('"I already have an account" opens sign-in and signs in', async ({ page, errors }) => {
   await page.goto('/welcome');
   await button(page, 'I already have an account').click();
   await expect(page.getByText('Welcome back')).toBeVisible();
   await page.getByLabel('Email').fill('not-an-email');
   await button(page, 'Sign in').click();
   await expect(page.getByText('Enter a valid email address')).toBeVisible();
-  await page.getByLabel('Email').fill('yusuf@example.com');
+  // A wrong password is rejected by the server and keeps the user on sign-in.
+  await page.getByLabel('Email').fill(TEST_USER.email);
+  await page.getByLabel('Password').fill('wrong-password');
+  await button(page, 'Sign in').click();
+  await expect(page.getByText('Email or password doesn’t match').first()).toBeVisible();
+  await expect(page).toHaveURL(/\/auth/);
+  // The browser logs the deliberate 400 from the wrong password; that one is expected.
+  errors.splice(0, errors.length, ...errors.filter(e => !/status of 400/.test(e)));
+  await page.getByLabel('Password').fill(TEST_USER.password);
   await button(page, 'Sign in').click();
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.getByText('Small steps.')).toHaveCount(0);
-  const s = await stored(page);
-  expect(s.signedIn).toBe(true);
-  expect(s.email).toBe('yusuf@example.com');
+  const s = await storedWhen(page, x => x.signedIn === true);
+  expect(s.email).toBe(TEST_USER.email);
 });

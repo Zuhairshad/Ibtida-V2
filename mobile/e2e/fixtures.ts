@@ -1,5 +1,6 @@
 import { expect, test as base, type Page } from '@playwright/test';
 import { mockQuranApi } from './quranMock';
+import { mockSupabase } from './supabaseMock';
 
 export const STORAGE_KEY = 'ibtida.v7.state';
 
@@ -19,6 +20,7 @@ export const test = base.extend<Fixtures>({
   errors: [async ({ page }, use) => {
     // Tests never touch the network: the Quran API is served from placeholder data.
     await mockQuranApi(page);
+    await mockSupabase(page);
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
     page.on('console', m => {

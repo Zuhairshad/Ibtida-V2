@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { BackBar, buzz, Cta, H1, Option, Page, say } from '../components/ui';
 import { code8 } from '../data/content';
+import { createCircleLive, liveOn } from '../lib/live';
 import { set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
@@ -13,8 +14,17 @@ export default function CircleNew() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [priv, setPriv] = useState(0);
+  const [busy, setBusy] = useState(false);
   const create = () => {
     if (!name.trim()) { say('Give your circle a name'); return; }
+    if (busy) return;
+    if (liveOn()) {
+      setBusy(true);
+      createCircleLive(name.trim().slice(0, 60), PRIV[priv][0])
+        .then(c => { buzz([10, 30, 16]); say('Circle created · share your code'); router.replace(`/community/circle/${c.id}`); })
+        .catch((e: Error) => { say(e.message); setBusy(false); });
+      return;
+    }
     const c = { id: Date.now(), name: name.trim(), priv: PRIV[priv][0], members: 1, code: code8(), role: 'Owner' as const, goals: [] };
     buzz([10, 30, 16]);
     set(s => ({ circles: s.circles.concat([c]) }));

@@ -15,6 +15,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '../components/ui';
+import { startBackend } from '../lib/account';
 import { useNotifications } from '../lib/notifications';
 import { hydrate, useApp } from '../state/store';
 import { ThemeProvider, useT } from '../theme/ThemeProvider';
@@ -54,6 +55,8 @@ export default function RootLayout() {
     DMSerifDisplay_400Regular, ScheherazadeNew_400Regular, ScheherazadeNew_600SemiBold, ScheherazadeNew_700Bold, NotoNastaliqUrdu_400Regular,
   });
   useEffect(() => { hydrate(); }, []);
+  // Sync + auth deep links start once local data is loaded (no-op without Supabase env vars).
+  useEffect(() => { if (hydrated) startBackend(); }, [hydrated]);
   const ready = fonts && hydrated;
   useEffect(() => { if (ready) SplashScreen.hideAsync().catch(() => {}); }, [ready]);
   if (!ready) return null;

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { Icon } from '../../../components/Icon';
 import { BackBar, buzz, Cta, H1, Label, say, Screen, Tap, Txt } from '../../../components/ui';
+import { joinCircleLive, liveOn } from '../../../lib/live';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 
@@ -11,10 +12,19 @@ export default function Circles() {
   const router = useRouter();
   const circles = useApp(s => s.circles);
   const [code, setCode] = useState('');
-  const ok = code.length === 8;
+  const [busy, setBusy] = useState(false);
+  const ok = code.length === 8 && !busy;
   const join = () => {
     if (!ok) { say('Invite codes are 8 characters'); return; }
     if (circles.some(c => c.code === code)) { say('You’re already in that circle'); return; }
+    if (liveOn()) {
+      setBusy(true);
+      joinCircleLive(code)
+        .then(c => { buzz([10, 30, 16]); setCode(''); say('Joined ' + c.name); })
+        .catch((e: Error) => say(e.message))
+        .finally(() => setBusy(false));
+      return;
+    }
     const c = { id: Date.now(), name: 'Masjid youth circle', priv: 'Invite only', members: 23, code, role: 'Member' as const, goals: [{ name: 'Fajr in jama’ah', done: 120, total: 400 }] };
     buzz([10, 30, 16]);
     set(s => ({ circles: s.circles.concat([c]) }));

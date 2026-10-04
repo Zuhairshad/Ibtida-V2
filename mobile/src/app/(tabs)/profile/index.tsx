@@ -4,7 +4,9 @@ import { Icon, type IconName } from '../../../components/Icon';
 import { FadeIn } from '../../../components/motion';
 import { Cta, IconChip, ListCard, Ring, say, Screen, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
 import { METHODS, PH } from '../../../data/content';
+import { signOut } from '../../../lib/account';
 import { initials } from '../../../lib/hooks';
+import { backendEnabled } from '../../../lib/supabase';
 import { addDays, dayKey } from '../../../lib/prayer';
 import { set, useApp, type ThemePref } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
@@ -28,7 +30,7 @@ export default function Profile() {
     ['Emergency history', 'lock', t.lav, '/profile/emergency', String(s.emergencies.length)],
     ['Notifications', 'bell', t.acc, '/profile/notifications', ''],
     ['Privacy', 'shield', t.mint, '/profile/privacy', s.privacy.some(Boolean) ? 'Custom' : 'Private'],
-    ['Offline & sync', 'wifiOff', t.peri, '/offline', 'On device'],
+    ['Offline & sync', 'wifiOff', t.peri, '/offline', backendEnabled && s.signedIn ? 'Synced' : 'On device'],
   ];
   return (
     <Screen>
@@ -77,7 +79,7 @@ export default function Profile() {
         ))}
       </ListCard>
       <View style={{ paddingTop: 14, paddingHorizontal: 16 }}>
-        <Cta label="Sign out" kind="danger" height={54} size={14.5} onPress={() => { set({ signedIn: false }); say('Signed out safely'); router.replace({ pathname: '/auth', params: { mode: 'in' } }); }} />
+        <Cta label="Sign out" kind="danger" height={54} size={14.5} onPress={async () => { await signOut(); say('Signed out safely'); router.replace({ pathname: '/auth', params: { mode: 'in' } }); }} />
       </View>
     </Screen>
   );

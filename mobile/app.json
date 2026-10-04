@@ -72,7 +72,8 @@
           "color": "#F2A65A"
         }
       ],
-      "./modules/ibadah-lock/plugin"
+      "./modules/ibadah-lock/plugin",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": false
