@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { BackBar, buzz, Chips, Cta, H1, Option, Page, say, Seg, Tap, Txt, useBack } from '../components/ui';
-import { COMMUNITY_GOALS, fmt, GOAL_PRESETS } from '../data/content';
+import { COMMUNITY_GOALS, fmt, GOAL_PRESETS, participantsLabel } from '../data/content';
 import { set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
@@ -39,7 +39,7 @@ export default function GoalNew() {
               <Tap key={c.name} scale={0.985} onPress={() => setCg(i)} accessibilityRole="radio" accessibilityState={{ checked: cg === i }}
                 style={{ borderRadius: 22, backgroundColor: t.opt, paddingVertical: 14, paddingHorizontal: 16, boxShadow: cg === i ? FIXED.sel : undefined }}>
                 <Txt style={{ fontSize: 15, fontWeight: 700 }}>{c.name}</Txt>
-                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{fmt(c.people)} participants · {Math.round((c.done / c.total) * 100)}% complete</Txt>
+                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{participantsLabel(c.people)} · {Math.round((c.done / c.total) * 100)}% complete</Txt>
               </Tap>
             ))}
           </View>

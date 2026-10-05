@@ -6,7 +6,7 @@ import { Breathe, FadeIn, Orbit } from '../components/motion';
 import { Page, Txt } from '../components/ui';
 import { HADITH } from '../data/content';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 function Loading() {
   const t = useT();
@@ -37,7 +37,7 @@ function Loading() {
                   <Txt style={{ fontSize: 18, fontWeight: 700, color: t.acc }}>{pct}%</Txt>
                 </View>
                 <View style={{ height: 4, borderRadius: 2, backgroundColor: t.sheetc, marginTop: 12, overflow: 'hidden' }}>
-                  <View style={{ height: '100%', width: `${pct}%`, borderRadius: 2, experimental_backgroundImage: G.brandH }} />
+                  <View style={{ height: '100%', width: `${pct}%`, borderRadius: 2, ...bgImage(G.brandH) }} />
                 </View>
               </View>
             );
@@ -48,7 +48,7 @@ function Loading() {
             <View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, borderRadius: 125, borderWidth: 1, borderColor: t.bord }} />
             <View style={{ position: 'absolute', left: 40, top: 40, right: 40, bottom: 40, borderRadius: 125, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.1)' }} />
             <Orbit dur={14000} style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }}>
-              <View style={{ position: 'absolute', left: 114, top: -10, width: 22, height: 22, borderRadius: 11, experimental_backgroundImage: G.moonOrb }} />
+              <View style={{ position: 'absolute', left: 114, top: -10, width: 22, height: 22, borderRadius: 11, ...bgImage(G.moonOrb) }} />
             </Orbit>
             <Orbit dur={9000} reverse style={{ position: 'absolute', left: 40, top: 40, right: 40, bottom: 40 }}>
               <View style={{ position: 'absolute', left: -7, top: 78, width: 14, height: 14, borderRadius: 7, backgroundColor: '#6F87C9' }} />

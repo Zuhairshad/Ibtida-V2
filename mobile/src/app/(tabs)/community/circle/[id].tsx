@@ -8,7 +8,7 @@ import { code8, fmt } from '../../../../data/content';
 import { addCircleGoalLive, contributeCircleLive, leaveCircleLive, loadMembers, regenerateCodeLive, useLive } from '../../../../lib/live';
 import { set, useApp, type Circle } from '../../../../state/store';
 import { useT } from '../../../../theme/ThemeProvider';
-import { FIXED, G } from '../../../../theme/tokens';
+import { FIXED, G, bgImage } from '../../../../theme/tokens';
 
 export default function CircleDetail() {
   const t = useT();
@@ -63,7 +63,7 @@ export default function CircleDetail() {
         </View>
       </View>
       <View style={{ paddingTop: 16, paddingHorizontal: 16 }}>
-        <View style={{ borderRadius: 28, padding: 20, experimental_backgroundImage: G.circleCode }}>
+        <View style={{ borderRadius: 28, padding: 20, ...bgImage(G.circleCode) }}>
           <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.85)' }}>INVITE CODE</Txt>
           <Txt mono style={{ fontSize: 32, fontWeight: 800, letterSpacing: 7.7, marginTop: 8, color: '#FFFFFF' }}>{c.code}</Txt>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>

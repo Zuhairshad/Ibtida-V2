@@ -25,7 +25,7 @@ export default function Place() {
         <H1 style={{ textAlign: 'center', marginTop: 8 }}>Where do you pray?</H1>
         <Txt style={{ fontSize: 15, color: t.t3, textAlign: 'center', marginTop: 10 }}>Prayer times are calculated on your device</Txt>
         <TextInput value={q} onChangeText={setQ} placeholder="City" placeholderTextColor={t.t4} accessibilityLabel="City" selectionColor={t.acc}
-          style={{ marginTop: 56, textAlign: 'center', color: t.txw, fontSize: 24, fontFamily: 'PlusJakartaSans_700Bold' }} />
+          style={{ outlineWidth: 0, marginTop: 56, textAlign: 'center', color: t.txw, fontSize: 24, fontFamily: 'PlusJakartaSans_700Bold' }} />
         <View style={{ marginTop: 18, borderRadius: 24, backgroundColor: t.sunk, overflow: 'hidden' }}>
           {hits.map(c => (
             <Pressable key={c.name} onPress={() => { buzz(6); set({ city: c }); setQ(c.name.split(',')[0]); }} accessibilityRole="button" accessibilityState={{ selected: c.name === city.name }}

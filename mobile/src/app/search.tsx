@@ -43,7 +43,7 @@ export default function Search() {
         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 14, borderRadius: 26, backgroundColor: t.card }}>
           <Icon name="search" color={t.t4} />
           <TextInput autoFocus value={q} onChangeText={setQ} placeholder="Quran, hadith, azkar…" placeholderTextColor={t.t4} accessibilityLabel="Search" returnKeyType="search"
-            style={{ flex: 1, minWidth: 0, color: t.txw, fontSize: 16, fontFamily: 'PlusJakartaSans_400Regular' }} />
+            style={{ outlineWidth: 0, flex: 1, minWidth: 0, color: t.txw, fontSize: 16, fontFamily: 'PlusJakartaSans_400Regular' }} />
           {!!q && (
             <Pressable onPress={() => setQ('')} accessibilityLabel="Clear" style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: t.ctl4, alignItems: 'center', justifyContent: 'center' }}>
               <Icon name="x" size={14} color={t.txw} />

@@ -11,7 +11,7 @@ import { DOW, fmtTime } from '../lib/prayer';
 import { appName, IbadahLock, lockPackages } from '../lib/shield';
 import { getState, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 const REASONS = ['Family emergency', 'Work call', 'Need directions', 'Other'];
 const DUR_SECS = [0, 15 * 60, 30 * 60, 60 * 60];
@@ -111,7 +111,7 @@ function Lock() {
   const lit = n === 0 ? 0 : n % 33 === 0 ? 33 : n % 33;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0F1013', experimental_backgroundImage: G.focus }}>
+    <View style={{ flex: 1, backgroundColor: '#0F1013', ...bgImage(G.focus) }}>
       <StatusBar style="light" />
       <View style={{ paddingTop: ins.top + 12, paddingHorizontal: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>

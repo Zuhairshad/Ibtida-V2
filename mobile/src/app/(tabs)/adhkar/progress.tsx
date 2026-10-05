@@ -6,7 +6,7 @@ import { fmt, PH, rnd } from '../../../data/content';
 import { addDays, dayKey } from '../../../lib/prayer';
 import { useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
-import { G } from '../../../theme/tokens';
+import { G, bgImage } from '../../../theme/tokens';
 
 export default function Progress() {
   const t = useT();
@@ -51,7 +51,7 @@ export default function Progress() {
         <View style={{ borderRadius: 28, backgroundColor: t.card, padding: 20 }}>
           <Label>DAILY ACTIVITY</Label>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 130, marginTop: 16 }}>
-            {bars.map((h, i) => <View key={i} style={{ flex: 1, height: `${h}%`, borderRadius: 6, backgroundColor: i === 13 ? undefined : t.ctl4, experimental_backgroundImage: i === 13 ? G.brandV : undefined }} />)}
+            {bars.map((h, i) => <View key={i} style={{ flex: 1, height: `${h}%`, borderRadius: 6, backgroundColor: i === 13 ? undefined : t.ctl4, ...bgImage(i === 13 ? G.brandV : undefined) }} />)}
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
             <Txt style={{ fontSize: 12, color: t.t4 }}>{['Midnight', '2 weeks ago', '14 weeks ago', '14 months ago'][range]}</Txt>

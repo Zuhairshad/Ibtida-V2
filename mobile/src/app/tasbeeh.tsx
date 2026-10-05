@@ -9,7 +9,7 @@ import { buzz, Ring, say, Tap, Txt, useBack } from '../components/ui';
 import { DHIKR, mmss } from '../data/content';
 import { getState, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 /** 33 beads around the dial; lit beads glow orange, the current one is larger. */
 function Beads({ count }: { count: number }) {
@@ -24,7 +24,7 @@ function Beads({ count }: { count: number }) {
         return (
           <View key={i} style={{
             position: 'absolute', left: Math.round(150 + 132 * Math.cos(a)) - s / 2, top: Math.round(150 + 132 * Math.sin(a)) - s / 2,
-            width: s, height: s, borderRadius: s, experimental_backgroundImage: on ? G.beadOn : G.beadOff,
+            width: s, height: s, borderRadius: s, ...bgImage(on ? G.beadOn : G.beadOff),
             boxShadow: cur ? '0 0 16px rgba(242,166,90,0.9)' : undefined,
           }} />
         );
@@ -77,7 +77,7 @@ function Tasbeeh() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#14151B', experimental_backgroundImage: G.tasbeeh, overflow: 'hidden' }}>
+    <View style={{ flex: 1, backgroundColor: '#14151B', ...bgImage(G.tasbeeh), overflow: 'hidden' }}>
       <StatusBar style="light" />
       <Stars style={{ top: 130 }} />
       <View style={{ paddingTop: ins.top + 6, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 4, zIndex: 2 }}>

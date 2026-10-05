@@ -9,7 +9,7 @@ import { buzz, Ring, say, Tap, Txt, UrduToggle, useBack } from '../components/ui
 import { SESS } from '../data/content';
 import { useUrdu } from '../lib/hooks';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 function Session() {
   const t = useT();
@@ -43,7 +43,7 @@ function Session() {
 
   return (
     <Pressable onPress={tap} accessibilityLabel={`Count. ${n} of ${s.n}`} accessibilityHint="Tap anywhere to count"
-      style={{ flex: 1, experimental_backgroundImage: G.session, backgroundColor: t.bg }}>
+      style={{ flex: 1, ...bgImage(G.session), backgroundColor: t.bg }}>
       <StatusBar style="light" />
       <View style={{ paddingTop: ins.top + 6, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <Tap onPress={() => { buzz(5); back(); }} accessibilityLabel="Back" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
@@ -76,7 +76,7 @@ function Session() {
         <Txt style={{ fontSize: 13, color: t.t4, marginTop: 14 }}>Tap anywhere to count</Txt>
       </View>
       <View style={{ height: 4, backgroundColor: t.sheetc, marginHorizontal: 26, marginBottom: ins.bottom + 34, borderRadius: 2, overflow: 'hidden' }}>
-        <View style={{ height: '100%', width: `${pct}%`, experimental_backgroundImage: G.brandH }} />
+        <View style={{ height: '100%', width: `${pct}%`, ...bgImage(G.brandH) }} />
       </View>
     </Pressable>
   );

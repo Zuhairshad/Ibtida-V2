@@ -10,7 +10,7 @@ import { backendEnabled } from '../../../lib/supabase';
 import { addDays, dayKey } from '../../../lib/prayer';
 import { set, useApp, type ThemePref } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
-import { FIXED, G } from '../../../theme/tokens';
+import { FIXED, G, bgImage } from '../../../theme/tokens';
 
 const THEMES: ThemePref[] = ['dark', 'light', 'system'];
 
@@ -38,7 +38,7 @@ export default function Profile() {
       <FadeIn delay={40} style={{ paddingTop: 18, paddingHorizontal: 16 }}>
         <View style={{ borderRadius: 32, backgroundColor: t.card, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <Ring size={84} r={38} stroke={5} pct={pct / 100} track={t.ctl3} color={t.acc}>
-            <View style={{ width: 64, height: 64, borderRadius: 32, experimental_backgroundImage: G.brand, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: 64, height: 64, borderRadius: 32, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 22, fontWeight: 800, color: FIXED.ink }}>{initials(s.name)}</Txt>
             </View>
           </Ring>

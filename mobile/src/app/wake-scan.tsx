@@ -12,7 +12,7 @@ import { dayKey, fmtTime } from '../lib/prayer';
 import { fmtCountdown, readWakeTag, WAKE_WINDOW_MS, wakeTagUrl } from '../lib/wakeTag';
 import { getState, set } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { FIXED, G } from '../theme/tokens';
+import { FIXED, G, bgImage } from '../theme/tokens';
 
 /** A tag that stays in view only fires once; it can fire again after this long out of view. */
 const SAME_TAG_QUIET_MS = 3000;
@@ -32,7 +32,7 @@ function ScanLine({ color }: { color: string }) {
     return () => a.stop();
   }, [v, rm]);
   return (
-    <Animated.View style={{ position: 'absolute', left: 14, right: 14, height: 2, top: 0, experimental_backgroundImage: `linear-gradient(90deg, rgba(242,166,90,0), ${color}, rgba(242,166,90,0))`, boxShadow: `0 0 14px ${color}`, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [30, 210] }) }] }} />
+    <Animated.View style={{ position: 'absolute', left: 14, right: 14, height: 2, top: 0, ...bgImage(`linear-gradient(90deg, rgba(242,166,90,0), ${color}, rgba(242,166,90,0))`), boxShadow: `0 0 14px ${color}`, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [30, 210] }) }] }} />
   );
 }
 
@@ -191,7 +191,7 @@ function Scan() {
       : `Alarm stopped. Fajr ends at ${fmtTime(times.Sunrise)}.`;
 
   return (
-    <View style={{ flex: 1, backgroundColor: FIXED.scanBg, experimental_backgroundImage: live ? undefined : G.scan }}>
+    <View style={{ flex: 1, backgroundColor: FIXED.scanBg, ...bgImage(live ? undefined : G.scan) }}>
       <StatusBar style="light" />
       {live && (
         <>

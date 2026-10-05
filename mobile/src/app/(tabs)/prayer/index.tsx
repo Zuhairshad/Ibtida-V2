@@ -14,7 +14,7 @@ import { enableNotifications } from '../../../lib/notifications';
 import { addDays, dayKey, fmtTime, qibla, timesFor } from '../../../lib/prayer';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
-import { G } from '../../../theme/tokens';
+import { G, bgImage } from '../../../theme/tokens';
 
 const ORDER: (PrayerName | 'Sunrise')[] = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
@@ -48,7 +48,7 @@ function QiblaCard({ open, onToggle }: { open: boolean; onToggle: () => void }) 
       </Tap>
       {open && (
         <FadeIn dur={350} style={{ paddingTop: 6, paddingHorizontal: 16, paddingBottom: 22, alignItems: 'center' }}>
-          <View style={{ width: 200, height: 200, borderRadius: 100, experimental_backgroundImage: `radial-gradient(circle, ${t.dark ? '#2A2B34' : '#F4F4F7'}, ${t.dark ? '#1C1D23' : '#F4F4F7'})`, boxShadow: aligned ? 'inset 0 0 0 2px #5EB87A' : t.hair }}>
+          <View style={{ width: 200, height: 200, borderRadius: 100, ...bgImage(`radial-gradient(circle, ${t.dark ? '#2A2B34' : '#F4F4F7'}, ${t.dark ? '#1C1D23' : '#F4F4F7'})`), boxShadow: aligned ? 'inset 0 0 0 2px #5EB87A' : t.hair }}>
             <View style={{ position: 'absolute', left: 14, right: 14, top: 14, bottom: 14, borderRadius: 100, borderWidth: 1, borderStyle: 'dashed', borderColor: t.dark ? 'rgba(255,255,255,0.12)' : 'rgba(15,16,20,0.12)' }} />
             <Txt style={{ position: 'absolute', top: 10, alignSelf: 'center', fontSize: 12, fontWeight: 700, color: t.t2 }}>N</Txt>
             <Animated.View style={{ position: 'absolute', left: 0, top: 0, transform: [{ rotate: rot.interpolate({ inputRange: [-720, 720], outputRange: ['-720deg', '720deg'] }) }] }}>
@@ -162,12 +162,12 @@ export default function Prayer() {
               );
             }
             const n = r.n as PrayerName;
-            const note = r.done ? 'Prayed · logged' : r.missed ? 'Missed · tap to make up' : r.isNext ? `Next · in ${Math.ceil(next.secs / 60)} min` : adhan[n] ? 'Adhan on' : 'Adhan off';
+            const note = r.done ? 'Prayed · logged' : r.missed ? 'Missed · tap to make up' : r.isNext ? `Next · in ${next.secs >= 3600 ? `${Math.floor(next.secs / 3600)}h ${Math.ceil((next.secs % 3600) / 60)}m` : `${Math.ceil(next.secs / 60)} min`}` : adhan[n] ? 'Adhan on' : 'Adhan off';
             const noteInk = r.done ? t.mint : r.missed ? t.rose : r.isNext ? t.acc : t.t2;
             return (
               <FadeIn key={n} delay={i * 40}>
                 <Tap scale={0.985} onPress={() => { buzz(6); setDetail(n); }} accessibilityLabel={`${n} ${fmtTime(r.at)}, ${note}`}
-                  style={{ borderRadius: 26, backgroundColor: r.isNext ? undefined : t.card, experimental_backgroundImage: r.isNext ? G.nextRow : undefined, boxShadow: r.isNext ? 'inset 0 0 0 1.5px rgba(242,166,90,0.5)' : undefined, paddingVertical: 14, paddingLeft: 16, paddingRight: 14, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+                  style={{ borderRadius: 26, backgroundColor: r.isNext ? undefined : t.card, ...bgImage(r.isNext ? G.nextRow : undefined), boxShadow: r.isNext ? 'inset 0 0 0 1.5px rgba(242,166,90,0.5)' : undefined, paddingVertical: 14, paddingLeft: 16, paddingRight: 14, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
                   <IconChip name={PRAYER_META[n].ic} color={r.done ? t.mint : r.isNext ? t.acc : t.t5} />
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Txt style={{ fontSize: 16.5, fontWeight: 700 }}>{n}</Txt>
@@ -186,7 +186,7 @@ export default function Prayer() {
                         setLog(key, n, r.done ? null : 'prayed');
                         if (!r.done) say(`${n} logged · May Allah accept it`);
                       }}
-                      style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: r.done ? undefined : t.ctl3, experimental_backgroundImage: r.done ? G.brand : undefined, alignItems: 'center', justifyContent: 'center' }}>
+                      style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: r.done ? undefined : t.ctl3, ...bgImage(r.done ? G.brand : undefined), alignItems: 'center', justifyContent: 'center' }}>
                       {r.done && <Icon name="check" color="#111217" />}
                     </Tap>
                   )}

@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { joinGoal, useCommunityGoals } from '../../../../components/community';
 import { Avatar, BackBar, Cta, H1, Label, Ring, Screen, Txt } from '../../../../components/ui';
-import { fmt } from '../../../../data/content';
+import { fmt, participantsLabel } from '../../../../data/content';
 import { useApp } from '../../../../state/store';
 import { useT } from '../../../../theme/ThemeProvider';
 import { FIXED } from '../../../../theme/tokens';
@@ -21,7 +21,7 @@ export default function CommunityGoal() {
       <BackBar />
       <View style={{ paddingTop: 4, paddingHorizontal: 22 }}>
         <H1>{c.name}</H1>
-        <Txt style={{ fontSize: 14, color: t.t2, marginTop: 6 }}>{fmt(c.people)} participants · ends in {c.ends}</Txt>
+        <Txt style={{ fontSize: 14, color: t.t2, marginTop: 6 }}>{participantsLabel(c.people)} · ends in {c.ends}</Txt>
       </View>
       <View style={{ paddingTop: 20, alignItems: 'center' }}>
         <Ring size={230} r={100} stroke={14} pct={pct} track={t.sheetc} gradient={['#F7BD5A', '#E07A4B']}>

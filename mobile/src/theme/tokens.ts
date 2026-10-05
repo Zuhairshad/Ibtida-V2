@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 /**
  * Ibtida v7 design tokens — ported 1:1 from THEME_D / THEME_L in `Ibtida v7.dc.html`.
  * Every colour in the app comes from here or from `G` (gradients) / `FIXED` below.
@@ -142,3 +143,13 @@ export const FONTS = {
 
 /** Screens that always render in the dark palette (from IMMERSIVE in the prototype). */
 export const IMMERSIVE = ['splash', 'loading', 'session', 'tasbeeh', 'goal-done', 'focus-active', 'wake-scan', 'reader'];
+
+/**
+ * Gradient background for a style object. Native (new architecture) draws CSS gradients through
+ * `experimental_backgroundImage`; react-native-web ignores that key but passes standard CSS
+ * `backgroundImage` through, so web needs the plain name. Usage: `{ ...bgImage(G.brand) }`.
+ */
+export function bgImage(g: string | undefined): object {
+  if (!g) return {};
+  return Platform.OS === 'web' ? { backgroundImage: g } : { experimental_backgroundImage: g };
+}

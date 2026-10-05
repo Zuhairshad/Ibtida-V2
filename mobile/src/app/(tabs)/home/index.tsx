@@ -12,13 +12,13 @@ import { firstName, fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hoo
 import { DOW, fmtTime, hijri, MON, qibla } from '../../../lib/prayer';
 import { useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
-import { FIXED, G } from '../../../theme/tokens';
+import { FIXED, G, bgImage } from '../../../theme/tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function SkyLayer({ bg, on }: { bg: string; on: boolean }) {
   const v = useRef(new Animated.Value(on ? 1 : 0)).current;
   useEffect(() => { Animated.timing(v, { toValue: on ? 1 : 0, duration: 1400, useNativeDriver: true }).start(); }, [on, v]);
-  return <Animated.View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, experimental_backgroundImage: bg, opacity: v }} />;
+  return <Animated.View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, ...bgImage(bg), opacity: v }} />;
 }
 
 export default function Home() {
@@ -106,7 +106,7 @@ export default function Home() {
               <Breathe bg={G.glowWarm} style={{ width: 220, height: 220, right: -60, top: 40 }} dur={9000} />
               <Breathe bg={G.glowViolet} style={{ width: 260, height: 260, left: -90, bottom: -40 }} dur={14000} />
               <Stars />
-              <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%', experimental_backgroundImage: G.skyFade }} />
+              <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%', ...bgImage(G.skyFade) }} />
               <View style={{ position: 'absolute', left: 24, right: 24, top: 24, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Icon name="pin" color="#FFFFFF" />
                 <View style={{ flex: 1 }}>
@@ -146,7 +146,7 @@ export default function Home() {
 
             {/* Daily insight card */}
             <Tap scale={0.985} onPress={() => { buzz(6); setInsight(true); }} accessibilityLabel="Open daily insight"
-              style={{ width: cardW, height: 402, borderRadius: 36, overflow: 'hidden', padding: 24, experimental_backgroundImage: G.insight }}>
+              style={{ width: cardW, height: 402, borderRadius: 36, overflow: 'hidden', padding: 24, ...bgImage(G.insight) }}>
               <Breathe bg={G.glowGold} style={{ width: 240, height: 240, right: -70, bottom: -60 }} dur={11000} />
               <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.8)' }}>YOUR CONSISTENCY</Txt>
               <Txt style={{ fontSize: 18, fontWeight: 700, marginTop: 3, color: '#FFFFFF' }}>Daily insight</Txt>
@@ -165,7 +165,7 @@ export default function Home() {
 
             {/* Community impact card */}
             <Tap scale={0.985} onPress={() => router.navigate('/community')} accessibilityLabel="Community impact"
-              style={{ width: cardW, height: 402, borderRadius: 36, overflow: 'hidden', padding: 24, experimental_backgroundImage: G.ummah }}>
+              style={{ width: cardW, height: 402, borderRadius: 36, overflow: 'hidden', padding: 24, ...bgImage(G.ummah) }}>
               <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.8)' }}>THE UMMAH TODAY</Txt>
               <Txt style={{ fontSize: 18, fontWeight: 700, marginTop: 3, color: '#FFFFFF' }}>Community impact</Txt>
               <View style={{ position: 'absolute', left: 24, right: 24, bottom: 28 }}>

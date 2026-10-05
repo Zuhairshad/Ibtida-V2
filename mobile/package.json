@@ -57,7 +57,8 @@
     "export:android": "expo export --platform android",
     "test": "jest",
     "web:export": "expo export --platform web --output-dir dist-web",
-    "e2e": "npm run web:export && playwright test"
+    "e2e": "npm run web:export && playwright test",
+    "shots": "npm run web:export && SHOTS=1 playwright test e2e/visual"
   },
   "private": true,
   "jest": {

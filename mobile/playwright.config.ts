@@ -7,6 +7,8 @@ const LOCAL_CHROMIUM = '/opt/pw-browsers/chromium';
 
 export default defineConfig({
   testDir: './e2e',
+  // `npm run shots` (SHOTS=1) runs the visual capture; the default run is the functional specs.
+  testMatch: process.env.SHOTS ? '**/*.shots.ts' : '**/*.spec.ts',
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,

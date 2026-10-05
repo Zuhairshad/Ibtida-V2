@@ -4,7 +4,7 @@ import { Icon, type IconName } from '../components/Icon';
 import { FadeIn } from '../components/motion';
 import { Cta, Page, Txt } from '../components/ui';
 import { useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 const TILES: [string, IconName][] = [['Prayer times', 'moon'], ['Daily dhikr', 'beads'], ['Quran', 'book'], ['Ibadah Lock', 'lock']];
 
@@ -20,7 +20,7 @@ export default function Welcome() {
         <Txt style={{ fontSize: 16, lineHeight: 24, color: t.t3, textAlign: 'center', marginTop: 12 }}>Prayer, dhikr and Quran — with fewer distractions</Txt>
         <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 28, alignContent: 'stretch' }}>
           {TILES.map(([label, ic], i) => (
-            <View key={label} style={{ width: w, height: '47%', minHeight: 140, borderRadius: 30, overflow: 'hidden', experimental_backgroundImage: G.welcome[i], boxShadow: t.hair }}>
+            <View key={label} style={{ width: w, height: '47%', minHeight: 140, borderRadius: 30, overflow: 'hidden', ...bgImage(G.welcome[i]), boxShadow: t.hair }}>
               <View style={{ position: 'absolute', left: '50%', top: '44%', marginLeft: -37, marginTop: -37, width: 74, height: 74, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon name={ic} size={34} color="#FFFFFF" />
               </View>

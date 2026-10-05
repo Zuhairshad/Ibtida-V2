@@ -1,3 +1,4 @@
+import { bgImage } from '../../../theme/tokens';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
@@ -33,7 +34,7 @@ export default function Adhkar() {
           {CATS.map((c, i) => (
             <FadeIn key={c.k} delay={i * 40} dur={450}>
               <Tap scale={0.96} onPress={() => router.push({ pathname: '/session', params: { cat: c.k } })} accessibilityLabel={`${c.k} adhkar, ${c.n} adhkar, ${c.m} minutes`}
-                style={{ width: tileW, height: 176, borderRadius: 30, experimental_backgroundImage: c.bg, padding: 16, justifyContent: 'space-between', overflow: 'hidden' }}>
+                style={{ width: tileW, height: 176, borderRadius: 30, ...bgImage(c.bg), padding: 16, justifyContent: 'space-between', overflow: 'hidden' }}>
                 <Txt ar style={{ fontSize: 24, lineHeight: 31, textAlign: 'right', color: 'rgba(255,255,255,0.95)' }}>{c.ar}</Txt>
                 <View>
                   <Txt style={{ fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>{c.k}</Txt>

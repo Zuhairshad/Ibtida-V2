@@ -39,7 +39,7 @@ export default function CircleNew() {
       <View style={{ paddingTop: 6, paddingHorizontal: 22 }}><H1>Name your circle</H1></View>
       <View style={{ paddingTop: 18, paddingHorizontal: 22 }}>
         <TextInput value={name} onChangeText={setName} placeholder="e.g. Thursday halaqa" placeholderTextColor={t.t4} accessibilityLabel="Circle name" returnKeyType="done"
-          style={{ height: 60, borderRadius: 22, borderWidth: 1, borderColor: t.bord, backgroundColor: t.sunk, paddingHorizontal: 18, color: t.txw, fontSize: 17, fontFamily: 'PlusJakartaSans_600SemiBold' }} />
+          style={{ outlineWidth: 0, height: 60, borderRadius: 22, borderWidth: 1, borderColor: t.bord, backgroundColor: t.sunk, paddingHorizontal: 18, color: t.txw, fontSize: 17, fontFamily: 'PlusJakartaSans_600SemiBold' }} />
       </View>
       <View style={{ paddingTop: 14, paddingHorizontal: 22, gap: 10 }}>
         {PRIV.map(([l, s], i) => <Option key={l} title={l} sub={s} on={priv === i} onPress={() => setPriv(i)} />)}

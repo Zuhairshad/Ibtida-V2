@@ -4,7 +4,7 @@ import { fmt, MILESTONES, PH } from '../data/content';
 import { firstName, usePrayerNow } from '../lib/hooks';
 import { useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
-import { FIXED, G } from '../theme/tokens';
+import { FIXED, G, bgImage } from '../theme/tokens';
 import { Icon } from './Icon';
 import { Bar, Label, Ring, say, Sheet, Tap, Txt } from './ui';
 
@@ -34,7 +34,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
           const got = streak >= d;
           return (
             <View key={n} style={{ width: 104, borderRadius: 22, paddingVertical: 14, paddingHorizontal: 10, backgroundColor: got ? 'rgba(242,166,90,0.12)' : t.sheetc, alignItems: 'center', opacity: got ? 1 : 0.55 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 20, experimental_backgroundImage: got ? 'linear-gradient(135deg, #FFD27A, #E07A4B)' : undefined, backgroundColor: got ? undefined : t.ctl4, alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, ...bgImage(got ? 'linear-gradient(135deg, #FFD27A, #E07A4B)' : undefined), backgroundColor: got ? undefined : t.ctl4, alignItems: 'center', justifyContent: 'center' }}>
                 <Txt style={{ fontSize: 14, fontWeight: 800, color: FIXED.ink }}>{n}</Txt>
               </View>
               <Txt style={{ fontSize: 12.5, fontWeight: 700, marginTop: 9, lineHeight: 16, textAlign: 'center' }}>{label}</Txt>
@@ -89,7 +89,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
         ))}
       </View>
 
-      <View style={{ marginTop: 14, borderRadius: 22, padding: 16, experimental_backgroundImage: G.mintNote }}>
+      <View style={{ marginTop: 14, borderRadius: 22, padding: 16, ...bgImage(G.mintNote) }}>
         <Txt style={{ fontSize: 14, lineHeight: 21, color: t.mintTx }}>Your 1,240 Salawat this week joined {fmt(impact)} counted by the community today.</Txt>
       </View>
     </Sheet>

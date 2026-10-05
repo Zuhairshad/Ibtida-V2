@@ -73,10 +73,10 @@ export default function Auth() {
           </View>
           <View style={{ gap: 10, marginTop: 16 }}>
             <TextInput value={email} onChangeText={v => { setEmail(v); setTouched(true); }} placeholder="Email" placeholderTextColor={t.t4} accessibilityLabel="Email"
-              autoCapitalize="none" autoComplete="email" keyboardType="email-address" style={[inputStyle, { borderColor: bad ? t.errTx : t.bord }]} />
+              autoCapitalize="none" autoComplete="email" keyboardType="email-address" style={[inputStyle, { outlineWidth: 0 }, { borderColor: bad ? t.errTx : t.bord }]} />
             {bad && <Txt style={{ fontSize: 12.5, color: t.errTx, paddingHorizontal: 6 }}>Enter a valid email address</Txt>}
             <TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="Password" placeholderTextColor={t.t4} accessibilityLabel="Password"
-              autoComplete={mode === 0 ? 'new-password' : 'current-password'} onSubmitEditing={submit} style={[inputStyle, { borderColor: t.bord }]} />
+              autoComplete={mode === 0 ? 'new-password' : 'current-password'} onSubmitEditing={submit} style={[inputStyle, { outlineWidth: 0 }, { borderColor: t.bord }]} />
           </View>
           <Cta label={busy ? 'One moment…' : mode === 0 ? 'Create account' : 'Sign in'} height={58} size={17} style={{ marginTop: 16 }} onPress={() => {
             if (!backendEnabled && email && !EMAIL.test(email)) { setTouched(true); return; }

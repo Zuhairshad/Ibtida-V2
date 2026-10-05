@@ -1,3 +1,4 @@
+import { bgImage } from '../theme/tokens';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing, View, type StyleProp, type ViewStyle } from 'react-native';
 import { STARS } from '../data/content';
@@ -52,7 +53,7 @@ export function Breathe({ style, bg, dur = 9000 }: { style: StyleProp<ViewStyle>
     <Animated.View
       pointerEvents="none"
       style={[
-        { position: 'absolute', borderRadius: 999, experimental_backgroundImage: bg },
+        { position: 'absolute', borderRadius: 999, ...bgImage(bg) },
         style,
         rm ? { opacity: 0.6 } : {
           opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0.8] }),

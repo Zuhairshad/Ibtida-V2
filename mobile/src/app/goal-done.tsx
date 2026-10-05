@@ -7,7 +7,7 @@ import { Breathe, FadeIn, Stars } from '../components/motion';
 import { Cta, Ring, Txt } from '../components/ui';
 import { useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
-import { G } from '../theme/tokens';
+import { G, bgImage } from '../theme/tokens';
 
 function Done() {
   const t = useT();
@@ -16,7 +16,7 @@ function Done() {
   const { name = 'Durood Sharif', target = '100' } = useLocalSearchParams<{ name?: string; target?: string }>();
   const streak = useApp(s => s.streak) + 1;
   return (
-    <View style={{ flex: 1, alignItems: 'center', paddingTop: ins.top + 52, paddingHorizontal: 26, paddingBottom: ins.bottom + 36, experimental_backgroundImage: G.goalDone, backgroundColor: t.bg, overflow: 'hidden' }}>
+    <View style={{ flex: 1, alignItems: 'center', paddingTop: ins.top + 52, paddingHorizontal: 26, paddingBottom: ins.bottom + 36, ...bgImage(G.goalDone), backgroundColor: t.bg, overflow: 'hidden' }}>
       <StatusBar style="light" />
       <Stars style={{ top: 70 }} color="#FFE2B0" />
       <FadeIn dur={700} style={{ width: 210, height: 210, alignItems: 'center', justifyContent: 'center' }}>
@@ -24,7 +24,7 @@ function Done() {
         <View style={{ position: 'absolute' }}>
           <Ring size={210} r={94} stroke={12} pct={1} track="#3A2E22" gradient={['#FFD27A', '#E07A4B']} />
         </View>
-        <View style={{ width: 96, height: 96, borderRadius: 32, experimental_backgroundImage: G.trophy, alignItems: 'center', justifyContent: 'center', boxShadow: '0 20px 40px -10px rgba(224,122,75,0.6)' }}>
+        <View style={{ width: 96, height: 96, borderRadius: 32, ...bgImage(G.trophy), alignItems: 'center', justifyContent: 'center', boxShadow: '0 20px 40px -10px rgba(224,122,75,0.6)' }}>
           <Icon name="trophy" size={48} color="#2A1A08" />
         </View>
       </FadeIn>

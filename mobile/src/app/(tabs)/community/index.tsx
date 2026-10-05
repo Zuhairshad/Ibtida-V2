@@ -5,11 +5,11 @@ import { AvatarRow, circlePct, FeedRow, joinGoal, Sparkline, useCommunityGoals, 
 import { Icon } from '../../../components/Icon';
 import { Breathe, FadeIn, PulseDot, useCountUp, useNow } from '../../../components/motion';
 import { Avatar, Bar, Cta, IconBtn, Ring, Screen, SectionHead, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
-import { fmt, IMPACT_TARGET } from '../../../data/content';
+import { fmt, IMPACT_TARGET, joinedLabel, participantsLabel } from '../../../data/content';
 import { useLive, useLiveRefresh } from '../../../lib/live';
 import { useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
-import { FIXED, G } from '../../../theme/tokens';
+import { FIXED, G, bgImage } from '../../../theme/tokens';
 
 export default function Community() {
   const t = useT();
@@ -18,6 +18,10 @@ export default function Community() {
   const [tab, setTab] = useState(0);
   useLiveRefresh();
   const ummah = useLive(l => (l.on ? l.ummah : null));
+  // Live: the user's real contributions across community goals; sample mode keeps the design's figures.
+  const myTotal = useLive(l => (l.on ? Object.values(l.goals).reduce((a, g) => a + g.mine, 0) : null));
+  const part = myTotal ?? 1240;
+  const INTENTION = 2000;
   const feed = useFeed();
   const impact = useCountUp(ummah ? ummah.today : IMPACT_TARGET);
   const cgs = useCommunityGoals();
@@ -33,7 +37,7 @@ export default function Community() {
         <View style={{ flexShrink: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <PulseDot size={7} color={t.acc} />
-            <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 1.15, color: t.acc }}>{fmt(live)} REMEMBERING NOW</Txt>
+            <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 1.15, color: t.acc }}>{live > 0 ? `${fmt(live)} REMEMBERING NOW` : 'BE THE FIRST TO REMEMBER TODAY'}</Txt>
           </View>
           <SerifTitle a="The" b="Ummah" style={{ marginTop: 8 }} />
         </View>
@@ -46,18 +50,19 @@ export default function Community() {
       {tab === 0 && (
         <>
           <FadeIn dur={450} style={{ paddingTop: 14, paddingHorizontal: 16 }}>
-            <View style={{ borderRadius: 36, paddingTop: 24, paddingHorizontal: 24, paddingBottom: 20, overflow: 'hidden', experimental_backgroundImage: G.ummah }}>
+            <View style={{ borderRadius: 36, paddingTop: 24, paddingHorizontal: 24, paddingBottom: 20, overflow: 'hidden', ...bgImage(G.ummah) }}>
               <Breathe bg={G.glowWhite} style={{ width: 240, height: 240, right: -70, top: -80 }} dur={12000} />
               <Breathe bg={G.glowGoldSoft} style={{ width: 200, height: 200, left: -60, bottom: -70 }} dur={9000} />
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                 <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: '#FFFFFF' }}>TODAY ACROSS THE UMMAH</Txt>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  {['AR', 'SK', 'MA', 'HN'].map((i, k) => <Avatar key={i} i={i} bg={FIXED.avatars[k]} size={28} fs={10.5} border="#1E5A68" style={{ marginLeft: -8 }} />)}
-                  <Txt style={{ fontSize: 12, fontWeight: 700, marginLeft: 6, color: '#FFFFFF' }}>+41k</Txt>
+                  {/* Sample avatars only when showing sample data; live mode never implies people who aren't there. */}
+                  {!ummah && ['AR', 'SK', 'MA', 'HN'].map((i, k) => <Avatar key={i} i={i} bg={FIXED.avatars[k]} size={28} fs={10.5} border="#1E5A68" style={{ marginLeft: -8 }} />)}
+                  {!ummah && <Txt style={{ fontSize: 12, fontWeight: 700, marginLeft: 6, color: '#FFFFFF' }}>+41k</Txt>}
                 </View>
               </View>
               <Txt style={{ fontSize: 48, fontWeight: 800, letterSpacing: -1.7, lineHeight: 52, marginTop: 18, color: '#FFFFFF' }}>{fmt(impact)}</Txt>
-              <Txt style={{ fontSize: 14, marginTop: 8, color: '#FFFFFF' }}>dhikr counted · <Txt style={{ fontSize: 14, fontWeight: 700, color: '#C8F0DC' }}>+{fmt(ummah ? ummah.hour : 18421)} this hour</Txt></Txt>
+              <Txt style={{ fontSize: 14, marginTop: 8, color: '#FFFFFF' }}>dhikr counted · <Txt style={{ fontSize: 14, fontWeight: 700, color: '#C8F0DC' }}>{(ummah ? ummah.hour : 18421) > 0 ? `+${fmt(ummah ? ummah.hour : 18421)} this hour` : 'be the first this hour'}</Txt></Txt>
               <Sparkline />
               <View style={{ flexDirection: 'row', gap: 8, marginTop: 14 }}>
                 <Cta label="Add your dhikr" height={50} size={15} color="#111217" style={{ flex: 1.3, backgroundColor: '#FFFFFF' }} onPress={() => router.push({ pathname: '/tasbeeh', params: { goal: '1' } })} />
@@ -67,16 +72,16 @@ export default function Community() {
           </FadeIn>
           <FadeIn delay={60} dur={450} style={{ paddingTop: 10, paddingHorizontal: 16 }}>
             <View style={{ borderRadius: 30, backgroundColor: t.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-              <Ring size={86} r={38} stroke={8} pct={1240 / 2000} track={t.ctl3} color={t.acc}>
+              <Ring size={86} r={38} stroke={8} pct={Math.min(1, part / INTENTION)} track={t.ctl3} color={t.acc}>
                 <View style={{ alignItems: 'center' }}>
-                  <Txt style={{ fontSize: 17, fontWeight: 800 }}>62%</Txt>
+                  <Txt style={{ fontSize: 17, fontWeight: 800 }}>{Math.min(100, Math.round((part / INTENTION) * 100))}%</Txt>
                   <Txt style={{ fontSize: 10.5, color: t.t2 }}>of intention</Txt>
                 </View>
               </Ring>
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: t.t2 }}>YOUR PART THIS WEEK</Txt>
-                <Txt style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginTop: 6 }}>1,240 <Txt style={{ fontSize: 15, fontWeight: 600, color: t.t2 }}>of 2,000</Txt></Txt>
-                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 4 }}>{joinedCount} goals · {circles.length} circles · 6 days active</Txt>
+                <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: t.t2 }}>{myTotal == null ? 'YOUR PART THIS WEEK' : 'YOUR CONTRIBUTION'}</Txt>
+                <Txt style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5, marginTop: 6 }}>{fmt(part)} <Txt style={{ fontSize: 15, fontWeight: 600, color: t.t2 }}>of {fmt(INTENTION)}</Txt></Txt>
+                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 4 }}>{joinedCount} {joinedCount === 1 ? 'goal' : 'goals'} · {circles.length} {circles.length === 1 ? 'circle' : 'circles'}{myTotal == null ? ' · 6 days active' : ''}</Txt>
                 <View style={{ alignSelf: 'flex-start', marginTop: 9, paddingVertical: 5, paddingHorizontal: 10, borderRadius: 10, backgroundColor: 'rgba(94,184,122,0.16)' }}>
                   <Txt style={{ fontSize: 11.5, fontWeight: 700, color: t.mint }}>Counted, never ranked</Txt>
                 </View>
@@ -89,11 +94,11 @@ export default function Community() {
             {cgs.map(c => {
               const pr = c.done / c.total;
               return (
-                <Tap key={c.name} scale={0.97} onPress={() => openGoal(c.i)} style={{ width: 262, height: 206, borderRadius: 30, padding: 18, overflow: 'hidden', experimental_backgroundImage: G.featured[c.i] }}>
-                  <View pointerEvents="none" style={{ position: 'absolute', width: 180, height: 180, borderRadius: 90, right: -60, bottom: -60, experimental_backgroundImage: G.glowWhiteSoft }} />
+                <Tap key={c.name} scale={0.97} onPress={() => openGoal(c.i)} style={{ width: 262, height: 206, borderRadius: 30, padding: 18, overflow: 'hidden', ...bgImage(G.featured[c.i]) }}>
+                  <View pointerEvents="none" style={{ position: 'absolute', width: 180, height: 180, borderRadius: 90, right: -60, bottom: -60, ...bgImage(G.glowWhiteSoft) }} />
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <View style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.22)' }}>
-                      <Txt style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>{fmt(c.people)} joined</Txt>
+                      <Txt style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF' }}>{joinedLabel(c.people)}</Txt>
                     </View>
                     <Txt style={{ fontSize: 12, fontWeight: 600, color: '#FFFFFF' }}>ends in {c.ends}</Txt>
                   </View>
@@ -148,7 +153,7 @@ export default function Community() {
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
                     <View style={{ flex: 1 }}>
                       <Txt style={{ fontSize: 17, fontWeight: 700 }}>{c.name}</Txt>
-                      <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 4 }}>{fmt(c.people)} participants · ends in {c.ends}</Txt>
+                      <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 4 }}>{participantsLabel(c.people)} · ends in {c.ends}</Txt>
                     </View>
                     <Tap scale={0.94} onPress={() => joinGoal(c.i)} style={{ height: 40, paddingHorizontal: 16, borderRadius: 20, backgroundColor: c.joined ? t.ctl : t.cta, justifyContent: 'center' }}>
                       <Txt style={{ fontSize: 13.5, fontWeight: 700, color: c.joined ? t.mint : t.ctaInk }}>{c.joined ? 'Joined' : 'Join'}</Txt>

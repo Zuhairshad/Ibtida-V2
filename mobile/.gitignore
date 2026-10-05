@@ -44,3 +44,4 @@ playwright-report/
 # generated native folders
 /ios
 /android
+screenshots/

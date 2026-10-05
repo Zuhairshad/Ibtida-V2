@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Animated, Easing, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
   type PressableProps, type StyleProp, type TextProps, type TextStyle, type ViewStyle,
@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { buzz, buzzError, say, useToast } from '../lib/feedback';
 import { useT } from '../theme/ThemeProvider';
-import { FIXED, FONTS, G } from '../theme/tokens';
+import { FIXED, FONTS, G, bgImage } from '../theme/tokens';
 import { Icon, type IconName } from './Icon';
 import { useReducedMotion } from './motion';
 
@@ -63,17 +63,21 @@ export function Tap({ style, scale = 0.97, children, onPressIn, onPressOut, ...r
   const v = useRef(new Animated.Value(1)).current;
   const rm = useReducedMotion();
   const to = (x: number) => { if (!rm) Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 6 }).start(); };
+  // The style (incl. flex/width) must sit on the touchable itself; on an inner view a `flex: 1`
+  // button collapses to its label inside a row.
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityRole="button"
       {...rest}
       onPressIn={e => { to(scale); onPressIn?.(e); }}
       onPressOut={e => { to(1); onPressOut?.(e); }}
+      style={[style, { transform: [{ scale: v }] }]}
     >
-      <Animated.View style={[style, { transform: [{ scale: v }] }]}>{children}</Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressable>
   );
 }
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /** Full-width pill CTA — white on dark, ink on light (var(--cta)). */
 export function Cta({ label, onPress, style, kind = 'primary', height = 60, size = 18, icon, disabled, color }: {
@@ -119,10 +123,16 @@ export function IconBtn({ name, onPress, label, bg, color, size = 44, dot }: {
 /** "Salam, *Yusuf*" — DM Serif Display two-tone title. */
 export function SerifTitle({ a, b, style }: { a: string; b: string; style?: StyleProp<TextStyle> }) {
   const t = useT();
+  const [w, setW] = useState(0);
+  // Shrink to fit the available width. Computed (DM Serif averages ~0.5em per glyph) rather than
+  // adjustsFontSizeToFit, which react-native-web doesn't support; works the same on every platform.
+  const fs = w ? Math.max(28, Math.min(44, Math.floor(w / ((a.length + b.length + 1) * 0.5)))) : 44;
   return (
-    <Txt serif style={[{ fontSize: 44, lineHeight: 48 }, style]} numberOfLines={1} adjustsFontSizeToFit>
-      {a} <Txt serif style={{ fontSize: 44, color: t.t6 }}>{b}</Txt>
-    </Txt>
+    <View onLayout={e => setW(e.nativeEvent.layout.width)} style={{ flexShrink: 1, flexGrow: 1, minWidth: 0 }}>
+      <Txt serif accessibilityRole="header" style={[{ fontSize: fs, lineHeight: fs * 1.1 }, style]} numberOfLines={1}>
+        {a} <Txt serif style={{ fontSize: fs, color: t.t6 }}>{b}</Txt>
+      </Txt>
+    </View>
   );
 }
 
@@ -259,8 +269,8 @@ export function Chips({ labels, isOn, onPick, wrap, height = 44, size = 13.5, st
     const on = isOn(i);
     return (
       <Tap key={l} onPress={() => { buzz(5); onPick(i); }} accessibilityState={{ selected: on }} scale={0.95}
-        style={[{ height, paddingHorizontal: 15, borderRadius: height / 2, backgroundColor: on ? t.cta : t.opt, alignItems: 'center', justifyContent: 'center' }, flex && { flex: 1 }]}>
-        <Txt numberOfLines={1} style={{ fontSize: size, fontWeight: 700, color: on ? t.ctaInk : t.t5 }}>{l}</Txt>
+        style={[{ height, paddingHorizontal: flex ? 10 : 15, borderRadius: height / 2, backgroundColor: on ? t.cta : t.opt, alignItems: 'center', justifyContent: 'center' }, flex && { flex: 1 }]}>
+        <Txt numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: size, fontWeight: 700, color: on ? t.ctaInk : t.t5 }}>{l}</Txt>
       </Tap>
     );
   });
@@ -278,7 +288,7 @@ export function RadioDot({ on, size = 30 }: { on: boolean; size?: number }) {
   const inner = Math.round(size / 2);
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: t.seg, alignItems: 'center', justifyContent: 'center', boxShadow: t.dark ? undefined : 'inset 0 0 0 1px rgba(15,16,20,0.1)' }}>
-      <Animated.View style={{ width: inner, height: inner, borderRadius: inner, experimental_backgroundImage: G.brand, transform: [{ scale: v }] }} />
+      <Animated.View style={{ width: inner, height: inner, borderRadius: inner, ...bgImage(G.brand), transform: [{ scale: v }] }} />
     </View>
   );
 }
@@ -397,7 +407,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 export function Bar({ pct, h = 5, track, fill, style }: { pct: number; h?: number; track: string; fill?: string; style?: StyleProp<ViewStyle> }) {
   return (
     <View style={[{ height: h, borderRadius: h, backgroundColor: track, overflow: 'hidden' }, style]}>
-      <View style={{ height: '100%', width: `${Math.max(0, Math.min(100, pct))}%`, borderRadius: h, experimental_backgroundImage: fill ? undefined : G.brandH, backgroundColor: fill }} />
+      <View style={{ height: '100%', width: `${Math.max(0, Math.min(100, pct))}%`, borderRadius: h, ...bgImage(fill ? undefined : G.brandH), backgroundColor: fill }} />
     </View>
   );
 }
@@ -524,7 +534,7 @@ export function ToastHost() {
         paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
         opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
       }}>
-      <View style={{ width: 26, height: 26, borderRadius: 13, experimental_backgroundImage: G.brand, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: 26, height: 26, borderRadius: 13, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
         <Icon name="check" size={15} color={FIXED.ink} />
       </View>
       <Txt style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{toast.msg}</Txt>

@@ -144,3 +144,7 @@ export const code8 = () => {
   for (let i = 0; i < 8; i++) c += A[Math.floor(Math.random() * A.length)];
   return c;
 };
+
+/** Copy for live counters: real numbers when there are some, a gentle invitation when there are none. */
+export const joinedLabel = (n: number) => (n > 0 ? `${fmt(n)} joined` : 'Be the first');
+export const participantsLabel = (n: number) => (n > 0 ? `${fmt(n)} participant${n === 1 ? '' : 's'}` : 'No participants yet');
