@@ -2,7 +2,7 @@ import * as Clipboard from 'expo-clipboard';
 import { ScrollView, View } from 'react-native';
 import { fmt, MILESTONES, PH } from '../data/content';
 import { firstName, usePrayerNow } from '../lib/hooks';
-import { useApp } from '../state/store';
+import { todayKey, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED, G, bgImage } from '../theme/tokens';
 import { Icon } from './Icon';
@@ -15,6 +15,8 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
   const goals = useApp(s => s.goals);
   const circles = useApp(s => s.circles);
   const { logs, doneCount } = usePrayerNow();
+  const act = useApp(s => s.act);
+  const week = Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return act[todayKey(d)]?.d ?? 0; }).reduce((a, b) => a + b, 0);
   return (
     <Sheet open={open} onClose={onClose}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -33,7 +35,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
         {MILESTONES.map(([n, label, d]) => {
           const got = streak >= d;
           return (
-            <View key={n} style={{ width: 104, borderRadius: 22, paddingVertical: 14, paddingHorizontal: 10, backgroundColor: got ? 'rgba(242,166,90,0.12)' : t.sheetc, alignItems: 'center', opacity: got ? 1 : 0.55 }}>
+            <View key={n} style={{ width: 104, borderRadius: 22, paddingVertical: 14, paddingHorizontal: 10, backgroundColor: got ? 'rgba(242,166,90,0.12)' : t.sheetc, boxShadow: got ? undefined : t.edge, alignItems: 'center', opacity: got ? 1 : 0.55 }}>
               <View style={{ width: 40, height: 40, borderRadius: 20, ...bgImage(got ? 'linear-gradient(135deg, #FFD27A, #E07A4B)' : undefined), backgroundColor: got ? undefined : t.ctl4, alignItems: 'center', justifyContent: 'center' }}>
                 <Txt style={{ fontSize: 14, fontWeight: 800, color: FIXED.ink }}>{n}</Txt>
               </View>
@@ -43,7 +45,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
         })}
       </ScrollView>
 
-      <View style={{ marginTop: 14, borderRadius: 24, backgroundColor: t.sheetc, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <View style={{ marginTop: 14, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <Ring size={76} r={32} stroke={8} pct={doneCount / 5} track={t.ctl3} color={t.acc}>
           <Txt style={{ fontSize: 17, fontWeight: 800 }}>{doneCount}/5</Txt>
         </Ring>
@@ -59,7 +61,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
         </View>
       </View>
 
-      <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 4 }}>ACTIVE GOALS</Label>
+      {goals.length > 0 && <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 4 }}>ACTIVE GOALS</Label>}
       <View style={{ gap: 10 }}>
         {goals.map(g => (
           <View key={g.id}>
@@ -72,10 +74,10 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
         ))}
       </View>
 
-      <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 4 }}>DAWAH NETWORK</Label>
+      {circles.length > 0 && <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 4 }}>DAWAH NETWORK</Label>}
       <View style={{ gap: 8 }}>
         {circles.map(c => (
-          <View key={c.id} style={{ borderRadius: 20, backgroundColor: t.sheetc, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <View key={c.id} style={{ borderRadius: 20, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
             <View style={{ flex: 1 }}>
               <Txt style={{ fontSize: 14.5, fontWeight: 700 }}>{c.name}</Txt>
               <Txt mono style={{ fontSize: 12.5, color: t.t2, marginTop: 3, letterSpacing: 1.25 }}>{c.code}</Txt>
@@ -90,7 +92,9 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
       </View>
 
       <View style={{ marginTop: 14, borderRadius: 22, padding: 16, ...bgImage(G.mintNote) }}>
-        <Txt style={{ fontSize: 14, lineHeight: 21, color: t.mintTx }}>Your 1,240 Salawat this week joined {fmt(impact)} counted by the community today.</Txt>
+        <Txt style={{ fontSize: 14, lineHeight: 21, color: t.mintTx }}>
+          {week > 0 ? `You counted ${fmt(week)} dhikr this week` : 'Start a dhikr today'}{impact > 0 ? ` · the Ummah has counted ${fmt(impact)} today.` : '.'}
+        </Txt>
       </View>
     </Sheet>
   );

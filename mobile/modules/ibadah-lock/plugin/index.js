@@ -15,12 +15,13 @@ const XML_NAME = 'ibadah_lock_accessibility_service';
 
 const DEFAULT_LABEL = 'Ibtida Ibadah Lock';
 const DEFAULT_DESCRIPTION =
-  'Ibadah Lock keeps the apps you choose closed while a lock session you started is running. ' +
-  'During a session, this service only checks which app has just opened. If it is one you chose to lock ' +
-  '(for example Instagram or YouTube), Ibtida brings you back to your dhikr. ' +
+  'Ibadah Lock keeps apps closed during the lock times you set. ' +
+  'For a lock you start now, it locks the apps you choose (for example Instagram or YouTube). ' +
+  'For a scheduled lock (a time, a duration and days you pick), it locks every app except the essentials until the time is up. ' +
+  'This service only checks which app has just opened; if it is locked, Ibtida brings you back to your worship. ' +
   'It does not read what is on your screen, does not see what you type, and does not collect or send any data. ' +
-  'Outside a session it does nothing. Phone, emergency and SMS apps are never locked. ' +
-  'You can turn this off here at any time, and end a session early with the emergency unlock in Ibtida.';
+  'Phone, emergency, SMS, your home screen, keyboard and clock are never locked. ' +
+  'You can turn this off here at any time, and end a lock early with the emergency unlock in Ibtida.';
 
 // No static android:packageNames: on connect, the service narrows delivery at runtime to the apps
 // in the active session, and to Ibtida's own package when no session is running.
@@ -59,7 +60,7 @@ function withLockStrings(config, { label, description }) {
   return withStringsXml(config, cfg => {
     const items = [
       AndroidConfig.Resources.buildResourceItem({ name: 'ibadah_lock_accessibility_label', value: label }),
-      AndroidConfig.Resources.buildResourceItem({ name: 'ibadah_lock_accessibility_summary', value: 'Returns you to Ibtida when a locked app opens during Ibadah Lock.' }),
+      AndroidConfig.Resources.buildResourceItem({ name: 'ibadah_lock_accessibility_summary', value: 'Returns you to Ibtida when a locked app opens during an Ibadah Lock or a scheduled lock time.' }),
       AndroidConfig.Resources.buildResourceItem({ name: 'ibadah_lock_accessibility_description', value: description }),
     ];
     cfg.modResults = AndroidConfig.Strings.setStringItem(items, cfg.modResults);

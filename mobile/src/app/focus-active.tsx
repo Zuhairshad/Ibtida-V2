@@ -9,7 +9,7 @@ import { buzz, Chips, Cta, Ring, say, Sheet, Txt } from '../components/ui';
 import { APPS, mmss } from '../data/content';
 import { DOW, fmtTime } from '../lib/prayer';
 import { appName, IbadahLock, lockPackages } from '../lib/shield';
-import { getState, set, useApp } from '../state/store';
+import { countGoal, getState, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 import { G, bgImage } from '../theme/tokens';
 
@@ -24,6 +24,8 @@ function Lock() {
   // `resume` is set by the shielding service's deep link: re-attach to the running native session.
   const { goal: gid, resume } = useLocalSearchParams<{ goal?: string; resume?: string }>();
   const goal = useApp(s => s.goals.find(g => g.id === Number(gid)) || s.goals[0]);
+  // The lock is tied to a goal; without one there is nothing to unlock it, so set one up first.
+  useEffect(() => { if (!goal) router.replace('/focus-setup'); }, [goal, router]);
   const focus = useApp(s => s.focus);
   const [secs, setSecs] = useState(0);
   const [sheet, setSheet] = useState(false);
@@ -104,8 +106,7 @@ function Lock() {
   const apps = APPS.filter((_, i) => focus.apps[i]);
   const tap = () => {
     pop();
-    const prog = getState().goals.find(g => g.id === goal.id)!.prog + 1;
-    set(s => ({ goals: s.goals.map(g => (g.id === goal.id ? { ...g, prog } : g)) }));
+    const prog = countGoal(goal.id, 1)?.prog ?? getState().goals.find(g => g.id === goal.id)!.prog;
     if (prog >= goal.target) finish('Target reached · apps unlocked'); else buzz(8);
   };
   const lit = n === 0 ? 0 : n % 33 === 0 ? 33 : n % 33;

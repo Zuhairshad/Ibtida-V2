@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Children, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Animated, Easing, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
   type PressableProps, type StyleProp, type TextProps, type TextStyle, type ViewStyle,
@@ -85,7 +85,7 @@ export function Cta({ label, onPress, style, kind = 'primary', height = 60, size
   height?: number; size?: number; icon?: IconName; disabled?: boolean; color?: string;
 }) {
   const t = useT();
-  const bg = disabled ? t.opt : kind === 'primary' ? t.cta : kind === 'secondary' ? t.ctl2 : 'transparent';
+  const bg = disabled ? (t.dark ? t.opt : t.ctl) : kind === 'primary' ? t.cta : kind === 'secondary' ? t.ctl2 : 'transparent';
   const ink = color || (disabled ? t.t4 : kind === 'primary' ? t.ctaInk : kind === 'danger' ? t.rose : kind === 'ghost' ? t.acc : t.txw);
   return (
     <Tap
@@ -111,7 +111,7 @@ export function IconBtn({ name, onPress, label, bg, color, size = 44, dot }: {
   const t = useT();
   return (
     <Tap onPress={onPress} accessibilityLabel={label} scale={0.92}
-      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: bg ?? t.card, alignItems: 'center', justifyContent: 'center' }}>
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: bg ?? t.card, boxShadow: bg ? undefined : t.edge, alignItems: 'center', justifyContent: 'center' }}>
       <Icon name={name} color={color ?? t.tx} />
       {dot && <View style={{ position: 'absolute', top: 10, right: 11, width: 10, height: 10, borderRadius: 5, backgroundColor: t.acc, borderWidth: 2, borderColor: bg ?? t.card }} />}
     </Tap>
@@ -222,16 +222,17 @@ export function Page({ children, top = 54, bottom = 34, style, bg }: { children:
 
 export function Card({ children, style, r = 28, pad = 18 }: { children: ReactNode; style?: StyleProp<ViewStyle>; r?: number; pad?: number }) {
   const t = useT();
-  return <View style={[{ borderRadius: r, backgroundColor: t.card, padding: pad }, style]}>{children}</View>;
+  return <View style={[{ borderRadius: r, backgroundColor: t.card, boxShadow: t.edge, padding: pad }, style]}>{children}</View>;
 }
 
 /** List card with hairline separators between rows (Privacy, Notifications, Profile menu). */
-export function ListCard({ children, style }: { children: ReactNode[]; style?: StyleProp<ViewStyle> }) {
+export function ListCard({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   const t = useT();
+  const rows = Children.toArray(children);
   return (
-    <View style={[{ marginHorizontal: 16, borderRadius: 28, backgroundColor: t.card, overflow: 'hidden' }, style]}>
-      {children.map((c, i) => (
-        <View key={i} style={i < children.length - 1 ? { borderBottomWidth: 1, borderBottomColor: t.line } : undefined}>{c}</View>
+    <View style={[{ marginHorizontal: 16, borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, overflow: 'hidden' }, style]}>
+      {rows.map((c, i) => (
+        <View key={i} style={i < rows.length - 1 ? { borderBottomWidth: 1, borderBottomColor: t.line } : undefined}>{c}</View>
       ))}
     </View>
   );
@@ -245,14 +246,14 @@ export function Seg({ labels, value, onChange, height = 46, radius = 22, inner =
 }) {
   const t = useT();
   return (
-    <View accessibilityRole="tablist" style={{ flexDirection: 'row', gap, padding: 4, borderRadius: radius, backgroundColor: bg ?? t.sunk }}>
+    <View accessibilityRole="tablist" style={{ flexDirection: 'row', gap, padding: 4, borderRadius: radius, backgroundColor: bg ?? t.sunk, boxShadow: bg ? undefined : t.edge }}>
       {labels.map((l, i) => {
         const on = i === value;
         return (
           <Pressable key={l} accessibilityRole="tab" accessibilityState={{ selected: on }}
             onPress={() => { buzz(5); onChange(i); }}
-            style={{ flex: 1, height, borderRadius: inner, backgroundColor: on ? t.seg : 'transparent', alignItems: 'center', justifyContent: 'center', boxShadow: on && !t.dark ? '0 1px 3px rgba(15,16,20,0.08)' : undefined }}>
-            <Txt numberOfLines={1} style={{ fontSize: size, fontWeight: 700, color: on ? t.txw : t.t2 }}>{l}</Txt>
+            style={{ flex: 1, height, borderRadius: inner, backgroundColor: on ? (t.dark ? t.seg : t.cta) : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+            <Txt numberOfLines={1} style={{ fontSize: size, fontWeight: 700, color: on ? (t.dark ? t.txw : t.ctaInk) : t.t2 }}>{l}</Txt>
           </Pressable>
         );
       })}
@@ -269,7 +270,7 @@ export function Chips({ labels, isOn, onPick, wrap, height = 44, size = 13.5, st
     const on = isOn(i);
     return (
       <Tap key={l} onPress={() => { buzz(5); onPick(i); }} accessibilityState={{ selected: on }} scale={0.95}
-        style={[{ height, paddingHorizontal: flex ? 10 : 15, borderRadius: height / 2, backgroundColor: on ? t.cta : t.opt, alignItems: 'center', justifyContent: 'center' }, flex && { flex: 1 }]}>
+        style={[{ height, paddingHorizontal: flex ? 10 : 15, borderRadius: height / 2, backgroundColor: on ? t.cta : t.opt, boxShadow: on ? undefined : t.edge, alignItems: 'center', justifyContent: 'center' }, flex && { flex: 1 }]}>
         <Txt numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ fontSize: size, fontWeight: 700, color: on ? t.ctaInk : t.t5 }}>{l}</Txt>
       </Tap>
     );
@@ -300,7 +301,7 @@ export function Option({ title, sub, on, onPress, ar, pad = 16, r = 22, dot = 30
   const t = useT();
   return (
     <Tap onPress={() => { buzz(6); onPress(); }} scale={0.985} accessibilityRole="radio" accessibilityState={{ checked: on }}
-      style={{ backgroundColor: t.opt, borderRadius: r, paddingVertical: pad, paddingHorizontal: pad + 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, boxShadow: on ? FIXED.sel : undefined }}>
+      style={{ backgroundColor: t.opt, borderRadius: r, paddingVertical: pad, paddingHorizontal: pad + 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, boxShadow: on ? FIXED.sel : t.edge }}>
       <View style={{ flex: 1 }}>
         <Txt style={{ fontSize: titleSize, fontWeight: 700 }}>{title}</Txt>
         {ar ? <Txt ar style={{ fontSize: 19, color: t.gold, marginTop: 2, textAlign: 'left' }}>{ar}</Txt> : null}
@@ -355,7 +356,7 @@ export function IconChip({ name, color, bg, size = 44, r = 15, icon = 22 }: { na
 export function PillShortcut({ icon, kicker, title, onPress }: { icon: IconName; kicker: string; title: string; onPress: () => void }) {
   const t = useT();
   return (
-    <Tap onPress={onPress} style={{ flex: 1, height: 72, borderRadius: 36, backgroundColor: t.card, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 14 }}>
+    <Tap onPress={onPress} style={{ flex: 1, height: 72, borderRadius: 36, backgroundColor: t.card, boxShadow: t.edge, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 14 }}>
       <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctl, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} color={t.acc} />
       </View>
@@ -438,7 +439,7 @@ export function WheelSet({ cols, inset = 18 }: { cols: { values: string[]; idx: 
   const t = useT();
   return (
     <View style={{ height: 250, flexDirection: 'row', justifyContent: 'center', gap: 34 }}>
-      <View style={{ position: 'absolute', left: inset, right: inset, top: 103, height: 46, borderRadius: 23, backgroundColor: t.opt }} />
+      <View style={{ position: 'absolute', left: inset, right: inset, top: 103, height: 46, borderRadius: 23, backgroundColor: t.opt, boxShadow: t.edge }} />
       {cols.map((c, i) => <Wheel key={i} {...c} />)}
     </View>
   );

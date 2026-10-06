@@ -8,13 +8,16 @@ import { Cta, Ring, Txt } from '../components/ui';
 import { useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 import { G, bgImage } from '../theme/tokens';
+import { MILESTONES } from '../data/content';
 
 function Done() {
   const t = useT();
   const router = useRouter();
   const ins = useSafeAreaInsets();
-  const { name = 'Durood Sharif', target = '100' } = useLocalSearchParams<{ name?: string; target?: string }>();
-  const streak = useApp(s => s.streak) + 1;
+  const { name = '', target = '' } = useLocalSearchParams<{ name?: string; target?: string }>();
+  // The goal's own streak (days its target was met in a row), including today.
+  const streak = useApp(s => s.goals.find(g => g.name === name)?.streak ?? 1);
+  const nextMs = MILESTONES.find(m => streak < m[2]);
   return (
     <View style={{ flex: 1, alignItems: 'center', paddingTop: ins.top + 52, paddingHorizontal: 26, paddingBottom: ins.bottom + 36, ...bgImage(G.goalDone), backgroundColor: t.bg, overflow: 'hidden' }}>
       <StatusBar style="light" />
@@ -34,7 +37,7 @@ function Done() {
       <Txt style={{ fontSize: 16, lineHeight: 24.8, color: t.t5, textAlign: 'center', marginTop: 8, maxWidth: 290 }}>{name} complete. May Allah accept your worship.</Txt>
       <View style={{ marginTop: 18, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, backgroundColor: 'rgba(242,166,90,0.14)' }}>
         <Icon name="flame" size={16} color="#F7C58A" />
-        <Txt style={{ fontSize: 14, fontWeight: 700, color: '#F7C58A' }}>{streak}-day streak · 2-Week Steadfast in {Math.max(0, 14 - streak)} days</Txt>
+        <Txt style={{ fontSize: 14, fontWeight: 700, color: '#F7C58A' }}>{streak}-day streak{nextMs ? ` · ${nextMs[1]} in ${nextMs[2] - streak} ${nextMs[2] - streak === 1 ? 'day' : 'days'}` : ''}</Txt>
       </View>
       <View style={{ flex: 1 }} />
       <View style={{ width: '100%', flexDirection: 'row', gap: 10 }}>

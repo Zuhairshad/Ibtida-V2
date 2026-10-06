@@ -29,7 +29,7 @@ export default function WakeAlarm() {
       <Statement a="Prove you’re up." b="Two scans to stop it." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
       <View style={{ paddingTop: 16, paddingHorizontal: 16, flexDirection: 'row', gap: 8 }}>
         {[['STAGE 1', 'Wudu station'], ['STAGE 2', 'Prayer mat · 10 min']].map(([k, v]) => (
-          <View key={k} style={{ flex: 1, borderRadius: 22, backgroundColor: t.card, padding: 14 }}>
+          <View key={k} style={{ flex: 1, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, padding: 14 }}>
             <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: t.acc }}>{k}</Txt>
             <Txt style={{ fontSize: 15, fontWeight: 700, marginTop: 5 }}>{v}</Txt>
           </View>

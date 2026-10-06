@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNow } from '../components/motion';
 import { PH, type PrayerName } from '../data/content';
-import { getState, set, useApp, type PrayerLog } from '../state/store';
+import { getState, refreshStreak, set, useApp, type PrayerLog } from '../state/store';
 import { dayKey, nextPrayer, timesFor } from './prayer';
 
 /** Live prayer schedule for today, re-evaluated every second. */
@@ -24,6 +24,7 @@ export function setLog(key: string, p: PrayerName, v: PrayerLog | null) {
     if (v) day[p] = v; else delete day[p];
     return { logs: { ...s.logs, [key]: day } };
   });
+  refreshStreak();
 }
 
 /** Per-item Urdu visibility; falls back to the global "Urdu translation" switch. */
@@ -51,5 +52,5 @@ export function clock(secs: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export const firstName = () => getState().name.split(' ')[0];
+export const firstName = () => getState().name.trim().split(' ')[0] || 'friend';
 export const initials = (n: string) => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();

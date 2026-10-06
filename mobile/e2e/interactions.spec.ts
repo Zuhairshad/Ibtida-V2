@@ -1,4 +1,4 @@
-import { button, tapLabel, expect, STORAGE_KEY, stored, storedWhen, test, todayKey } from './fixtures';
+import { button, tapLabel, expect, STORAGE_KEY, stored, storedWhen, test, todayKey, withSample } from './fixtures';
 import type { Page } from '@playwright/test';
 
 const visibleText = (page: Page, text: string | RegExp) => page.getByText(text).filter({ visible: true });
@@ -7,7 +7,7 @@ const inkOf = (page: Page, text: string) => visibleText(page, text).first().eval
 
 test.describe('prayer', () => {
   test('log a prayer from the row and persist it', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/prayer');
     await button(page, 'Mark Dhuhr as prayed').click();
     await expect(button(page, 'Unmark Dhuhr')).toBeVisible();
@@ -26,7 +26,7 @@ test.describe('prayer', () => {
   });
 
   test('prayer detail sheet opens, logs and closes', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/prayer');
     await page.getByRole('button', { name: /^Asr \d/ }).click();
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toBeVisible();
@@ -50,7 +50,7 @@ test.describe('prayer', () => {
   });
 
   test('location sheet changes the calculation method', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/prayer');
     await expect(visibleText(page, /Lahore, Pakistan · Karachi · Hanafi Asr/)).toBeVisible();
     await button(page, 'Location and method').click();
@@ -65,15 +65,15 @@ test.describe('prayer', () => {
   });
 
   test('Qibla shortcut on Home opens the compass on Prayer', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/home');
     await page.getByRole('button', { name: /QIBLA/ }).click();
     await expect(page).toHaveURL(/\/prayer/);
-    await expect(visibleText(page, /Showing the calculated bearing/)).toBeVisible();
+    await expect(visibleText(page, /great-circle bearing/)).toBeVisible();
   });
 
   test('wake alarm toggles persist and Test the alarm opens the camera scan', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/prayer/wake-alarm');
     await page.getByRole('switch', { name: 'Isha' }).click();
     await storedWhen(page, s => s.wakeVerify?.[4] === true);
@@ -91,7 +91,7 @@ test.describe('location', () => {
   test.use({ geolocation: { latitude: 51.5074, longitude: -0.1278 }, permissions: ['geolocation'] });
 
   test('"Use my current location" sets the city from the device position', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/prayer');
     await button(page, 'Location and method').click();
     await button(page, /Use my current location/).click();
@@ -105,7 +105,7 @@ test.describe('location', () => {
 
 test.describe('home', () => {
   test('daily insight sheet opens and closes', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/home');
     await button(page, 'Open daily insight').click();
     await expect(visibleText(page, 'Today’s insight')).toBeVisible();
@@ -116,7 +116,7 @@ test.describe('home', () => {
   });
 
   test('quick actions navigate', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/home');
     await visibleText(page, 'Quran').first().click();
     await expect(page).toHaveURL(/\/home\/quran$/);
@@ -128,7 +128,7 @@ test.describe('home', () => {
 
 test.describe('quran reader', () => {
   test('reader settings sheet changes size, translation, theme and bookmarks', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/reader?surah=2&ayah=184');
     await expect(visibleText(page, 'EN_TEXT_2_184')).toBeVisible();
     await button(page, 'Bookmark 2:184').click();
@@ -205,7 +205,7 @@ test.describe('adhkar', () => {
   });
 
   test('a goal that is already complete does not count past its target', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/tasbeeh?goal=2'); // Istighfar, seeded at 100 / 100
     const counter = labelled(page, /^Count\./);
     await expect(counter).toHaveAttribute('aria-label', 'Count. 100 of 100');
@@ -217,22 +217,58 @@ test.describe('adhkar', () => {
     await expect(visibleText(page, /^0 remaining/)).toBeVisible();
   });
 
-  test('an adhkar session runs to completion', async ({ page, seed }) => {
+  test('category tiles open their adhkar with real counts', async ({ page, seed }) => {
     await seed();
     await page.goto('/adhkar');
-    await button(page, /^Evening adhkar/).click();
+    await button(page, /^Evening adhkar, 17 adhkar/).click();
     await expect(page).toHaveURL(/\/session/);
-    for (const [step, n] of [[1, 100], [2, 3], [3, 33]] as const) {
-      await expect(visibleText(page, `${step} / 3`)).toBeVisible();
-      const counter = labelled(page, /^Count\./);
-      for (let i = 0; i < n; i++) await counter.click();
+    await expect(visibleText(page, '1 / 17')).toBeVisible();
+    // Quranic adhkar come from the Quran source, with their reference.
+    await expect(visibleText(page, 'AYAT AL-KURSI')).toBeVisible();
+  });
+
+  test('an adhkar session counts by tap, swipes and runs to completion', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/session?cat=Gratitude');
+    await expect(visibleText(page, '1 / 6')).toBeVisible();
+    await expect(visibleText(page, /Verified · At-Tirmidhi 3383/)).toBeVisible();
+    // Next / previous move between adhkar without counting.
+    await button(page, 'Next dhikr').click();
+    await expect(visibleText(page, '2 / 6')).toBeVisible();
+    await button(page, 'Previous dhikr').click();
+    await expect(visibleText(page, '1 / 6')).toBeVisible();
+    // Each count completes a dhikr and moves on to the next one by itself.
+    for (let step = 1; step <= 6; step++) {
+      await expect(visibleText(page, `${step} / 6`)).toBeVisible();
+      await labelled(page, /^Count\./).click();
     }
-    await expect(page).toHaveURL(/\/home$/);
-    await expect(visibleText(page, 'Evening adhkar complete · May Allah accept')).toBeVisible();
+    await expect(visibleText(page, 'All complete today · May Allah accept')).toBeVisible();
+    const key = await todayKey(page);
+    const s = await storedWhen(page, x => x.az?.c?.Gratitude?.every((n: number) => n === 1) && x.act?.[key]?.s === 1);
+    expect(s.act[key].d).toBe(6);
+    // Progress is kept for the day: the Gratitude tile shows 100%.
+    await page.goto('/adhkar');
+    await expect(button(page, /^Gratitude adhkar, 6 adhkar, \d+ minutes, 100 percent done today/)).toBeVisible();
+  });
+
+  test('adhkar text size and background are adjustable and remembered', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/session?cat=Gratitude');
+    await button(page, 'Reading settings').click();
+    await expect(labelled(page, 'Text size Normal')).toBeVisible();
+    await button(page, 'Larger text').click();
+    await button(page, 'Larger text').click();
+    await expect(labelled(page, 'Text size Larger')).toBeVisible();
+    await page.getByRole('radio', { name: 'White background' }).click();
+    await button(page, 'Done').click();
+    await storedWhen(page, x => x.azSize === 3 && x.azBg === 5);
+    await page.reload();
+    await button(page, 'Reading settings').click();
+    await expect(labelled(page, 'Text size Larger')).toBeVisible();
   });
 
   test('create a goal', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/adhkar/goals');
     await expect(visibleText(page, 'Three active.')).toBeVisible();
     await button(page, 'New goal').click();
@@ -249,7 +285,7 @@ test.describe('adhkar', () => {
   });
 
   test('schedule a goal reminder', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/adhkar/goals');
     await button(page, 'Schedule').first().click();
     await expect(page).toHaveURL(/\/goal-schedule/);
@@ -258,16 +294,22 @@ test.describe('adhkar', () => {
     await labelled(page, 'Sat').click();
     await button(page, 'Save schedule').click();
     await expect(page).toHaveURL(/\/adhkar\/goals$/);
-    await expect(visibleText(page, /9-day streak · 9:30 pm/)).toBeVisible();
+    // Streaks come from real history; the seeded goal has none yet.
+    await expect(visibleText(page, /0-day streak · 9:30 pm/)).toBeVisible();
     const s = await storedWhen(page, x => x.goals?.[0]?.remind === '9:30 pm');
     expect(s.goals[0].days).toEqual([1, 1, 1, 1, 1, 1, 0]);
   });
 
   test('progress ranges switch', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
+    await page.goto('/adhkar/progress');
+    await expect(visibleText(page, 'Your activity will appear here')).toBeVisible();
+    await page.goto('/tasbeeh');
+    for (let i = 0; i < 3; i++) await labelled(page, /^Count\./).click();
     await page.goto('/adhkar/progress');
     for (const r of ['Today', 'Month', 'Year', 'Week']) await page.getByRole('tab', { name: r }).click();
     await expect(visibleText(page, '2 weeks ago')).toBeVisible();
+    await expect(visibleText(page, 'Dhikr counted')).toBeVisible();
   });
 });
 
@@ -276,7 +318,7 @@ test.describe('ibadah lock', () => {
   // slider with a mouse (react-native-web's responder system handles both).
   test.use({ isMobile: false, hasTouch: false });
   test('emergency unlock sheet logs the reason', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/home');
     await visibleText(page, 'Ibadah Lock').first().click();
     await expect(page).toHaveURL(/\/focus-setup$/);
@@ -321,22 +363,96 @@ test.describe('ibadah lock', () => {
   });
 });
 
+test.describe('scheduled ibadah lock', () => {
+  test('add, edit, switch off and remove a lock time', async ({ page, seed, errors }) => {
+    await seed();
+    await page.goto('/focus-setup');
+    await page.getByRole('tab', { name: 'Schedule' }).click();
+    await expect(visibleText(page, 'No lock times yet')).toBeVisible();
+    await button(page, 'Add lock time').click();
+    await expect(page).toHaveURL(/\/lock-schedule$/);
+    // 6:30 am, 1 hr 30 min, weekdays.
+    await labelled(page, '6').click();
+    for (const m of ['10', '20', '30']) await labelled(page, m).click(); // the wheel shows two steps either side
+    await button(page, '1 hr 30 min').click();
+    await button(page, 'Weekdays').click();
+    await expect(visibleText(page, '6:30 am for 1 hr 30 min · Weekdays')).toBeVisible();
+    await button(page, 'Accept & schedule lock').click();
+    await expect(page).toHaveURL(/\/focus-setup/);
+    await expect(visibleText(page, '6:30 am – 8:00 am').first()).toBeVisible();
+    await expect(visibleText(page, '1 hr 30 min · Weekdays')).toBeVisible();
+    let s = await storedWhen(page, x => x.locks?.length === 1);
+    expect(s.locks[0]).toMatchObject({ h: 6, m: 30, dur: 90, days: [1, 1, 1, 1, 1, 0, 0], on: true });
+
+    await page.getByRole('switch', { name: /6:30 am – 8:00 am on/ }).click();
+    await storedWhen(page, x => x.locks?.[0]?.on === false);
+
+    await button(page, /^Lock time 6:30 am – 8:00 am/).click();
+    await expect(page).toHaveURL(/\/lock-schedule\?id=/);
+    await button(page, 'Longer').click();
+    await labelled(page, 'Sat').click();
+    await button(page, 'Save lock time').click();
+    s = await storedWhen(page, x => x.locks?.[0]?.dur === 95);
+    expect(s.locks[0].days).toEqual([1, 1, 1, 1, 1, 1, 0]);
+    expect(s.locks[0].on).toBe(true);
+
+    await button(page, /^Lock time/).click();
+    page.once('dialog', d => d.accept());
+    await button(page, 'Remove lock time').click();
+    await storedWhen(page, x => x.locks?.length === 0);
+    expect(errors).toEqual([]);
+  });
+
+  test('during a lock time the lock screen counts down and can be unlocked in an emergency', async ({ page, seed }) => {
+    const now = new Date();
+    const start = new Date(now.getTime() - 10 * 60_000);
+    await seed({ locks: [{ id: 'l1', h: start.getHours(), m: start.getMinutes(), dur: 60, days: [1, 1, 1, 1, 1, 1, 1], on: true }] });
+    await page.goto('/lock-scheduled');
+    await expect(visibleText(page, 'Your apps are resting')).toBeVisible();
+    await expect(visibleText(page, /^IBADAH TIME · /)).toBeVisible();
+    await button(page, 'Emergency unlock').click();
+    await button(page, 'Need directions').click();
+    await button(page, 'Unlock').click();
+    await expect(page).toHaveURL(/\/profile\/emergency$/);
+    const s = await storedWhen(page, x => x.lockSkip > Date.now());
+    expect(s.emergencies[0].reason).toBe('Need directions');
+    await page.goto('/lock-scheduled');
+    await expect(visibleText(page, 'No lock running')).toBeVisible();
+  });
+});
+
 test.describe('community', () => {
   test('create a circle', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/community');
     await button(page, 'New circle').first().click();
     await expect(page).toHaveURL(/\/circle-new$/);
     await expect(button(page, 'Create circle')).toHaveAttribute('aria-disabled', 'true');
     await page.getByLabel('Circle name').fill('Friday brothers');
     await page.getByRole('radio', { name: /Invite only/ }).click();
-    await button(page, 'Create circle').click();
+    // A target adopted from the community goals, with a circle-sized count…
+    await page.getByRole('checkbox', { name: /^1 Million Salawat/ }).click();
+    // …and one of our own.
+    await page.getByRole('tab', { name: 'Make my own' }).click();
+    await page.getByLabel('Target name').fill('Surah al-Kahf every Friday');
+    await page.getByLabel('Count to reach').fill('40');
+    await button(page, 'Add target').click();
+    await button(page, 'Create circle · 2 targets').click();
     await expect(page).toHaveURL(/\/community\/circle\/\d+$/);
     await expect(page.getByRole('heading', { name: 'Friday brothers' })).toBeVisible();
-    await button(page, '+ Add goal').click();
-    await expect(visibleText(page, '1,000 Istighfar together')).toBeVisible();
+    await expect(visibleText(page, '0 / 10,000')).toBeVisible();
+    await expect(visibleText(page, 'Surah al-Kahf every Friday')).toBeVisible();
     const s = await storedWhen(page, x => x.circles?.length === 3);
-    expect(s.circles[2]).toMatchObject({ name: 'Friday brothers', priv: 'Invite only', role: 'Owner' });
+    expect(s.circles[2]).toMatchObject({
+      name: 'Friday brothers', priv: 'Invite only', role: 'Owner',
+      goals: [{ name: '1 Million Salawat', done: 0, total: 10000 }, { name: 'Surah al-Kahf every Friday', done: 0, total: 40 }],
+    });
+    // More targets can be added later from the circle.
+    await button(page, '+ Add target').click();
+    await expect(page).toHaveURL(/\/circle-goal/);
+    await page.getByRole('checkbox', { name: /^10 Million Istighfar/ }).click();
+    await button(page, 'Add target').click();
+    await storedWhen(page, x => x.circles?.[2]?.goals?.length === 3);
 
     await button(page, 'Back').click();
     await expect(page).toHaveURL(/\/community$/);
@@ -345,7 +461,7 @@ test.describe('community', () => {
   });
 
   test('delete a circle asks for confirmation', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/community');
     await visibleText(page, 'Thursday halaqa').first().click();
     await expect(page).toHaveURL(/\/community\/circle\/2$/);
@@ -356,25 +472,27 @@ test.describe('community', () => {
     await expect(page.getByText('Thursday halaqa', { exact: true }).filter({ visible: true })).toHaveCount(0);
   });
 
-  test('join with an invite code, join a community goal and say Ameen', async ({ page, seed }) => {
-    await seed();
+  test('joining by invite code needs an account; community goals can be joined', async ({ page, seed }) => {
+    await seed(withSample());
     await page.goto('/community/circles');
     await page.getByLabel('Invite code').fill('ab12-cd34');
     await expect(page.getByLabel('Invite code')).toHaveValue('AB12CD34');
     await button(page, 'Join circle').click();
-    await expect(page.getByText('Masjid youth circle', { exact: true })).toBeVisible();
+    // Codes are checked by the server — no circle is made up offline.
+    await expect(page).toHaveURL(/\/auth/);
+    expect((await stored(page)).circles).toHaveLength(2);
 
     await page.goto('/community');
     await page.getByRole('tab', { name: 'Goals' }).click();
+    await expect(visibleText(page, 'Sign in to see live progress').first()).toBeVisible();
     await button(page, 'Join').first().click();
     await storedWhen(page, s => s.joined?.[1] === true);
     await page.getByRole('tab', { name: 'Feed' }).click();
-    await button(page, 'Say Ameen').first().click();
-    await storedWhen(page, s => s.ameen?.f1 === true);
+    await expect(visibleText(page, 'Sign in to see the feed')).toBeVisible();
   });
 
   test('contributing to a community goal counts toward a linked personal goal', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/community/goal/2'); // 10 Million Istighfar — no linked personal goal
     await button(page, 'Join & contribute').click();
     await expect(page).toHaveURL(/\/tasbeeh/);
@@ -389,7 +507,7 @@ test.describe('community', () => {
 
 test.describe('profile', () => {
   test('toggle Light / Dark appearance', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/profile');
     expect(await inkOf(page, 'Appearance')).toBe('rgb(245, 243, 239)');
     await page.getByRole('tab', { name: 'Light' }).click();
@@ -409,7 +527,7 @@ test.describe('profile', () => {
   });
 
   test('settings toggles persist', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/profile/notifications');
     await page.getByRole('switch', { name: 'Quran' }).click();
     await storedWhen(page, s => s.notifs?.[3] === true);
@@ -419,7 +537,7 @@ test.describe('profile', () => {
   });
 
   test('profile menu rows navigate', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/profile');
     const rows: [RegExp, RegExp][] = [
       [/^Goals/, /\/adhkar\/goals$/], [/^Quran bookmarks/, /\/home\/quran$/], [/^Wake alarm/, /\/prayer\/wake-alarm$/],
@@ -443,7 +561,7 @@ test.describe('profile', () => {
   });
 
   test('mat tag regenerates a token', async ({ page, seed }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/mat-tag');
     await expect(visibleText(page, 'TOKEN A7F2-KQ9M-3XPD-W')).toBeVisible();
     await page.getByRole('tab', { name: 'Prayer mat' }).click();
@@ -451,23 +569,77 @@ test.describe('profile', () => {
     await button(page, 'Regenerate').click();
     await storedWhen(page, s => s.token !== 'A7F2-KQ9M-3XPD');
   });
+
+  test('a station can be verified by scanning the item itself', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/mat-tag');
+    // A fresh install gets its own random token, never a shared sample one.
+    const s0 = await storedWhen(page, x => typeof x.token === 'string' && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(x.token));
+    expect(s0.token).not.toBe('A7F2-KQ9M-3XPD');
+    await page.getByRole('radio', { name: /The sink itself/ }).click();
+    await expect(visibleText(page, /^TOKEN /)).toHaveCount(0);
+    await page.getByRole('tab', { name: 'Prayer mat' }).click();
+    await expect(visibleText(page, /^TOKEN /)).toBeVisible(); // the mat still uses its tag
+    await page.getByRole('radio', { name: /The prayer mat itself/ }).click();
+    await storedWhen(page, x => x.wakeMode?.W === 'item' && x.wakeMode?.M === 'item');
+    await button(page, 'Test with my prayer mat').click();
+    await expect(page).toHaveURL(/\/wake-scan\?test=M/);
+    await expect(visibleText(page, 'Test · Prayer mat')).toBeVisible();
+    await expect(visibleText(page, 'Now point at your prayer mat')).toBeVisible();
+  });
+});
+
+test.describe('notifications and qibla', () => {
+  test('reminders can be in Urdu with a daily hadith, previewed live', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/profile/notifications');
+    const preview = page.getByLabel('Notification preview');
+    // Default: English and Urdu together, with a sourced hadith.
+    await expect(preview.getByText(/^Time for \w+ · \S+ کا وقت$/)).toBeVisible();
+    await expect(preview.getByText(/— .*\d/)).toBeVisible();
+    await page.getByRole('tab', { name: 'اردو' }).click();
+    await expect(preview.getByText(/^(فجر|ظہر|عصر|مغرب|عشاء) کا وقت$/)).toBeVisible();
+    await storedWhen(page, x => x.notifLang === 'ur');
+    await page.getByRole('switch', { name: 'Daily hadith' }).click();
+    await expect(preview.getByText(/«/)).toHaveCount(0);
+    await storedWhen(page, x => x.notifQuotes === false);
+  });
+
+  test('qibla card shows the true bearing and an honest compass status', async ({ page, seed }) => {
+    await seed({ city: { name: 'London, United Kingdom', lat: 51.5074, lng: -0.1278, cc: 'GB' } });
+    await page.goto('/prayer?qibla=1');
+    await expect(visibleText(page, '119° east-southeast of true north')).toBeVisible();
+    await expect(labelled(page, 'Qibla bearing 119 degrees from true north')).toBeVisible();
+    // Browsers that gate motion sensors ask for a tap first; a desktop browser then has no
+    // compass, so the dial stays on the calculated bearing and says so.
+    const tap = button(page, 'Use compass');
+    if (await tap.isVisible()) await tap.click();
+    await expect(visibleText(page, /This device has no compass|Compass access is off/)).toBeVisible({ timeout: 8000 });
+  });
 });
 
 test.describe('search', () => {
   test('search filters results and opens a match', async ({ page, seed, errors }) => {
-    await seed();
+    await seed(withSample());
     await page.goto('/home');
     await button(page, 'Search').first().click();
     await expect(page).toHaveURL(/\/search$/);
     await page.getByRole('textbox', { name: 'Search' }).fill('istighfar');
-    await expect(visibleText(page, '4 semantic matches via Kalimat')).toBeVisible();
+    await expect(visibleText(page, /^\d+ matches$/)).toBeVisible();
     await button(page, 'Hadith').click();
-    await expect(visibleText(page, '2 semantic matches via Kalimat')).toBeVisible();
+    await expect(button(page, /^Sayyid al-Istighfar Forgiveness adhkar · Sahih al-Bukhari 6306/)).toBeVisible();
     await button(page, 'Azkar').click();
-    await expect(visibleText(page, '1 semantic match via Kalimat')).toBeVisible();
+    await expect(visibleText(page, '1 match')).toBeVisible();
     await button(page, /Forgiveness adhkar/).click();
     await expect(page).toHaveURL(/\/session/);
     await expect(visibleText(page, 'Forgiveness Adhkar')).toBeVisible();
+
+    // Arabic without harakat finds the vowelled text, and opens the session at that dhikr.
+    await page.goto('/search');
+    await page.getByRole('textbox', { name: 'Search' }).fill('حسبنا الله');
+    await button(page, /Hasbunallahu wa niʿmal-wakil Protection adhkar/).click();
+    await expect(page).toHaveURL(/\/session\?cat=Protection&i=\d+/);
+    await expect(visibleText(page, 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ')).toBeVisible();
 
     await page.goto('/search');
     await page.getByRole('textbox', { name: 'Search' }).fill('zzzz');

@@ -17,4 +17,9 @@ export function Immersive({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={DARK}>{children}</Ctx.Provider>;
 }
 
+/** Renders children with a specific palette (e.g. the adhkar session's chosen background). */
+export function PaletteProvider({ value, children }: { value: Palette; children: ReactNode }) {
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
 export const useT = () => useContext(Ctx);

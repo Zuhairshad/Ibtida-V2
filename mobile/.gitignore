@@ -45,3 +45,4 @@ playwright-report/
 /ios
 /android
 screenshots/
+supabase/functions/quran/.secrets.tmp.env

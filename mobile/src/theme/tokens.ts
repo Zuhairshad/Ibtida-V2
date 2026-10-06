@@ -15,6 +15,8 @@ export type Palette = {
   cta: string; ctaInk: string; sheet: string;
   tabbar: string; tabShadow: string; tabOn: string; tabRing: string; tabInk: string;
   toast: string; line: string; hair: string; bord: string; dayRing: string; dayBg: string;
+  /** Outline for cards and rows: none in dark mode; a hairline + soft shadow on light mode's white surfaces. */
+  edge: string;
   dark: boolean;
 };
 
@@ -34,12 +36,14 @@ export const DARK: Palette = {
   toast: 'rgba(44,45,54,0.92)', line: 'rgba(255,255,255,0.05)',
   hair: 'inset 0 0 0 1px rgba(255,255,255,0.08)', bord: 'rgba(255,255,255,0.08)',
   dayRing: 'inset 0 0 0 1.5px rgba(255,255,255,0.3)', dayBg: 'rgba(255,255,255,0.06)',
+  edge: '0 0 0 0 transparent',
 };
 
 export const LIGHT: Palette = {
   dark: false,
-  tMint: '#E3F1EC', bg: '#FFFFFF', sunk: '#F3F3F6', card: '#F7F7F9', opt: '#F7F7F9', sheetc: '#F3F3F6',
-  ctl2: '#EEEEF2', ctl: '#EFEFF3', ctl3: '#E7E7EC', seg: '#FFFFFF', ctl4: '#D9D9E0', sunk2: '#F4F4F7',
+  // Light mode is pure white: every surface is #FFFFFF and cards are set apart by `edge`.
+  tMint: '#E3F1EC', bg: '#FFFFFF', sunk: '#FFFFFF', card: '#FFFFFF', opt: '#FFFFFF', sheetc: '#FFFFFF',
+  ctl2: '#EEEEF2', ctl: '#EFEFF3', ctl3: '#E7E7EC', seg: '#FFFFFF', ctl4: '#D9D9E0', sunk2: '#FFFFFF',
   tx: '#0F1014', t2: '#5E5E66', t3: '#55555D', t4: '#6B6B73', t5: '#26262B', t6: '#7A7A82', ctl4b: '#CFCFD6',
   acc: '#B45F25', gold: '#9A5B20', mint: '#2B7458', rose: '#B4463A', peri: '#3F55A6', lav: '#7447A0',
   noteBg: '#FBF1E3', noteTx: '#7A4A12', iosBg: '#EEF1FA', iosTx: '#34457E', iosB: '#1F2B55',
@@ -52,6 +56,7 @@ export const LIGHT: Palette = {
   toast: 'rgba(255,255,255,0.97)', line: 'rgba(15,16,20,0.06)',
   hair: 'inset 0 0 0 1px rgba(15,16,20,0.06)', bord: 'rgba(15,16,20,0.1)',
   dayRing: 'inset 0 0 0 1.5px rgba(15,16,20,0.18)', dayBg: '#FFFFFF',
+  edge: 'inset 0 0 0 1px rgba(15,16,20,0.08), 0 2px 10px -4px rgba(15,16,20,0.08)',
 };
 
 /** Theme-independent colours used by the design (illustration, brand gradient, avatars). */

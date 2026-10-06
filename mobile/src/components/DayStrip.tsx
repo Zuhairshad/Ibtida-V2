@@ -31,7 +31,7 @@ function Day({ d, on, onPress, sun }: { d: Date; on: boolean; onPress: () => voi
 export function DayStrip({ count, value, onChange, base }: { count: number; value: number; onChange: (i: number) => void; base: Date }) {
   const t = useT();
   return (
-    <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 6, borderRadius: 30, backgroundColor: t.sunk }}>
+    <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', justifyContent: 'space-between', padding: 6, borderRadius: 30, backgroundColor: t.sunk, boxShadow: t.edge }}>
       {Array.from({ length: count }, (_, i) => (
         <Day key={i} d={addDays(base, i)} on={value === i} sun={count > 5 ? 22 : 26} onPress={() => { buzz(5); onChange(i); }} />
       ))}

@@ -8,7 +8,7 @@ import { FadeIn, Glow } from '../components/motion';
 import { BackBar, buzz, Cta, say, Seg, Sheet, Switch, Tap, Txt, UrduToggle } from '../components/ui';
 import { juzOf, SURAHS } from '../data/surahs';
 import { useUrdu } from '../lib/hooks';
-import { ATTRIBUTION, useSurah, type Ayah as AyahT, type Surah } from '../lib/quran';
+import { attributionFor, useSurah, type Ayah as AyahT, type Surah } from '../lib/quran';
 import { getState, markKey, recordReading, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 
@@ -86,12 +86,12 @@ function Skeleton({ card }: { card: string }) {
         <Glow key={k} dur={1200}>
           <Animated.View style={{ borderRadius: 28, backgroundColor: card, padding: 18, gap: 12 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ width: 54, height: 28, borderRadius: 12, backgroundColor: t.sunk }} />
-              <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: t.sunk }} />
+              <View style={{ width: 54, height: 28, borderRadius: 12, backgroundColor: t.sunk, boxShadow: t.edge }} />
+              <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: t.sunk, boxShadow: t.edge }} />
             </View>
-            <View style={{ height: 22, borderRadius: 8, backgroundColor: t.sunk, marginLeft: 30 }} />
-            <View style={{ height: 22, borderRadius: 8, backgroundColor: t.sunk, marginLeft: 90 }} />
-            <View style={{ height: 12, borderRadius: 6, backgroundColor: t.sunk, marginRight: 40, marginTop: 6 }} />
+            <View style={{ height: 22, borderRadius: 8, backgroundColor: t.sunk, boxShadow: t.edge, marginLeft: 30 }} />
+            <View style={{ height: 22, borderRadius: 8, backgroundColor: t.sunk, boxShadow: t.edge, marginLeft: 90 }} />
+            <View style={{ height: 12, borderRadius: 6, backgroundColor: t.sunk, boxShadow: t.edge, marginRight: 40, marginTop: 6 }} />
           </Animated.View>
         </Glow>
       ))}
@@ -188,7 +188,7 @@ function Reader() {
           ItemSeparatorComponent={Gap}
           ListHeaderComponent={<View style={{ marginBottom: 12 }}><SurahHead surah={surah} card={card} /></View>}
           ListFooterComponent={
-            <Txt style={{ fontSize: 11.5, lineHeight: 17, color: t.t4, textAlign: 'center', marginTop: 10, paddingHorizontal: 12 }}>{ATTRIBUTION}</Txt>
+            <Txt style={{ fontSize: 11.5, lineHeight: 17, color: t.t4, textAlign: 'center', marginTop: 10, paddingHorizontal: 12 }}>{attributionFor(surah)}</Txt>
           }
           initialNumToRender={Math.min(Math.max(8, startAyah + 2), 30)}
           maxToRenderPerBatch={8}
@@ -217,7 +217,7 @@ function Reader() {
 
       <Sheet open={sheet} onClose={() => setSheet(false)}>
         <Txt style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.5 }}>Reading settings</Txt>
-        <View style={{ marginTop: 16, borderRadius: 24, backgroundColor: t.sheetc, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ marginTop: 16, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View>
             <Txt style={{ fontSize: 15, fontWeight: 700 }}>Arabic size</Txt>
             <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{fontSize} pt</Txt>
@@ -231,11 +231,11 @@ function Reader() {
             ))}
           </View>
         </View>
-        <View style={{ marginTop: 10, borderRadius: 24, backgroundColor: t.sheetc, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ marginTop: 10, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Txt style={{ fontSize: 15, fontWeight: 700 }}>Show translation</Txt>
           <Switch on={showTr} label="Show translation" onToggle={() => set({ showTr: !showTr })} />
         </View>
-        <View style={{ marginTop: 10, borderRadius: 24, backgroundColor: t.sheetc, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <View style={{ marginTop: 10, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 16, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <View style={{ flex: 1 }}>
             <Txt style={{ fontSize: 15, fontWeight: 700 }}>Urdu translation</Txt>
             <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>Show under every verse and hadith</Txt>
@@ -245,7 +245,7 @@ function Reader() {
         <View style={{ marginTop: 10 }}>
           <Seg labels={['Night', 'Midnight', 'Sepia']} value={rTheme} onChange={i => set({ rTheme: i })} height={44} radius={20} inner={16} bg={t.sheetc} size={14} />
         </View>
-        <Txt style={{ fontSize: 11.5, lineHeight: 17, color: t.t4, marginTop: 14, textAlign: 'center' }}>{ATTRIBUTION}</Txt>
+        <Txt style={{ fontSize: 11.5, lineHeight: 17, color: t.t4, marginTop: 14, textAlign: 'center' }}>{attributionFor(surah)}</Txt>
       </Sheet>
     </View>
   );

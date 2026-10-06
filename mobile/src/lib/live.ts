@@ -8,8 +8,8 @@ import { enqueueCircleContribution, pendingOp, rememberGoalIds, setAfterSignIn }
 
 /**
  * Live community data from Supabase (Ummah totals, community goals, feed, circles).
- * `on` is true only while signed in and the last refresh succeeded; otherwise screens fall back
- * to the bundled sample data, so the Community tab looks the same offline.
+ * `on` is true only while signed in and the last refresh succeeded; otherwise screens show
+ * an invitation to sign in / reconnect — never made-up numbers.
  */
 export type LiveGoal = {
   id: string; name: string; total: number; target: number; people: number;
@@ -23,9 +23,11 @@ type Live = {
   ummah: { today: number; hour: number; now: number } | null;
   feed: LiveFeedItem[] | null;
   members: Record<string, LiveMember[]>;
+  /** Dhikr counted in each of the last 12 hours, oldest first (null until the server provides it). */
+  hours: number[] | null;
 };
 
-let live: Live = { on: false, goals: {}, ummah: null, feed: null, members: {} };
+let live: Live = { on: false, goals: {}, ummah: null, feed: null, members: {}, hours: null };
 const ls = new Set<() => void>();
 const put = (p: Partial<Live>) => { live = { ...live, ...p }; ls.forEach(l => l()); };
 const sub = (l: () => void) => { ls.add(l); return () => { ls.delete(l); }; };
@@ -102,7 +104,7 @@ export async function refreshCircles() {
   await applyCircles((data || []) as CircleRow[]);
 }
 
-/** Pull everything the Community tab shows. Failures leave `on` false (sample fallback). */
+/** Pull everything the Community tab shows. Failures leave `on` false. */
 export async function refreshLive() {
   if (!liveOn()) { put({ on: false }); return; }
   const db = supabase!;
@@ -132,6 +134,7 @@ export async function refreshLive() {
     const s0 = st.data as { today: number; this_hour: number; people_now: number };
 
     put({ on: true, goals: g, feed: fi, ummah: { today: Number(s0.today), hour: Number(s0.this_hour), now: Number(s0.people_now) } });
+    refreshHours().catch(() => {});
 
     // Mirror server state into the local store (without echoing it back as changes);
     // anything still waiting in the outbox wins over the server copy.
@@ -148,6 +151,13 @@ export async function refreshLive() {
     put({ on: false });
   }
 }
+/** Hourly Ummah totals (migration 0024). Older backends without the RPC simply show no chart. */
+async function refreshHours() {
+  const { data, error } = await supabase!.rpc('get_ummah_hourly', { p_hours: 12 });
+  if (error || !Array.isArray(data)) { put({ hours: null }); return; }
+  put({ hours: (data as { count: number | string }[]).map(r => Number(r.count) || 0) });
+}
+
 setAfterSignIn(() => { refreshLive().catch(() => {}); });
 
 /** Refresh on mount and every 30 s while a community screen is open. */
@@ -161,7 +171,7 @@ export function useLiveRefresh() {
 
 /** Restore the on-device circles and drop live data (sign out). */
 export async function resetLive() {
-  put({ on: false, goals: {}, ummah: null, feed: null, members: {} });
+  put({ on: false, goals: {}, ummah: null, feed: null, members: {}, hours: null });
   try {
     const raw = await AsyncStorage.getItem(LOCAL_CIRCLES_KEY);
     await AsyncStorage.removeItem(LOCAL_CIRCLES_KEY);

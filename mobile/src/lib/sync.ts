@@ -125,7 +125,7 @@ const stamp = (k: string, at = Date.now()) => { stamps[k] = at; persistSoon(); }
 // ---------------------------------------------------------------------------------------------
 const PROFILE_KEYS: (keyof AppState)[] = [
   'name', 'city', 'method', 'hanafi', 'privacy', 'theme', 'adhan', 'sound', 'vib', 'notifs', 'wakeVerify',
-  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh',
+  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes',
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 
@@ -452,6 +452,8 @@ export async function pullAndMerge() {
         id, name: r.title, target: r.target, prog: r.progress, streak: r.streak ?? 0, remind: r.remind ?? '8:00 pm',
         week: Array.isArray(r.week) && r.week.length === 7 ? r.week : [0, 0, 0, 0, 0, 0, 0], cg: r.cg_name ?? null,
         ...(r.sched ? { sched: r.sched } : {}),
+        // Day bookkeeping lives on the device; the server copy has no history.
+        ...(local ? { day: local.day, hist: local.hist } : {}),
       };
       const i = nextGoals.findIndex(x => x.id === id);
       if (i >= 0) nextGoals[i] = g; else nextGoals.push(g);

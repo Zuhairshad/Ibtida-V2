@@ -6,7 +6,10 @@ import { Icon, MosqueLogo, type IconName } from '../../../components/Icon';
 import { InsightSheet } from '../../../components/InsightSheet';
 import { Breathe, FadeIn, PulseDot, Stars, useCountUp } from '../../../components/motion';
 import { buzz, IconBtn, PillShortcut, say, SerifTitle, Tap, Txt, UrduToggle } from '../../../components/ui';
-import { fmt, HADITH, IMPACT_TARGET, PH, type PrayerName } from '../../../data/content';
+import { HourBars } from '../../../components/community';
+import { adhkarCat, catMinutes } from '../../../data/adhkar';
+import { fmt, HADITH, MILESTONES, PH, type PrayerName } from '../../../data/content';
+import { useLive } from '../../../lib/live';
 import { SURAHS, surahPct } from '../../../data/surahs';
 import { firstName, fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hooks';
 import { DOW, fmtTime, hijri, MON, qibla } from '../../../lib/prayer';
@@ -27,16 +30,22 @@ export default function Home() {
   const ins = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const cardW = Math.min(width - 49, 420);
-  const { now, next } = usePrayerNow();
+  const { now, next, times } = usePrayerNow();
   const city = useApp(s => s.city);
   const streak = useApp(s => s.streak);
   const qLast = useApp(s => s.qLast);
+  const intents = useApp(s => s.intents);
   const [day, setDay] = useState(0);
   const [phase, setPhase] = useState<PrayerName | null>(null);
   const [car, setCar] = useState(0);
   const [had, setHad] = useState(0);
   const [insight, setInsight] = useState(false);
-  const impact = useCountUp(IMPACT_TARGET);
+  const ummah = useLive(l => (l.on ? l.ummah : null));
+  const hours = useLive(l => (l.on ? l.hours : null));
+  const impact = useCountUp(ummah ? ummah.today : 0);
+  const nowCat = adhkarCat(now >= times.Isha || now < times.Fajr ? 'Before Sleep' : now >= times.Asr ? 'Evening' : 'Morning');
+  const earned = [...MILESTONES].reverse().find(m => streak >= m[2]);
+  const nextMs = MILESTONES.find(m => streak < m[2]);
   const [urOn, urFlip] = useUrdu('had' + had);
   const q = qibla(city);
 
@@ -52,10 +61,12 @@ export default function Home() {
 
   const quick: { title: string; sub: string; icon: IconName; tint: string; ink: string; go: () => void }[] = [
     { title: 'Prayer times', sub: `${next.name} at ${fmtTime(next.at)}`, icon: 'prayer', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
-    { title: 'Daily adhkar', sub: 'Evening · 8 min', icon: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: 'Evening' } }) },
+    { title: 'Daily adhkar', sub: `${nowCat.k} · ${catMinutes(nowCat)} min`, icon: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: nowCat.k } }) },
     { title: 'Quran', sub: qLast ? `${SURAHS[qLast.s - 1].name} · ${surahPct(qLast.s, qLast.a)}%` : 'Start reading', icon: 'book', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
     { title: 'Ibadah Lock', sub: 'Focus while you recite', icon: 'lock', tint: t.tLav, ink: t.lav, go: () => router.push('/focus-setup') },
   ];
+  // Same order as the onboarding intents (prayer, adhkar, Quran, focus): picked ones come first.
+  const ordered = quick.map((q, i) => ({ q, i })).sort((a, b) => Number(!!intents[b.i]) - Number(!!intents[a.i]) || a.i - b.i).map(x => x.q);
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
@@ -83,7 +94,7 @@ export default function Home() {
             if (i !== 0) { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i); say(`Showing times for ${DOW[d.getDay()][0]}${DOW[d.getDay()].slice(1).toLowerCase()} ${d.getDate()}`); }
           }} />
           <Tap onPress={() => router.push('/adhkar/progress')} accessibilityLabel="Calendar and progress"
-            style={{ width: 64, flex: 1, maxWidth: 64, borderRadius: 30, backgroundColor: t.sunk, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            style={{ width: 64, flex: 1, maxWidth: 64, borderRadius: 30, backgroundColor: t.sunk, boxShadow: t.edge, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             <Icon name="cal" color={t.tx} />
             <Txt style={{ fontSize: 11.5, fontWeight: 600, color: t.t2 }}>{MON[now.getMonth()]}</Txt>
           </Tap>
@@ -156,7 +167,9 @@ export default function Home() {
                   <Txt style={{ fontSize: 54, fontWeight: 800, letterSpacing: -1.6, lineHeight: 58, color: '#FFFFFF' }}>{streak}</Txt>
                   <Txt style={{ fontSize: 17, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginTop: 14 }}>day streak</Txt>
                 </View>
-                <Txt style={{ fontSize: 15, lineHeight: 22.5, color: 'rgba(255,255,255,0.88)', marginTop: 12 }}>7-Day Warrior earned. {Math.max(0, 14 - streak)} more days to reach 2-Week Steadfast.</Txt>
+                <Txt style={{ fontSize: 15, lineHeight: 22.5, color: 'rgba(255,255,255,0.88)', marginTop: 12 }}>
+                  {streak === 0 ? 'Log a prayer or a dhikr today to start your streak.' : `${earned ? `${earned[1]} earned. ` : ''}${nextMs ? `${nextMs[2] - streak} more ${nextMs[2] - streak === 1 ? 'day' : 'days'} to reach ${nextMs[1]}.` : 'Every milestone reached — keep going.'}`}
+                </Txt>
                 <View style={{ alignSelf: 'flex-start', marginTop: 16, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.18)' }}>
                   <Txt style={{ fontSize: 13.5, fontWeight: 700, color: '#FFFFFF' }}>Open insight</Txt>
                 </View>
@@ -169,13 +182,18 @@ export default function Home() {
               <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.8)' }}>THE UMMAH TODAY</Txt>
               <Txt style={{ fontSize: 18, fontWeight: 700, marginTop: 3, color: '#FFFFFF' }}>Community impact</Txt>
               <View style={{ position: 'absolute', left: 24, right: 24, bottom: 28 }}>
-                <Txt style={{ fontSize: 46, fontWeight: 800, letterSpacing: -1.4, lineHeight: 50, color: '#FFFFFF' }}>{fmt(impact)}</Txt>
-                <Txt style={{ fontSize: 15, color: 'rgba(255,255,255,0.88)', marginTop: 10 }}>dhikr counted today · +18,421 this hour</Txt>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5, height: 56, marginTop: 18 }}>
-                  {[30, 42, 38, 55, 48, 62, 58, 70, 66, 80, 76, 94].map((hh, i) => (
-                    <View key={i} style={{ flex: 1, borderRadius: 4, height: `${hh}%`, backgroundColor: `rgba(255,255,255,${(0.3 + i * 0.05).toFixed(2)})` }} />
-                  ))}
-                </View>
+                {ummah ? (
+                  <>
+                    <Txt style={{ fontSize: 46, fontWeight: 800, letterSpacing: -1.4, lineHeight: 50, color: '#FFFFFF' }}>{fmt(impact)}</Txt>
+                    <Txt style={{ fontSize: 15, color: 'rgba(255,255,255,0.88)', marginTop: 10 }}>dhikr counted today · {ummah.hour > 0 ? `+${fmt(ummah.hour)} this hour` : 'be the first this hour'}</Txt>
+                    {hours && <HourBars hours={hours} />}
+                  </>
+                ) : (
+                  <>
+                    <Txt style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.6, lineHeight: 32, color: '#FFFFFF' }}>Count together with the Ummah</Txt>
+                    <Txt style={{ fontSize: 15, lineHeight: 22, color: 'rgba(255,255,255,0.88)', marginTop: 10 }}>Sign in and connect to see today’s live total.</Txt>
+                  </>
+                )}
               </View>
             </Tap>
           </ScrollView>
@@ -185,9 +203,9 @@ export default function Home() {
         </FadeIn>
 
         <FadeIn delay={220} style={{ paddingTop: 22, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-          {quick.map(qk => (
+          {ordered.map(qk => (
             <Tap key={qk.title} scale={0.96} onPress={() => { buzz(6); qk.go(); }}
-              style={{ width: (width - 42) / 2, borderRadius: 28, backgroundColor: t.card, padding: 18 }}>
+              style={{ width: (width - 42) / 2, borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}>
               <View style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: qk.tint, alignItems: 'center', justifyContent: 'center' }}>
                 <Icon name={qk.icon} color={qk.ink} />
               </View>
@@ -198,7 +216,7 @@ export default function Home() {
         </FadeIn>
 
         <FadeIn delay={260} style={{ paddingTop: 22, paddingHorizontal: 16 }}>
-          <View style={{ borderRadius: 30, backgroundColor: t.card, padding: 22, overflow: 'hidden' }}>
+          <View style={{ borderRadius: 30, backgroundColor: t.card, boxShadow: t.edge, padding: 22, overflow: 'hidden' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: t.t2 }}>HADITH OF THE MOMENT</Txt>
               <View style={{ flexDirection: 'row', gap: 5 }}>

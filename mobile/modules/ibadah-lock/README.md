@@ -14,6 +14,9 @@ in Expo Go the module is missing and every call is a no-op.
 | `start({ packages, endsAt, returnUrl? })` | persists the session, returns `{ packages, shielding }` | `{ packages: [], shielding: false }` |
 | `stop()` | clears the session | no-op |
 | `getSession()` | running session `{ packages, endsAt, startedAt, blocked }` or `null` | `null` |
+| `setSchedule(windows, returnUrl?)` | persists recurring windows `{ id, start, duration, days, enabled }` | `false` |
+| `getActiveWindow()` | running window `{ id, startsAt, endsAt, blocked }` or `null` | `null` |
+| `skipWindow(until)` | emergency unlock: the current window stops locking until `until` | no-op |
 | `onBlockedAttempt(fn)` | `{ packageName, count, at }` per intercepted launch | subscription that never fires |
 
 `endsAt` is epoch ms or `null` ("until goal completed"). `returnUrl` defaults to
@@ -38,6 +41,15 @@ in Expo Go the module is missing and every call is a no-op.
 - These are never blocked, whatever JS passes: Ibtida itself, System UI, Settings, the default
   dialer and default SMS app (resolved at runtime), and a fixed list of phone, in-call, emergency,
   cell-broadcast and messaging packages (`Exempt` in `LockSession.kt`).
+
+- **Scheduled windows** (`LockSchedule.kt`, SharedPreferences `ibadah_lock_schedule`): `start` is
+  minutes after local midnight, `duration` minutes (max 12 h), `days` a Monday-first bitmask for the
+  day the window opens (a window may run past midnight). The service evaluates the schedule on each
+  window event, so no alarms are needed and it works with Ibtida closed. During a window it locks
+  **every** app except Ibtida, `Exempt`, the default home screen, the default keyboard, the clock
+  and permission/installer dialogs, and opens `ibtida://lock-scheduled`. While any window is
+  enabled the service listens to all packages (package names only); with none, it goes back to
+  Ibtida's package or the session's apps. `skipWindow(until)` is the emergency unlock.
 
 Known limits: picture-in-picture windows (for example YouTube PiP) don't raise a window-state
 event, so they aren't intercepted. The user can switch the service off in Settings at any time

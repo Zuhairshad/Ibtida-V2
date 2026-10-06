@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { BackBar, buzz, Chips, Cta, H1, Option, Page, say, Seg, Tap, Txt, useBack } from '../components/ui';
-import { COMMUNITY_GOALS, fmt, GOAL_PRESETS, participantsLabel } from '../data/content';
-import { set } from '../state/store';
+import { useCommunityGoals } from '../components/community';
+import { fmt, GOAL_PRESETS, participantsLabel } from '../data/content';
+import { set, todayKey } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
 
@@ -17,9 +18,10 @@ export default function GoalNew() {
   const [preset, setPreset] = useState(0);
   const [target, setTarget] = useState(100);
   const [freq, setFreq] = useState(0);
+  const cgs = useCommunityGoals();
   const create = () => {
     const name = GOAL_PRESETS[preset][0];
-    const g = { id: Date.now(), name, target, prog: 0, streak: 0, remind: '8:00 pm', week: [0, 0, 0, 0, 0, 0, 0], cg: mode === 1 ? COMMUNITY_GOALS[cg].name : null, days: FREQ_DAYS[freq] };
+    const g = { id: Date.now(), name, target, prog: 0, streak: 0, remind: '8:00 pm', week: [0, 0, 0, 0, 0, 0, 0], cg: mode === 1 ? cgs[cg].name : null, days: FREQ_DAYS[freq], day: todayKey(), hist: [] };
     buzz([10, 30, 16]);
     set(s => ({ goals: s.goals.concat([g]) }));
     say('Goal created · ' + name);
@@ -35,11 +37,11 @@ export default function GoalNew() {
         </View>
         {mode === 1 && (
           <View style={{ paddingTop: 12, paddingHorizontal: 22, gap: 8 }}>
-            {COMMUNITY_GOALS.map((c, i) => (
+            {cgs.map((c, i) => (
               <Tap key={c.name} scale={0.985} onPress={() => setCg(i)} accessibilityRole="radio" accessibilityState={{ checked: cg === i }}
-                style={{ borderRadius: 22, backgroundColor: t.opt, paddingVertical: 14, paddingHorizontal: 16, boxShadow: cg === i ? FIXED.sel : undefined }}>
+                style={{ borderRadius: 22, backgroundColor: t.opt, paddingVertical: 14, paddingHorizontal: 16, boxShadow: cg === i ? FIXED.sel : t.edge }}>
                 <Txt style={{ fontSize: 15, fontWeight: 700 }}>{c.name}</Txt>
-                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{participantsLabel(c.people)} · {Math.round((c.done / c.total) * 100)}% complete</Txt>
+                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{c.live ? `${participantsLabel(c.people)} · ${Math.round((c.done / c.total) * 100)}% complete` : `Target ${fmt(c.total)} · live progress when signed in`}</Txt>
               </Tap>
             ))}
           </View>
@@ -48,7 +50,7 @@ export default function GoalNew() {
           {GOAL_PRESETS.map(([name, ar], i) => <Option key={name} title={name} ar={ar} on={preset === i} onPress={() => setPreset(i)} />)}
         </View>
         <View style={{ paddingTop: 16, paddingHorizontal: 22 }}>
-          <View style={{ borderRadius: 22, backgroundColor: t.opt, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View style={{ borderRadius: 22, backgroundColor: t.opt, boxShadow: t.edge, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <View>
               <Txt style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: 0.92, color: t.t2 }}>DAILY TARGET</Txt>
               <Txt style={{ fontSize: 24, fontWeight: 800, marginTop: 4 }}>{target}</Txt>

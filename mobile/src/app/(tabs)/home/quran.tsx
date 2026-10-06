@@ -75,7 +75,7 @@ export default function Quran() {
         </Tap>
       </View>
       <View style={{ paddingTop: 12, paddingHorizontal: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 16, borderRadius: 26, backgroundColor: t.card }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 16, borderRadius: 26, backgroundColor: t.card, boxShadow: t.edge }}>
           <Icon name="search" color={t.t4} />
           <TextInput value={q} onChangeText={v => { setQ(v); if (v) setTab(0); }} placeholder="Search surah name or number" placeholderTextColor={t.t4} accessibilityLabel="Search surahs"
             style={{ outlineWidth: 0, flex: 1, color: t.txw, fontSize: 15, fontFamily: 'PlusJakartaSans_400Regular' }} />
@@ -87,7 +87,7 @@ export default function Quran() {
       <View style={{ paddingTop: 10, paddingHorizontal: 16, gap: 8 }}>
         {rows.map(r => (
           <Tap key={r.key} scale={0.985} onPress={() => open(r.s, r.a)} accessibilityLabel={r.label}
-            style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: t.ctl, alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 14, fontWeight: 800, color: t.acc }}>{r.n}</Txt>
             </View>
@@ -104,7 +104,7 @@ export default function Quran() {
           </Tap>
         ))}
         {rows.length === 0 && (
-          <View style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 28, paddingHorizontal: 20, alignItems: 'center' }}>
+          <View style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 28, paddingHorizontal: 20, alignItems: 'center' }}>
             <Txt style={{ fontSize: 16, fontWeight: 700 }}>{tab === 2 ? 'Nothing read yet' : 'No matches'}</Txt>
             <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6 }}>{tab === 2 ? 'Surahs you open will appear here.' : 'Try a surah number, like 18.'}</Txt>
           </View>

@@ -30,7 +30,7 @@ export default function Welcome() {
             </View>
           ))}
         </View>
-        <Cta label="Begin with Bismillah" style={{ marginTop: 26 }} onPress={() => router.push('/intent')} />
+        <Cta label="Begin with Bismillah" style={{ marginTop: 26 }} onPress={() => router.push('/name')} />
         <Pressable onPress={() => router.push({ pathname: '/auth', params: { mode: 'in' } })} accessibilityRole="button" style={{ height: 44, marginTop: 6, alignItems: 'center', justifyContent: 'center' }}>
           <Txt style={{ fontSize: 14.5, fontWeight: 600, color: t.t3 }}>I already have an account</Txt>
         </Pressable>

@@ -36,14 +36,16 @@ export default function Profile() {
     <Screen>
       <FadeIn style={{ paddingHorizontal: 22 }}><SerifTitle a="Your" b="Path" /></FadeIn>
       <FadeIn delay={40} style={{ paddingTop: 18, paddingHorizontal: 16 }}>
-        <View style={{ borderRadius: 32, backgroundColor: t.card, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <View style={{ borderRadius: 32, backgroundColor: t.card, boxShadow: t.edge, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <Ring size={84} r={38} stroke={5} pct={pct / 100} track={t.ctl3} color={t.acc}>
             <View style={{ width: 64, height: 64, borderRadius: 32, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 22, fontWeight: 800, color: FIXED.ink }}>{initials(s.name)}</Txt>
             </View>
           </Ring>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Txt style={{ fontSize: 21, fontWeight: 800 }}>{s.name}</Txt>
+            <Tap onPress={() => router.push({ pathname: '/name', params: { edit: '1' } })} accessibilityRole="button" accessibilityLabel={s.name ? `Edit name, ${s.name}` : 'Add your name'}>
+              <Txt style={{ fontSize: 21, fontWeight: 800, color: s.name ? t.tx : t.acc }}>{s.name || 'Add your name'}</Txt>
+            </Tap>
             <Txt style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>{pct}% prayer consistency · 7 days</Txt>
             <View style={{ alignSelf: 'flex-start', marginTop: 9, paddingVertical: 6, paddingHorizontal: 10, borderRadius: 11, backgroundColor: t.ctl }}>
               <Txt style={{ fontSize: 12, fontWeight: 700, color: t.t5 }}>{METHODS[s.method].k} · {s.hanafi ? 'Hanafi' : 'Standard'}</Txt>
@@ -52,15 +54,15 @@ export default function Profile() {
         </View>
       </FadeIn>
       <View style={{ paddingTop: 10, paddingHorizontal: 16, flexDirection: 'row', gap: 8 }}>
-        {[[s.goals.length, 'Goals'], [marks + 13, 'Bookmarks'], [s.circles.length, 'Circles'], [s.streak, 'Streak']].map(([v, l]) => (
-          <View key={l} style={{ flex: 1, borderRadius: 22, backgroundColor: t.card, paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center' }}>
+        {[[s.goals.length, 'Goals'], [marks, 'Bookmarks'], [s.circles.length, 'Circles'], [s.streak, 'Streak']].map(([v, l]) => (
+          <View key={l} style={{ flex: 1, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center' }}>
             <Txt style={{ fontSize: 22, fontWeight: 800 }}>{v}</Txt>
             <Txt style={{ fontSize: 11.5, color: t.t2, marginTop: 4 }}>{l}</Txt>
           </View>
         ))}
       </View>
       <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
-        <View style={{ borderRadius: 28, backgroundColor: t.card, paddingVertical: 12, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <View style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 12, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
           <Txt style={{ fontSize: 15.5, fontWeight: 600 }}>Appearance</Txt>
           <View style={{ width: 210 }}>
             <Seg labels={['Dark', 'Light', 'Auto']} value={THEMES.indexOf(s.theme)} onChange={i => set({ theme: THEMES[i] })} height={36} radius={18} inner={14} size={13} gap={3} />

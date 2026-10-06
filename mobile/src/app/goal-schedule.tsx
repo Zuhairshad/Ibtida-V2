@@ -47,14 +47,14 @@ export default function GoalSchedule() {
           return (
             <Tap key={d} scale={0.9} accessibilityLabel={d} accessibilityState={{ selected: on }}
               onPress={() => { buzz(5); const days = s.days.slice(); days[i] = on ? 0 : 1; put({ days }); }}
-              style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? t.cta : t.opt, alignItems: 'center', justifyContent: 'center' }}>
+              style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: on ? t.cta : t.opt, boxShadow: on ? undefined : t.edge, alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 14, fontWeight: 700, color: on ? t.ctaInk : t.t2 }}>{d[0]}</Txt>
             </Tap>
           );
         })}
       </View>
       <Tap onPress={() => { buzz([20, 80, 20]); previewReminder(); }}
-        style={{ marginTop: 18, marginHorizontal: 22, height: 52, borderRadius: 26, backgroundColor: t.card, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        style={{ marginTop: 18, marginHorizontal: 22, height: 52, borderRadius: 26, backgroundColor: t.card, boxShadow: t.edge, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
         <Icon name="bell" color={t.acc} />
         <Txt style={{ fontSize: 14.5, fontWeight: 700 }}>Preview reminder tone</Txt>
       </Tap>

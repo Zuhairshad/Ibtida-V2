@@ -64,6 +64,29 @@ class IbadahLockModule : Module() {
       )
     }
 
+    /** Replaces the recurring lock windows (JSON array of { id, start, duration, days, enabled }). */
+    AsyncFunction("setSchedule") { json: String, returnUrl: String? ->
+      val ctx = context
+      LockSchedule.save(ctx, json, returnUrl)
+      IbadahLockAccessibilityService.refresh()
+      LockSchedule.hasEnabled(ctx) && isLockServiceEnabled(ctx)
+    }
+
+    /** The scheduled window running now, or null. */
+    Function("getActiveWindow") {
+      val ctx = context
+      val w = LockSchedule.active(ctx, System.currentTimeMillis())
+      val result: Map<String, Any?>? = w?.let {
+        mapOf("id" to it.first, "startsAt" to it.second.toDouble(), "endsAt" to it.third.toDouble(), "blocked" to LockSchedule.blocked(ctx, it.second))
+      }
+      result
+    }
+
+    /** Emergency unlock for the running window: apps open normally until [until] (epoch ms). */
+    AsyncFunction("skipWindow") { until: Double ->
+      LockSchedule.skipUntil(context, until.toLong())
+    }
+
     AsyncFunction("stop") {
       val ctx = context
       LockSession.clear(ctx)

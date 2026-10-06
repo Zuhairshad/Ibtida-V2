@@ -31,25 +31,33 @@ class IbadahLockAccessibilityService : AccessibilityService() {
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
     val pkg = event.packageName?.toString() ?: return
-    val session = LockSession.read(this)
-    if (!session.active) return
+    if (pkg == packageName) return
     val now = System.currentTimeMillis()
-    if (session.isExpired(now)) {
+
+    // 1. A session started from the app: locks the chosen apps.
+    val session = LockSession.read(this)
+    if (session.active && session.isExpired(now)) {
       LockSession.clear(this)
       applySession(LockSession.read(this))
+    } else if (session.active && pkg in session.packages && !Exempt.isExempt(this, pkg)) {
+      returnToIbtida(session.returnUrl)
+      if (countOnce(pkg, now)) IbadahLockModule.notifyBlocked(pkg, LockSession.incrementBlocked(this), now)
       return
     }
-    if (pkg !in session.packages || Exempt.isExempt(this, pkg)) return
 
-    returnToIbtida(session.returnUrl)
+    // 2. A scheduled window: locks every app except the essentials.
+    val window = LockSchedule.active(this, now) ?: return
+    if (LockSchedule.isAllowed(this, pkg)) return
+    returnToIbtida(LockSchedule.returnUrl(this))
+    if (countOnce(pkg, now)) IbadahLockModule.notifyBlocked(pkg, LockSchedule.incrementBlocked(this, window.second), now)
+  }
 
-    // One app launch fires several window events; count it as one attempt.
-    if (pkg != lastCountedPkg || now - lastCountedAt > COUNT_DEBOUNCE_MS) {
-      lastCountedPkg = pkg
-      lastCountedAt = now
-      val count = LockSession.incrementBlocked(this)
-      IbadahLockModule.notifyBlocked(pkg, count, now)
-    }
+  /** One app launch fires several window events; count it as one attempt. */
+  private fun countOnce(pkg: String, now: Long): Boolean {
+    if (pkg == lastCountedPkg && now - lastCountedAt <= COUNT_DEBOUNCE_MS) return false
+    lastCountedPkg = pkg
+    lastCountedAt = now
+    return true
   }
 
   override fun onInterrupt() = Unit
@@ -88,10 +96,12 @@ class IbadahLockAccessibilityService : AccessibilityService() {
   private fun applySession(session: LockSession) {
     val info = serviceInfo ?: return
     info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-    info.packageNames = if (session.active && session.packages.isNotEmpty()) {
-      session.packages.toTypedArray()
-    } else {
-      arrayOf(packageName)
+    info.packageNames = when {
+      // Scheduled windows lock every app, so the service has to hear about every app opening
+      // (still only the package name — window content is never retrieved).
+      LockSchedule.hasEnabled(this) -> null
+      session.active && session.packages.isNotEmpty() -> session.packages.toTypedArray()
+      else -> arrayOf(packageName)
     }
     serviceInfo = info
   }
@@ -103,7 +113,7 @@ class IbadahLockAccessibilityService : AccessibilityService() {
     @Volatile
     private var instance: WeakReference<IbadahLockAccessibilityService>? = null
 
-    /** Called after JS starts or stops a session, if the service is currently running. */
+    /** Called after JS starts or stops a session or changes the schedule, if the service is running. */
     fun refresh() {
       val service = instance?.get() ?: return
       // Accessibility callbacks run on the main thread; keep serviceInfo updates there too.

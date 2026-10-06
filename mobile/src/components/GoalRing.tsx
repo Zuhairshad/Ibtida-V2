@@ -20,7 +20,7 @@ export function GoalCard({ g, onPress }: { g: Goal; onPress: () => void }) {
   const t = useT();
   return (
     <Tap scale={0.985} onPress={onPress} accessibilityLabel={`${g.name}, ${goalPct(g)} percent, count now`}
-      style={{ borderRadius: 28, backgroundColor: t.card, padding: 18 }}>
+      style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <GoalRing g={g} />
         <View style={{ flex: 1, minWidth: 0 }}>

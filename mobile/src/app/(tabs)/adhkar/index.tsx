@@ -5,15 +5,18 @@ import { useWindowDimensions, View } from 'react-native';
 import { GoalCard } from '../../../components/GoalRing';
 import { FadeIn } from '../../../components/motion';
 import { Cta, IconBtn, PillShortcut, Screen, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
-import { CATS } from '../../../data/content';
-import { useApp } from '../../../state/store';
+import { ADHKAR, catMinutes } from '../../../data/adhkar';
+import { todayKey, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
+
+const NONE: Record<string, number[]> = {};
 
 export default function Adhkar() {
   const t = useT();
   const router = useRouter();
   const { width } = useWindowDimensions();
   const goals = useApp(s => s.goals);
+  const az = useApp(s => (s.az.day === todayKey() ? s.az.c : NONE));
   const [mode, setMode] = useState(0);
   const tileW = (width - 42) / 2;
   return (
@@ -31,9 +34,13 @@ export default function Adhkar() {
       </View>
       {mode === 0 ? (
         <View style={{ paddingTop: 14, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-          {CATS.map((c, i) => (
+          {ADHKAR.map((cat, i) => {
+            const counts = az[cat.k] || [];
+            const done = cat.items.reduce((a, d, k) => a + Math.min(counts[k] || 0, d.n) / d.n, 0);
+            const c = { k: cat.k, ar: cat.ar, bg: cat.bg, n: cat.items.length, m: catMinutes(cat), pct: Math.round((done / cat.items.length) * 100) };
+            return (
             <FadeIn key={c.k} delay={i * 40} dur={450}>
-              <Tap scale={0.96} onPress={() => router.push({ pathname: '/session', params: { cat: c.k } })} accessibilityLabel={`${c.k} adhkar, ${c.n} adhkar, ${c.m} minutes`}
+              <Tap scale={0.96} onPress={() => router.push({ pathname: '/session', params: { cat: c.k } })} accessibilityLabel={`${c.k} adhkar, ${c.n} adhkar, ${c.m} minutes, ${c.pct} percent done today`}
                 style={{ width: tileW, height: 176, borderRadius: 30, ...bgImage(c.bg), padding: 16, justifyContent: 'space-between', overflow: 'hidden' }}>
                 <Txt ar style={{ fontSize: 24, lineHeight: 31, textAlign: 'right', color: 'rgba(255,255,255,0.95)' }}>{c.ar}</Txt>
                 <View>
@@ -45,12 +52,13 @@ export default function Adhkar() {
                 </View>
               </Tap>
             </FadeIn>
-          ))}
+            );
+          })}
         </View>
       ) : (
         <View style={{ paddingTop: 14, paddingHorizontal: 16, gap: 10 }}>
           {goals.length === 0 && (
-            <View style={{ borderRadius: 28, backgroundColor: t.card, padding: 28, alignItems: 'center' }}>
+            <View style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 28, alignItems: 'center' }}>
               <Txt style={{ fontSize: 17, fontWeight: 700 }}>No goals yet</Txt>
               <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6 }}>Start with one small act of worship.</Txt>
             </View>
@@ -61,7 +69,7 @@ export default function Adhkar() {
             </FadeIn>
           ))}
           <Cta label={goals.length ? 'Manage all goals' : 'Create goal'} kind={goals.length ? 'secondary' : 'primary'} height={52} size={14.5}
-            color={goals.length ? t.tx : undefined} style={goals.length ? { backgroundColor: t.card } : undefined}
+            color={goals.length ? t.tx : undefined} style={goals.length ? { backgroundColor: t.card, boxShadow: t.edge } : undefined}
             onPress={() => router.push(goals.length ? '/adhkar/goals' : '/goal-new')} />
         </View>
       )}

@@ -12,14 +12,36 @@
  *
  * Offline-first: every surah is cached in AsyncStorage after its first successful load;
  * the cached copy is shown instantly and refreshed in the background when stale.
+ *
+ * Quran Foundation (Quran.com API): with EXPO_PUBLIC_QURAN_SOURCE=quran.foundation, surahs are
+ * loaded through the Supabase Edge Function `quran` (supabase/functions/quran), which holds the
+ * Quran Foundation client secret server-side. Any failure there falls back to AlQuran Cloud.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { isSurah, SURAHS, type Revelation, type SurahMeta } from '../data/surahs';
+import { supabaseKey, supabaseUrl } from './supabase';
 
 export const API_BASE = 'https://api.alquran.cloud/v1';
 export const EDITIONS = { ar: 'quran-uthmani', en: 'en.sahih', ur: 'ur.jalandhry' } as const;
 export const ATTRIBUTION = 'Arabic: Tanzil (Uthmani) · English: Saheeh International · Urdu: Jalandhry · via AlQuran Cloud';
+
+/** Quran Foundation translation resource ids → names shown in the credit line. */
+const QF_TRANSLATIONS: Record<number, string> = { 20: 'Saheeh International', 85: 'Abdel Haleem', 131: 'The Clear Quran', 234: 'Jalandhry' };
+
+/** Credit line for a loaded surah, naming the source it actually came from. */
+export function attributionFor(surah: Pick<Surah, 'source' | 'tr'> | null | undefined) {
+  if (surah?.source !== 'quran.foundation') return ATTRIBUTION;
+  const name = (id: number | null | undefined) => (id ? QF_TRANSLATIONS[id] ?? `translation ${id}` : null);
+  return ['Arabic: Quran.com (Uthmani)', name(surah.tr?.en) && `English: ${name(surah.tr?.en)}`, name(surah.tr?.ur) && `Urdu: ${name(surah.tr?.ur)}`, 'via Quran Foundation API']
+    .filter(Boolean).join(' · ');
+}
+
+/** The Quran Foundation proxy URL, when that source is switched on and Supabase is configured. */
+export function quranProxyUrl(): string | null {
+  if (process.env.EXPO_PUBLIC_QURAN_SOURCE !== 'quran.foundation' || !supabaseUrl || !supabaseKey) return null;
+  return `${supabaseUrl.replace(/\/$/, '')}/functions/v1/quran`;
+}
 
 const TIMEOUT_MS = 15000;
 /** A cached surah older than this is re-fetched in the background (still shown instantly). */
@@ -53,6 +75,10 @@ export type Surah = {
   /** Bismillah split off ayah 1, verbatim from the Arabic edition; null for 1 and 9. */
   bismillah: string | null;
   ayahs: Ayah[];
+  /** Where the text came from (missing on older cache entries = AlQuran Cloud / Tanzil). */
+  source?: 'alquran.cloud' | 'quran.foundation';
+  /** Quran Foundation translation ids used, for the credit line. */
+  tr?: { en: number | null; ur: number | null };
 };
 
 export type JuzAyah = { s: number; a: number; text: string };
@@ -71,6 +97,13 @@ export class QuranError extends Error {
 /* --------------------------------------------------------------- Network */
 
 async function getJson(path: string, opts: { timeoutMs?: number; signal?: AbortSignal } = {}): Promise<unknown> {
+  const body = await request(API_BASE + path, opts);
+  if (body.code !== undefined && body.code !== 200) throw new QuranError('http', `API code ${String(body.code)}`);
+  return body.data;
+}
+
+/** GET a JSON object with timeout and abort handling, mapping failures to QuranError kinds. */
+async function request(url: string, opts: { timeoutMs?: number; signal?: AbortSignal } = {}, headers: Record<string, string> = {}): Promise<Obj> {
   const ac = new AbortController();
   let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; ac.abort(); }, opts.timeoutMs ?? TIMEOUT_MS);
@@ -78,13 +111,12 @@ async function getJson(path: string, opts: { timeoutMs?: number; signal?: AbortS
   opts.signal?.addEventListener('abort', onAbort);
   try {
     if (opts.signal?.aborted) throw new QuranError('aborted');
-    const res = await fetch(API_BASE + path, { signal: ac.signal, headers: { Accept: 'application/json' } });
+    const res = await fetch(url, { signal: ac.signal, headers: { Accept: 'application/json', ...headers } });
     if (!res.ok) throw new QuranError('http', `HTTP ${res.status}`);
     let body: unknown;
     try { body = await res.json(); } catch { throw new QuranError('bad_response', 'Response was not JSON'); }
     if (!isObj(body)) throw new QuranError('bad_response', 'Unexpected body');
-    if (body.code !== undefined && body.code !== 200) throw new QuranError('http', `API code ${String(body.code)}`);
-    return body.data;
+    return body;
   } catch (e) {
     if (e instanceof QuranError) throw e;
     if (timedOut) throw new QuranError('timeout', 'Request timed out');
@@ -191,6 +223,34 @@ export function parseSurahEditions(data: unknown, n: number): Surah {
   };
 }
 
+/**
+ * Validates the Quran Foundation proxy response (supabase/functions/quran/core.ts `ProxySurah`).
+ * Its ayah 1 never contains the Bismillah; that comes separately, verbatim from verse 1:1.
+ */
+export function parseProxySurah(data: unknown, n: number): Surah {
+  if (!isSurah(n)) bad(`Invalid surah ${n}`);
+  const meta = SURAHS[n - 1];
+  if (!isObj(data) || data.source !== 'quran.foundation' || data.n !== n || !Array.isArray(data.ayahs)) return bad('Not a Quran Foundation surah');
+  if (data.ayahs.length !== meta.ayahs) bad(`Surah ${n}: expected ${meta.ayahs} ayahs, got ${data.ayahs.length}`);
+  const str = (x: unknown) => (typeof x === 'string' && x.trim() ? x : null);
+  const ayahs = data.ayahs.map((a, i) => {
+    if (!isObj(a) || a.n !== i + 1 || !str(a.ar)) return bad(`Ayah ${i + 1} malformed`);
+    return { n: i + 1, num: isInt(a.num) ? a.num : 0, juz: isInt(a.juz) ? a.juz : 0, page: isInt(a.page) ? a.page : 0, ar: a.ar as string, en: str(a.en), ur: str(a.ur) };
+  });
+  const tr = isObj(data.translations) ? data.translations : {};
+  return {
+    n,
+    name: meta.name,
+    arName: str(data.arName) ?? meta.ar,
+    place: data.revelation === 'madinah' ? 'Madinah' : data.revelation === 'makkah' ? 'Makkah' : meta.place,
+    count: meta.ayahs,
+    bismillah: n === 1 || n === 9 ? null : str(data.bismillah),
+    ayahs,
+    source: 'quran.foundation',
+    tr: { en: isInt(tr.en) ? tr.en : null, ur: isInt(tr.ur) ? tr.ur : null },
+  };
+}
+
 /** Validates `/meta` `data.surahs.references`. */
 export function parseMeta(data: unknown): SurahMeta[] {
   const refs = isObj(data) && isObj(data.surahs) ? data.surahs.references : undefined;
@@ -264,11 +324,25 @@ export async function clearQuranCache() {
 
 /* -------------------------------------------------------------- Fetchers */
 
-/** Fetches a surah (all three editions) from the network and caches it. */
+/**
+ * Fetches a surah (Arabic + English + Urdu) and caches it: from Quran Foundation when that source
+ * is on, falling back to AlQuran Cloud if it fails (e.g. a pre-production key without that surah).
+ */
 export async function fetchSurah(n: number, opts: { signal?: AbortSignal; timeoutMs?: number; now?: number } = {}): Promise<Surah> {
   if (!isSurah(n)) throw new QuranError('bad_response', `Invalid surah ${n}`);
-  const data = await getJson(`/surah/${n}/editions/${EDITIONS.ar},${EDITIONS.en},${EDITIONS.ur}`, opts);
-  const surah = parseSurahEditions(data, n);
+  let surah: Surah | null = null;
+  const proxy = quranProxyUrl();
+  if (proxy) {
+    try {
+      surah = parseProxySurah(await request(`${proxy}?surah=${n}`, opts, { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }), n);
+    } catch (e) {
+      if (e instanceof QuranError && e.kind === 'aborted') throw e;
+    }
+  }
+  if (!surah) {
+    const data = await getJson(`/surah/${n}/editions/${EDITIONS.ar},${EDITIONS.en},${EDITIONS.ur}`, opts);
+    surah = { ...parseSurahEditions(data, n), source: 'alquran.cloud' };
+  }
   await writeCachedSurah(surah, opts.now ?? Date.now());
   return surah;
 }

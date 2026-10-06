@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { Breathe, Stars, usePop } from '../components/motion';
 import { buzz, Ring, say, Tap, Txt, useBack } from '../components/ui';
-import { DHIKR, mmss } from '../data/content';
-import { getState, set, useApp } from '../state/store';
+import { DHIKR, GOAL_PRESETS, mmss } from '../data/content';
+import { addAct, countGoal, getState, rollDay, set, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 import { G, bgImage } from '../theme/tokens';
 
@@ -33,6 +33,9 @@ function Beads({ count }: { count: number }) {
   );
 }
 
+/** Arabic for a goal made from a preset; custom names show no Arabic. */
+const goalAr = (name: string) => GOAL_PRESETS.find(([n]) => n === name)?.[1] ?? '';
+
 function Tasbeeh() {
   const t = useT();
   const router = useRouter();
@@ -47,6 +50,7 @@ function Tasbeeh() {
   const [secs, setSecs] = useState(0);
   const [scale, pop] = usePop(0.97);
   useEffect(() => { const id = setInterval(() => setSecs(x => x + 1), 1000); return () => clearInterval(id); }, []);
+  useEffect(() => { rollDay(); }, []);
 
   const dh = DHIKR[dhIdx];
   const count = goal ? goal.prog : tasN;
@@ -56,8 +60,7 @@ function Tasbeeh() {
   const countOne = () => {
     pop();
     if (goal) {
-      const prog = goal.prog + 1;
-      set(s => ({ goals: s.goals.map(x => (x.id === goal.id ? { ...x, prog } : x)) }));
+      const prog = countGoal(goal.id, 1)?.prog ?? goal.prog + 1;
       // Celebrate once, when the target is reached; extra counts after that are just counted.
       if (prog === goal.target) {
         buzz([30, 60, 30, 60, 90]);
@@ -67,11 +70,11 @@ function Tasbeeh() {
     }
     const n = getState().tasN + 1;
     set({ tasN: n });
+    addAct('d', 1);
     if (n % dh.t === 0) { buzz([20, 40, 20, 40, 60]); say(`${dh.label} · round of ${dh.t} complete`); } else buzz(8);
   };
   const undo = () => {
-    if (goal) set(s => ({ goals: s.goals.map(x => (x.id === goal.id ? { ...x, prog: Math.max(0, x.prog - 1) } : x)) }));
-    else set(s => ({ tasN: Math.max(0, s.tasN - 1) }));
+    if (goal) { if (goal.prog > 0) countGoal(goal.id, -1); } else if (getState().tasN > 0) { set(s => ({ tasN: s.tasN - 1 })); addAct('d', -1); }
     buzz([40]);
     say('Undid one count');
   };
@@ -110,7 +113,7 @@ function Tasbeeh() {
           </View>
           <Beads count={count} />
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-            <Txt ar style={{ fontSize: 26, lineHeight: 44, color: t.gold }}>{goal ? 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ' : dh.ar}</Txt>
+            <Txt ar style={{ fontSize: 26, lineHeight: 44, color: t.gold }}>{goal ? goalAr(goal.name) : dh.ar}</Txt>
             <Txt style={{ fontSize: 78, fontWeight: 800, letterSpacing: -3, lineHeight: 82, marginTop: 2 }}>{count}</Txt>
             <Txt style={{ fontSize: 15, color: t.t2, marginTop: 4 }}>/ {target}</Txt>
           </View>

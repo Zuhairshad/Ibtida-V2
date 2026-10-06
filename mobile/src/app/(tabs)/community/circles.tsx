@@ -4,7 +4,7 @@ import { TextInput, View } from 'react-native';
 import { Icon } from '../../../components/Icon';
 import { BackBar, buzz, Cta, H1, Label, say, Screen, Tap, Txt } from '../../../components/ui';
 import { joinCircleLive, liveOn } from '../../../lib/live';
-import { set, useApp } from '../../../state/store';
+import { getState, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 
 export default function Circles() {
@@ -25,11 +25,9 @@ export default function Circles() {
         .finally(() => setBusy(false));
       return;
     }
-    const c = { id: Date.now(), name: 'Masjid youth circle', priv: 'Invite only', members: 23, code, role: 'Member' as const, goals: [{ name: 'Fajr in jama’ah', done: 120, total: 400 }] };
-    buzz([10, 30, 16]);
-    set(s => ({ circles: s.circles.concat([c]) }));
-    setCode('');
-    say('Joined ' + c.name);
+    // Invite codes are checked by the server, so joining needs an account and a connection.
+    if (!getState().signedIn) { say('Sign in to join a circle with its code'); router.push({ pathname: '/auth', params: { mode: 'in' } }); return; }
+    say('You’re offline — connect to join this circle');
   };
   return (
     <Screen top={54}>
@@ -47,7 +45,7 @@ export default function Circles() {
       <View style={{ paddingHorizontal: 16, gap: 8 }}>
         {circles.map(c => (
           <Tap key={c.id} scale={0.985} onPress={() => router.push(`/community/circle/${c.id}`)}
-            style={{ borderRadius: 24, backgroundColor: t.card, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Txt style={{ fontSize: 16, fontWeight: 700 }}>{c.name}</Txt>
               <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{c.members} members</Txt>

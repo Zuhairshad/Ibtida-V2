@@ -1,8 +1,10 @@
 import * as Notifications from 'expo-notifications';
+import { durLabel, rangeLabel, upcomingLocks } from './lockTimes';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import { PH, type PrayerName } from '../data/content';
+import { compose, durUr, ltr, PRAYER_UR, quoteFor, type Line, type QuoteKind } from '../data/reminders';
 import { getState, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
 import { addDays, dayKey, fmtTime, timesFor } from './prayer';
@@ -130,8 +132,10 @@ export async function enableNotifications(): Promise<boolean> {
 export async function previewReminder() {
   if (!NATIVE) { say('Previews need the mobile app'); return; }
   if (!(await enableNotifications())) return;
+  const s = getState();
+  const p = compose(s.notifLang ?? 'both', { en: 'Preview', ur: 'نمونہ' }, { en: 'This is how your reminders will look and sound.', ur: 'آپ کی یاد دہانیاں ایسی دکھائی اور سنائی دیں گی۔' }, s.notifQuotes === false ? null : quoteFor('goal', new Date()));
   await Notifications.scheduleNotificationAsync({
-    content: { title: 'Preview', body: 'This is how your goal reminders will sound.', sound: 'default' },
+    content: { title: p.title, body: p.body, sound: 'default' },
     trigger: Platform.OS === 'android' ? { channelId: CH.reminders } : null,
   });
 }
@@ -176,6 +180,10 @@ export function planNotifications(s: Store, now = new Date()): Planned[] {
   const out: Planned[] = [];
   const [prayerOn, adhkarOn, goalsOn, quranOn] = s.notifs;
   const short = s.city.name.split(',')[0];
+  const lang = s.notifLang ?? 'both';
+  /** Title and body in the user's language, with the day's hadith for this kind of reminder. */
+  const txt = (day: Date, kind: QuoteKind, title: Line, body: Line, salt = 0) =>
+    compose(lang, title, body, s.notifQuotes === false ? null : quoteFor(kind, day, salt));
   for (let d = 0; d <= HORIZON_DAYS; d++) {
     const day = addDays(now, d);
     const times = timesFor(s.city, day, s.method, s.hanafi);
@@ -191,36 +199,70 @@ export function planNotifications(s: Store, now = new Date()): Planned[] {
           if (w < t && t.getTime() - w.getTime() < 4 * 3600_000) wakeAt = w;
         }
         out.push({
-          at: wakeAt, kind: `wake.${p}.${key}`, title: `Wake for ${p}`, body: `${p} · ${fmtTime(t)} · scan your wudu station to stop`,
+          at: wakeAt, kind: `wake.${p}.${key}`,
+          ...txt(day, p === 'Fajr' ? 'fajr' : 'prayer',
+            { en: `Wake for ${p}`, ur: `${PRAYER_UR[p]} کے لیے اٹھیں` },
+            { en: `${p} · ${fmtTime(t)} · scan your wudu station to stop`, ur: `${PRAYER_UR[p]} · ${ltr(fmtTime(t))} · الارم بند کرنے کے لیے وضو کی جگہ اسکین کریں` }),
           url: '/wake-scan', channelId: CH.wake, sound: 'default', urgent: true,
         });
       } else if (prayerOn && s.adhan[p]) {
         out.push({
-          at: t, kind: `adhan.${p}.${key}`, title: `Time for ${p}`, body: `${p} · ${fmtTime(t)} · ${short}`,
+          at: t, kind: `adhan.${p}.${key}`,
+          ...txt(day, p === 'Fajr' ? 'fajr' : 'prayer',
+            { en: `Time for ${p}`, ur: `${PRAYER_UR[p]} کا وقت` },
+            { en: `${p} · ${fmtTime(t)} · ${short}`, ur: `${PRAYER_UR[p]} · ${ltr(fmtTime(t))} · ${ltr(short)}` }, i),
           url: '/prayer', channelId: CH.adhan(s.sound), sound: adhanSound(s.sound),
         });
       }
     });
 
     if (adhkarOn) {
-      out.push({ at: new Date(times.Fajr.getTime() + 10 * MIN), kind: `adhkar.am.${key}`, title: 'Morning adhkar', body: 'Your morning adhkar are ready.', url: '/adhkar', channelId: CH.reminders, sound: 'default' });
-      out.push({ at: new Date(times.Asr.getTime() + 10 * MIN), kind: `adhkar.pm.${key}`, title: 'Evening adhkar', body: 'Your evening adhkar are ready.', url: '/adhkar', channelId: CH.reminders, sound: 'default' });
+      out.push({
+        at: new Date(times.Fajr.getTime() + 10 * MIN), kind: `adhkar.am.${key}`,
+        ...txt(day, 'adhkar', { en: 'Morning adhkar', ur: 'صبح کے اذکار' }, { en: 'Your morning adhkar are ready.', ur: 'آپ کے صبح کے اذکار تیار ہیں۔' }),
+        url: '/session?cat=Morning', channelId: CH.reminders, sound: 'default',
+      });
+      out.push({
+        at: new Date(times.Asr.getTime() + 10 * MIN), kind: `adhkar.pm.${key}`,
+        ...txt(day, 'adhkar', { en: 'Evening adhkar', ur: 'شام کے اذکار' }, { en: 'Your evening adhkar are ready.', ur: 'آپ کے شام کے اذکار تیار ہیں۔' }, 1),
+        url: '/session?cat=Evening', channelId: CH.reminders, sound: 'default',
+      });
     }
     if (quranOn) {
-      out.push({ at: new Date(times.Fajr.getTime() + 20 * MIN), kind: `quran.${key}`, title: 'Quran', body: 'A few verses after Fajr?', url: '/home/quran', channelId: CH.reminders, sound: 'default' });
+      out.push({
+        at: new Date(times.Fajr.getTime() + 20 * MIN), kind: `quran.${key}`,
+        ...txt(day, 'quran', { en: 'Quran', ur: 'قرآن' }, { en: 'A few verses after Fajr?', ur: 'فجر کے بعد چند آیات کی تلاوت؟' }),
+        url: '/home/quran', channelId: CH.reminders, sound: 'default',
+      });
     }
     if (goalsOn) {
       for (const g of s.goals) {
         const t = goalTime(g, day, times.Fajr);
         if (!t) continue;
         out.push({
-          at: t, kind: `goal.${g.id}.${key}`, title: g.name, body: `Your ${g.target} for today · tap to begin.`,
+          at: t, kind: `goal.${g.id}.${key}`,
+          ...txt(day, 'goal', { en: g.name, ur: g.name }, { en: `Your ${g.target} for today · tap to begin.`, ur: `آج کا ہدف ${ltr(g.target)} · شروع کرنے کے لیے ٹیپ کریں۔` }, g.id),
           url: `/tasbeeh?goal=${g.id}`, channelId: CH.reminders, sound: 'default',
         });
       }
     }
-    // TODO(focus): notifs[4] — schedule "Ibadah Lock starts/ends" once lock sessions can be planned ahead.
     // TODO(community): notifs[5] — circle milestones arrive as push from the backend, not local schedules.
+  }
+  // Scheduled Ibadah Lock: a heads-up 5 minutes before each window, and when it begins.
+  if (s.notifs[4]) {
+    for (const u of upcomingLocks(s.locks || [], now, HORIZON_DAYS)) {
+      const k = `${u.lock.id}.${u.start.getTime()}`;
+      out.push({
+        at: new Date(u.start.getTime() - 5 * MIN), kind: `lock.soon.${k}`,
+        ...compose(lang, { en: 'Ibadah Lock in 5 minutes', ur: 'عبادت لاک 5 منٹ میں' }, { en: `Apps lock ${rangeLabel(u.lock)} · finish what you’re doing.`, ur: `ایپس ${ltr(rangeLabel(u.lock))} بند رہیں گی · اپنا کام مکمل کر لیں۔` }, null),
+        url: '/focus-setup', channelId: CH.reminders, sound: 'default',
+      });
+      out.push({
+        at: u.start, kind: `lock.start.${k}`,
+        ...txt(u.start, 'focus', { en: 'Ibadah time has begun', ur: 'عبادت کا وقت شروع ہو گیا' }, { en: `Apps are locked for ${durLabel(u.lock.dur)}. Spend this time with Allah.`, ur: `ایپس ${durUr(u.lock.dur)} کے لیے بند ہیں۔ یہ وقت اللہ کے ساتھ گزاریں۔` }),
+        url: '/lock-scheduled', channelId: CH.reminders, sound: 'default',
+      });
+    }
   }
   // Soonest first, then cap so the nearest reminders always fit iOS's pending limit.
   return out
@@ -288,6 +330,7 @@ function signature(s: Store) {
   return JSON.stringify([
     s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.notifs, s.wakeVerify, s.wake,
     s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days]),
+    s.locks, s.notifLang, s.notifQuotes,
   ]);
 }
 

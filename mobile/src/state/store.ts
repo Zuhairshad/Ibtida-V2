@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { AppState as RNAppState } from 'react-native';
-import { CITIES, type City, type PrayerName } from '../data/content';
+import { CITIES, PH, type City, type PrayerName } from '../data/content';
 import { isAyahRef } from '../data/surahs';
+import type { LockSched } from '../lib/lockTimes';
+import type { NotifLang } from '../data/reminders';
 
 /** Reminder time from the goal-schedule wheels: h indexes 1–12, m indexes 00/15/30/45, a 0=AM 1=PM, days Mon…Sun. */
 export type Sched = { h: number; m: number; a: number; days: number[] };
@@ -13,11 +15,15 @@ export type Goal = {
   sched?: Sched;
   /** Reminder days, Mon..Sun (1 = on). Missing means every day. */
   days?: number[];
+  /** Day key the current `prog` belongs to; progress starts again each day. */
+  day?: string;
+  /** Day keys on which the daily target was reached (newest last, capped). */
+  hist?: string[];
 };
 export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
   goals: { name: string; done: number; total: number; id?: string }[];
-  /** Server uuid when the circle comes from Supabase (signed in); absent for local sample circles. */
+  /** Server uuid when the circle comes from Supabase (signed in); absent for on-device circles. */
   remoteId?: string;
 };
 /** `blocked`: locked-app openings intercepted during that session (older records may lack it). */
@@ -26,8 +32,12 @@ export type PrayerLog = 'prayed' | 'missed';
 /** One verified two-stage wake scan. `date` is the local day key, `at` epoch ms. */
 export type WakeEntry = { date: string; at: number };
 export type ThemePref = 'dark' | 'light' | 'system';
+/** How each wake station is verified: its printed QR tag, or by recognising the item itself. */
+export type WakeMode = 'tag' | 'item';
 /** A reading position: surah, ayah and when it was reached (ms). */
 export type QPos = { s: number; a: number; at: number };
+/** One day of activity: dhikr counted, adhkar sessions completed, Quran ayahs newly read. */
+export type DayAct = { d: number; s: number; q: number };
 
 export type AppState = {
   hydrated: boolean;
@@ -37,6 +47,11 @@ export type AppState = {
   email: string;
   theme: ThemePref;
   intents: boolean[];
+  /**
+   * Onboarding choices the user actually made, so suggestions never overwrite them: a place was
+   * picked, the method was suggested for this place name, the wake time was set from real Fajr.
+   */
+  ob: { place: boolean; method: string; wake: boolean };
   city: City;
   method: number;
   hanafi: boolean;
@@ -58,6 +73,8 @@ export type AppState = {
   wakeVerify: boolean[];
   wakeLog: WakeEntry[];
   token: string;
+  /** W = wudu sink, M = prayer mat. */
+  wakeMode: { W: WakeMode; M: WakeMode };
   /** Quran bookmarks keyed "surah:ayah" (e.g. "2:183"). */
   marks: Record<string, boolean>;
   /** Last reading position in the Quran reader. */
@@ -71,18 +88,34 @@ export type AppState = {
   rTheme: number;
   emergencies: Emergency[];
   focus: { dur: number; goal: number; apps: boolean[] };
+  /** Adhkar reading: text size step (index into AZ_SIZES) and background (index into AZ_BGS). */
+  azSize: number;
+  azBg: number;
+  /** Notification language, and whether reminders carry a short hadith. */
+  notifLang: NotifLang;
+  notifQuotes: boolean;
+  /** Recurring Ibadah Lock windows (time, duration, days). */
+  locks: LockSched[];
+  /** Emergency unlock of a scheduled window: apps open normally until this epoch ms. */
+  lockSkip: number;
   sched: Sched;
+  /** Consecutive active days, derived from `act` and prayer logs (see `calcStreak`). */
   streak: number;
+  /** Activity per day key. */
+  act: Record<string, DayAct>;
+  /** Today's adhkar counts: category → per-item counts. */
+  az: { day: string; c: Record<string, number[]> };
 };
 
 const initial: AppState = {
   hydrated: false,
   onboarded: false,
   signedIn: false,
-  name: 'Yusuf Rahman',
+  name: '',
   email: '',
   theme: 'dark',
-  intents: [true, true, false, true],
+  intents: [false, false, false, false],
+  ob: { place: false, method: '', wake: false },
   city: CITIES[0],
   method: 0,
   hanafi: true,
@@ -91,26 +124,20 @@ const initial: AppState = {
   adhan: { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: false },
   sound: 0,
   vib: true,
-  goals: [
-    { id: 1, name: 'Durood Sharif', target: 100, prog: 33, streak: 9, remind: '8:00 pm', week: [1, 1, 1, 1, 0, 1, 1], cg: '1 Million Salawat' },
-    { id: 2, name: 'Istighfar', target: 100, prog: 100, streak: 12, remind: 'after Fajr', week: [1, 1, 1, 1, 1, 1, 1], cg: null },
-    { id: 3, name: 'SubhanAllahi wa bihamdihi', target: 100, prog: 40, streak: 4, remind: '7:30 am', week: [0, 1, 1, 0, 1, 1, 1], cg: null },
-  ],
+  goals: [],
   dh: 0,
-  tasN: 21,
-  joined: [true, false, false],
+  tasN: 0,
+  joined: [false, false, false],
   ameen: {},
   urdu: {},
   urduAll: true,
-  circles: [
-    { id: 1, name: 'Rahman family', priv: 'Private', members: 6, code: 'K7Q2M9XA', role: 'Owner', goals: [{ name: 'Fajr together · 30 days', done: 216, total: 300 }, { name: '10,000 Salawat', done: 6420, total: 10000 }] },
-    { id: 2, name: 'Thursday halaqa', priv: 'Invite only', members: 14, code: 'P3WZ8LNC', role: 'Member', goals: [{ name: 'One juz a week', done: 9, total: 20 }] },
-  ],
+  circles: [],
   privacy: [false, false, true, false, true, false],
   notifs: [true, true, true, false, true, false],
   wakeVerify: [true, false, false, false, false],
   wakeLog: [],
-  token: 'A7F2-KQ9M-3XPD',
+  token: '',
+  wakeMode: { W: 'tag', M: 'tag' },
   marks: {},
   qLast: null,
   qHist: [],
@@ -118,13 +145,18 @@ const initial: AppState = {
   fontSize: 30,
   showTr: true,
   rTheme: 0,
-  emergencies: [
-    { when: 'Thu 24 Sep · 9:42 pm', after: 'after 11 min', reason: 'Family call about travel plans', blocked: 2 },
-    { when: 'Sat 19 Sep · 6:15 am', after: 'after 4 min', reason: 'Needed directions to the masjid', blocked: 0 },
-  ],
+  emergencies: [],
   focus: { dur: 0, goal: 0, apps: [true, true, true, false, false, false] },
+  locks: [],
+  lockSkip: 0,
+  azSize: 1,
+  azBg: 0,
+  notifLang: 'both',
+  notifQuotes: true,
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },
-  streak: 9,
+  streak: 0,
+  act: {},
+  az: { day: '', c: {} },
 };
 
 type Listener = () => void;
@@ -173,12 +205,14 @@ export async function hydrate() {
     if (raw) {
       const saved = JSON.parse(raw) as Partial<AppState>;
       set({ ...saved, ...migrate(saved), hydrated: true });
+      rollDay();
       return;
     }
   } catch {
     // Corrupt storage falls back to defaults rather than blocking launch.
   }
-  set({ hydrated: true });
+  set({ hydrated: true, token: newToken() });
+  rollDay();
 }
 
 /** Writes that come from the server (pull/merge), so the sync layer does not echo them back. */
@@ -191,7 +225,7 @@ export function setFromRemote(patch: Partial<AppState> | ((s: AppState) => Parti
 
 export async function resetAll() {
   await AsyncStorage.removeItem(KEY).catch(() => {});
-  state = { ...initial, hydrated: true };
+  state = { ...initial, hydrated: true, token: newToken() };
   listeners.forEach(l => l());
 }
 
@@ -218,6 +252,13 @@ const isPos = (p: unknown): p is QPos =>
 
 function migrate(saved: Partial<AppState>): Partial<AppState> {
   return {
+    token: saved.token || newToken(),
+    locks: Array.isArray(saved.locks) ? saved.locks : [],
+    // Installs from before this field finished onboarding with their own choices.
+    ob: saved.ob ?? { place: true, method: saved.city?.name ?? '', wake: true },
+    wakeMode: saved.wakeMode && saved.wakeMode.W && saved.wakeMode.M ? saved.wakeMode : { W: 'tag', M: 'tag' },
+    act: saved.act && typeof saved.act === 'object' ? saved.act : {},
+    az: saved.az && typeof saved.az === 'object' && saved.az.c ? saved.az : { day: '', c: {} },
     marks: migrateMarks(saved.marks),
     qLast: isPos(saved.qLast) ? saved.qLast : null,
     qHist: Array.isArray(saved.qHist) ? saved.qHist.filter(isPos) : [],
@@ -232,6 +273,7 @@ export function recordReading(s: number, a: number, at = Date.now()) {
   if (!isAyahRef(s, a)) return;
   const cur = state.qLast;
   if (cur && cur.s === s && cur.a === a) return;
+  const firstTime = (state.qMax[String(s)] ?? 0) < a;
   set(st => {
     const pos = { s, a, at };
     const key = String(s);
@@ -241,6 +283,114 @@ export function recordReading(s: number, a: number, at = Date.now()) {
       qMax: (st.qMax[key] ?? 0) >= a ? st.qMax : { ...st.qMax, [key]: a },
     };
   });
+  // A newly reached ayah counts toward today's reading.
+  if (firstTime) addAct('q', 1);
 }
 
 export const markKey = (s: number, a: number) => `${s}:${a}`;
+
+/* ------------------------------------------------------------- Activity */
+
+const pad = (n: number) => String(n).padStart(2, '0');
+/** Local day key, e.g. "2026-10-06" (same format as `lib/prayer` dayKey). */
+export const todayKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const keyBack = (n: number, from = new Date()) => todayKey(new Date(from.getFullYear(), from.getMonth(), from.getDate() - n, 12));
+
+const TOKEN_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+/** A fresh wake-tag token, e.g. "A7F2-KQ9M-3XPD". */
+export function newToken() {
+  const part = () => Array.from({ length: 4 }, () => TOKEN_ABC[Math.floor(Math.random() * TOKEN_ABC.length)]).join('');
+  return `${part()}-${part()}-${part()}`;
+}
+
+const ACT_DAYS = 400;
+const isActive = (s: Pick<AppState, 'act' | 'logs'>, k: string) => {
+  const a = s.act[k];
+  if (a && (a.d > 0 || a.s > 0 || a.q > 0)) return true;
+  const l = s.logs[k];
+  return !!l && PH.some(p => l[p] === 'prayed');
+};
+
+/** Consecutive active days ending today (or yesterday, while today is still open). */
+export function calcStreak(s: Pick<AppState, 'act' | 'logs'>, now = new Date()) {
+  let i = isActive(s, keyBack(0, now)) ? 0 : 1;
+  let n = 0;
+  while (isActive(s, keyBack(i, now))) { n++; i++; }
+  return n;
+}
+
+/** Record activity for today: dhikr counted (`d`), adhkar sessions finished (`s`), ayahs read (`q`). */
+export function addAct(kind: keyof DayAct, n = 1) {
+  if (!n) return;
+  set(st => {
+    const k = todayKey();
+    const cur = st.act[k] || { d: 0, s: 0, q: 0 };
+    const act = { ...st.act, [k]: { ...cur, [kind]: Math.max(0, cur[kind] + n) } };
+    const keys = Object.keys(act);
+    if (keys.length > ACT_DAYS) keys.sort().slice(0, keys.length - ACT_DAYS).forEach(x => { delete act[x]; });
+    return { act, streak: calcStreak({ act, logs: st.logs }) };
+  });
+}
+
+/** Re-derive the streak after prayer logs change. */
+export function refreshStreak() {
+  const n = calcStreak(state);
+  if (n !== state.streak) set({ streak: n });
+}
+
+/* ---------------------------------------------------------------- Goals */
+
+const HIST_MAX = 120;
+
+/** Streak and Mon..Sun strip for a goal, from the days its target was met. */
+export function goalStats(g: Goal, now = new Date()) {
+  const today = todayKey(now);
+  const met = new Set(g.hist || []);
+  if (g.day === today && g.prog >= g.target) met.add(today);
+  let i = met.has(today) ? 0 : 1;
+  let streak = 0;
+  while (met.has(keyBack(i, now))) { streak++; i++; }
+  const dow = (now.getDay() + 6) % 7; // Monday = 0
+  const week = Array.from({ length: 7 }, (_, d) => (d <= dow && met.has(keyBack(dow - d, now)) ? 1 : 0));
+  return { streak, week };
+}
+
+/** Move a goal into today: yesterday's result goes into `hist`, today's count starts at zero. */
+function rollGoal(g: Goal, today: string): Goal {
+  if (!g.day) return { ...g, day: today, ...goalStats({ ...g, day: today }) };
+  if (g.day === today) return g;
+  const hist = g.prog >= g.target ? [...(g.hist || []).filter(d => d !== g.day), g.day].slice(-HIST_MAX) : g.hist || [];
+  const next = { ...g, day: today, prog: 0, hist };
+  return { ...next, ...goalStats(next) };
+}
+
+/** Start a new day for goals and today's adhkar counts. Safe to call often. */
+export function rollDay() {
+  const today = todayKey();
+  const goals = state.goals.map(g => rollGoal(g, today));
+  const changed = goals.some((g, i) => g !== state.goals[i]);
+  const az = state.az.day === today ? state.az : { day: today, c: {} };
+  const streak = calcStreak(state);
+  if (changed || az !== state.az || streak !== state.streak) {
+    // Day rollover is bookkeeping, not a user edit — don't echo it to the server as one.
+    setFromRemote({ ...(changed ? { goals } : {}), az, streak });
+  }
+}
+
+/** Count toward a personal goal (negative to undo). Returns the goal after the change. */
+export function countGoal(id: number, delta: number): Goal | undefined {
+  rollDay();
+  let out: Goal | undefined;
+  set(s => ({
+    goals: s.goals.map(g => {
+      if (g.id !== id) return g;
+      const next = { ...g, prog: Math.max(0, g.prog + delta) };
+      out = { ...next, ...goalStats(next) };
+      return out;
+    }),
+  }));
+  if (out) addAct('d', delta);
+  return out;
+}
+
+RNAppState.addEventListener('change', s => { if (s === 'active' && state.hydrated) rollDay(); });

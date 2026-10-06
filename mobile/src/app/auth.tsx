@@ -88,11 +88,11 @@ export default function Auth() {
             <Txt style={{ fontSize: 12.5, color: t.t4 }}>or</Txt>
             <View style={{ flex: 1, height: 1, backgroundColor: t.line }} />
           </View>
-          <Tap onPress={() => (backendEnabled ? attempt(signInWithGoogle, enter) : enter())} style={{ height: 56, borderRadius: 28, backgroundColor: t.opt, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <Tap onPress={() => (backendEnabled ? attempt(signInWithGoogle, enter) : enter())} style={{ height: 56, borderRadius: 28, backgroundColor: t.opt, boxShadow: t.edge, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <GoogleG />
             <Txt style={{ fontSize: 15.5, fontWeight: 700, color: t.txw }}>Continue with Google</Txt>
           </Tap>
-          <Cta label="Email me a magic link" kind="secondary" color={t.txw} height={56} size={15.5} style={{ marginTop: 10, backgroundColor: t.opt }}
+          <Cta label="Email me a magic link" kind="secondary" color={t.txw} height={56} size={15.5} style={{ marginTop: 10, backgroundColor: t.opt, boxShadow: t.edge }}
             onPress={() => {
               if (!EMAIL.test(email.trim())) { setTouched(true); if (!email) setEmail(' '); return; }
               if (!backendEnabled) { setMagic(`Check your inbox — we sent a sign-in link to ${email.trim()}.`); return; }

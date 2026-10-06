@@ -19,14 +19,14 @@ export default function Goals() {
       <Statement a={`${WORDS[goals.length] ?? goals.length} ${goals.length === 1 ? 'goal' : 'active'}.`} b={active === 0 && goals.length ? 'All complete today.' : 'Keep them small.'} style={{ paddingTop: 10, paddingHorizontal: 22 }} />
       <View style={{ paddingTop: 18, paddingHorizontal: 16, gap: 10 }}>
         {goals.length === 0 && (
-          <View style={{ borderRadius: 28, backgroundColor: t.card, padding: 28, alignItems: 'center' }}>
+          <View style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 28, alignItems: 'center' }}>
             <Txt style={{ fontSize: 17, fontWeight: 700 }}>No goals yet</Txt>
             <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6, marginBottom: 16 }}>Start with one small act of worship.</Txt>
             <Cta label="Create goal" height={48} size={15} style={{ paddingHorizontal: 24 }} onPress={() => router.push('/goal-new')} />
           </View>
         )}
         {goals.map((g, i) => (
-          <FadeIn key={g.id} delay={i * 40} style={{ borderRadius: 28, backgroundColor: t.card, padding: 18 }}>
+          <FadeIn key={g.id} delay={i * 40} style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <GoalRing g={g} />
               <View style={{ flex: 1, minWidth: 0 }}>

@@ -43,6 +43,20 @@ export type StartResult = {
   shielding: boolean;
 };
 
+/** A recurring lock window. During it every app except the essentials is locked. */
+export type ScheduleWindow = {
+  id: string;
+  /** Minutes after local midnight. */
+  start: number;
+  /** Minutes. */
+  duration: number;
+  /** Monday = bit 0 … Sunday = bit 6. */
+  days: number;
+  enabled: boolean;
+};
+
+export type ActiveWindow = { id: string; startsAt: number; endsAt: number; blocked: number };
+
 type Events = { onBlockedAttempt: (e: BlockedAttempt) => void };
 
 declare class IbadahLockNative extends NativeModule<Events> {
@@ -52,6 +66,9 @@ declare class IbadahLockNative extends NativeModule<Events> {
   getSession(): LockSession | null;
   start(packages: string[], endsAt: number | null, returnUrl: string | null): Promise<StartResult>;
   stop(): Promise<void>;
+  setSchedule(json: string, returnUrl: string | null): Promise<boolean>;
+  getActiveWindow(): ActiveWindow | null;
+  skipWindow(until: number): Promise<void>;
 }
 
 // Only Android has a working implementation; the iOS stub is never loaded on purpose so a missing
@@ -100,6 +117,30 @@ export async function start({ packages, endsAt, returnUrl }: StartOptions): Prom
 
 export async function stop(): Promise<void> {
   if (native) await native.stop();
+}
+
+/**
+ * Replaces the recurring lock windows enforced natively (even while Ibtida is closed).
+ * Resolves true when at least one window is on and the Accessibility service is enabled.
+ */
+export async function setSchedule(windows: ScheduleWindow[], returnUrl?: string): Promise<boolean> {
+  if (!native) return false;
+  return native.setSchedule(JSON.stringify(windows), returnUrl ?? null);
+}
+
+/** The scheduled window the native side is enforcing right now, if any. */
+export function getActiveWindow(): ActiveWindow | null {
+  if (!native) return null;
+  try {
+    return native.getActiveWindow();
+  } catch {
+    return null;
+  }
+}
+
+/** Emergency unlock for the running window: apps open normally until `until` (epoch ms). */
+export async function skipWindow(until: number): Promise<void> {
+  if (native) await native.skipWindow(until);
 }
 
 export function onBlockedAttempt(listener: (e: BlockedAttempt) => void): Subscription {

@@ -30,6 +30,16 @@ public class IbadahLockModule: Module {
       ["packages": [String](), "shielding": false]
     }
 
+    AsyncFunction("setSchedule") { (json: String, returnUrl: String?) -> Bool in
+      false
+    }
+
+    Function("getActiveWindow") { () -> [String: Any]? in
+      nil
+    }
+
+    AsyncFunction("skipWindow") { (until: Double) in }
+
     AsyncFunction("stop") {}
   }
 }

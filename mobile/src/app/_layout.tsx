@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastHost } from '../components/ui';
 import { startBackend } from '../lib/account';
 import { useNotifications } from '../lib/notifications';
+import { useLockScheduleSync } from '../lib/shield';
 import { hydrate, useApp } from '../state/store';
 import { ThemeProvider, useT } from '../theme/ThemeProvider';
 
@@ -25,6 +26,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 function Shell() {
   const t = useT();
   useNotifications();
+  useLockScheduleSync();
   useEffect(() => { SystemUI.setBackgroundColorAsync(t.bg).catch(() => {}); }, [t.bg]);
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
@@ -41,6 +43,11 @@ function Shell() {
         <Stack.Screen name="wake-scan" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="goal-new" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="circle-new" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="circle-goal" options={{ animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="name" />
+        <Stack.Screen name="lock-schedule" options={{ animation: 'slide_from_bottom' }} />
+        {/* Same for scheduled lock times: every blocked app re-opens ibtida://lock-scheduled. */}
+        <Stack.Screen name="lock-scheduled" getId={() => 'scheduled-lock'} options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="search" options={{ animation: 'fade' }} />
       </Stack>
       <ToastHost />

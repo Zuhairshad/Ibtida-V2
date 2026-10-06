@@ -1,8 +1,34 @@
 import { expect, test as base, type Page } from '@playwright/test';
+import { mockGeocoding } from './geoMock';
 import { mockQuranApi } from './quranMock';
 import { mockSupabase } from './supabaseMock';
 
 export const STORAGE_KEY = 'ibtida.v7.state';
+
+/**
+ * A lived-in profile for tests that need goals, circles and history. The app itself starts empty;
+ * tests that exercise those features seed this explicitly. Goals carry no `day`, so the app adopts
+ * them into today without resetting their progress.
+ */
+export const SAMPLE = {
+  name: 'Yusuf Rahman',
+  token: 'A7F2-KQ9M-3XPD',
+  joined: [true, false, false],
+  goals: [
+    { id: 1, name: 'Durood Sharif', target: 100, prog: 33, streak: 9, remind: '8:00 pm', week: [1, 1, 1, 1, 0, 1, 1], cg: '1 Million Salawat' },
+    { id: 2, name: 'Istighfar', target: 100, prog: 100, streak: 12, remind: 'after Fajr', week: [1, 1, 1, 1, 1, 1, 1], cg: null },
+    { id: 3, name: 'SubhanAllahi wa bihamdihi', target: 100, prog: 40, streak: 4, remind: '7:30 am', week: [0, 1, 1, 0, 1, 1, 1], cg: null },
+  ],
+  circles: [
+    { id: 1, name: 'Rahman family', priv: 'Private', members: 1, code: 'K7Q2M9XA', role: 'Owner', goals: [{ name: 'Fajr together · 30 days', done: 216, total: 300 }] },
+    { id: 2, name: 'Thursday halaqa', priv: 'Invite only', members: 1, code: 'P3WZ8LNC', role: 'Member', goals: [{ name: 'One juz a week', done: 9, total: 20 }] },
+  ],
+  emergencies: [
+    { when: 'Thu 24 Sep · 9:42 pm', after: 'after 11 min', reason: 'Family call about travel plans', blocked: 2 },
+    { when: 'Sat 19 Sep · 6:15 am', after: 'after 4 min', reason: 'Needed directions to the masjid', blocked: 0 },
+  ],
+};
+export const withSample = (extra: Record<string, unknown> = {}) => ({ ...SAMPLE, ...extra });
 
 /** Web-only noise that is expected when running React Native on react-native-web. */
 const IGNORED = [
@@ -21,6 +47,7 @@ export const test = base.extend<Fixtures>({
     // Tests never touch the network: the Quran API is served from placeholder data.
     await mockQuranApi(page);
     await mockSupabase(page);
+    await mockGeocoding(page);
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(`pageerror: ${e.message}`));
     page.on('console', m => {

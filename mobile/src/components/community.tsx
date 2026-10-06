@@ -1,59 +1,49 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
-import { COMMUNITY_GOALS, FEED, fmt } from '../data/content';
+import { View } from 'react-native';
+import { COMMUNITY_GOALS, fmt } from '../data/content';
 import { buzz } from '../lib/feedback';
 import { endsIn, useLive, type LiveFeedItem } from '../lib/live';
 import { set, useApp, type Circle } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
 import { Icon } from './Icon';
-import { useReducedMotion } from './motion';
 import { Avatar, Tap, Txt, say } from './ui';
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-const LINE = 'M0 50 C30 47 45 40 70 42 S110 30 135 32 S180 18 205 22 S250 10 300 6';
-
-/** Ummah trend sparkline that draws itself in (ibDraw). */
-export function Sparkline() {
-  const v = useRef(new Animated.Value(420)).current;
-  const rm = useReducedMotion();
-  useEffect(() => {
-    if (rm) { v.setValue(0); return; }
-    Animated.timing(v, { toValue: 0, duration: 1800, easing: Easing.bezier(0.22, 1, 0.36, 1), useNativeDriver: false }).start();
-  }, [v, rm]);
+/** Ummah activity for the last 12 hours, drawn from real hourly totals (oldest first). */
+export function HourBars({ hours, color = '#FFFFFF', height = 56 }: { hours: number[]; color?: string; height?: number }) {
+  const max = Math.max(1, ...hours);
   return (
-    <Svg width="100%" height={62} viewBox="0 0 300 62" preserveAspectRatio="none" style={{ marginTop: 14 }}>
-      <Defs>
-        <LinearGradient id="cmg" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.35} />
-          <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
-        </LinearGradient>
-      </Defs>
-      <Path d={`${LINE} L300 62 L0 62 Z`} fill="url(#cmg)" />
-      <AnimatedPath d={LINE} stroke="#FFFFFF" strokeWidth={2.5} fill="none" strokeLinecap="round" strokeDasharray="420" strokeDashoffset={v} />
-    </Svg>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5, height, marginTop: 14 }} accessibilityLabel="Dhikr counted in each of the last 12 hours">
+      {hours.map((h, i) => (
+        <View key={i} style={{ flex: 1, borderRadius: 4, height: `${Math.max(4, (h / max) * 100)}%`, backgroundColor: color, opacity: h ? 0.35 + (0.65 * i) / Math.max(1, hours.length - 1) : 0.18 }} />
+      ))}
+    </View>
   );
 }
 
-/** Community goals: live totals when signed in and online, otherwise the bundled sample. */
-export function useCommunityGoals() {
+export type CommunityGoalView = {
+  i: number; name: string; total: number; joined: boolean; live: boolean;
+  done: number; people: number; ends: string; mine: number; hour: number;
+};
+
+/** Community goals with live totals. Signed out or offline, only the name and target are known. */
+export function useCommunityGoals(): CommunityGoalView[] {
   const joined = useApp(s => s.joined);
   const on = useLive(l => l.on);
   const goals = useLive(l => l.goals);
   return COMMUNITY_GOALS.map((c, i) => {
     const g = on ? goals[c.name] : undefined;
-    if (g) return { ...c, i, joined: joined[i], done: g.total, total: g.target, people: g.people, ends: endsIn(g.endsAt, c.ends), mine: g.mine, hour: g.thisHour, live: true };
-    return { ...c, i, joined: joined[i], done: c.done + (i === 0 && joined[0] ? 1240 : 0), mine: joined[i] ? 1240 : 0, hour: 18421, live: false };
+    if (g) return { i, name: c.name, total: g.target, joined: joined[i], live: true, done: g.total, people: g.people, ends: endsIn(g.endsAt, ''), mine: g.mine, hour: g.thisHour };
+    return { i, name: c.name, total: c.total, joined: !!joined[i], live: false, done: 0, people: 0, ends: '', mine: 0, hour: 0 };
   });
 }
 
-/** Feed items: live (with Ameen counts) when available, otherwise the sample feed. */
+/** Feed items, live from the server only. */
 export function useFeed(): LiveFeedItem[] {
   const on = useLive(l => l.on);
   const feed = useLive(l => l.feed);
-  return on && feed ? feed : FEED;
+  return on && feed ? feed : NO_FEED;
 }
+const NO_FEED: LiveFeedItem[] = [];
 
 export function joinGoal(i: number) {
   set(s => {
@@ -69,12 +59,12 @@ export function joinGoal(i: number) {
 export function FeedRow({ k }: { k: string }) {
   const t = useT();
   const liveItem = useLive(l => l.feed?.find(x => x.k === k));
-  const f = liveItem || FEED.find(x => x.k === k);
+  const f = liveItem;
   const on = useApp(s => !!s.ameen[k]);
   if (!f) return null;
   const tint = { amb: [t.tAmb, t.acc], mint: [t.tMint, t.mint], blue: [t.tBlue, t.peri], lav: [t.tLav, t.lav] }[f.tint];
   return (
-    <View style={{ borderRadius: 24, backgroundColor: t.card, paddingVertical: 14, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+    <View style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 14, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
       <View style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: tint[0], alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={f.icon} color={tint[1]} />
       </View>
@@ -92,13 +82,22 @@ export function FeedRow({ k }: { k: string }) {
   );
 }
 
+/** Member initials for a circle: real names once loaded, otherwise a member count bubble. */
 export function AvatarRow({ c, size = 32 }: { c: Circle; size?: number }) {
   const t = useT();
+  const me = useApp(s => s.name);
+  const list = useLive(l => (c.remoteId ? l.members[c.remoteId] : undefined));
+  const names = list ? list.map(m => m.name) : c.remoteId ? [] : [me || 'You'];
+  const shown = names.slice(0, 3);
+  const extra = Math.max(0, c.members - shown.length);
   return (
     <View style={{ flexDirection: 'row', paddingLeft: 9 }}>
-      {['A', 'S', 'M'].map((i, k) => <Avatar key={k} i={i} bg={FIXED.avatars[(k + c.id) % FIXED.avatars.length]} size={size} border={t.card} style={{ marginLeft: -9 }} />)}
+      {shown.map((n, k) => <Avatar key={k} i={initialsOf(n)} bg={FIXED.avatars[(k + c.id) % FIXED.avatars.length]} size={size} border={t.card} style={{ marginLeft: -9 }} />)}
+      {extra > 0 && <Avatar i={`+${extra}`} bg={FIXED.avatars[3]} size={size} fs={size * 0.34} border={t.card} style={{ marginLeft: -9 }} />}
     </View>
   );
 }
+
+export const initialsOf = (n: string) => n.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase() || '·';
 
 export const circlePct = (c: Circle) => (c.goals[0] ? Math.round((c.goals[0].done / c.goals[0].total) * 100) : 0);
