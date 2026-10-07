@@ -13,7 +13,7 @@
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.22.0",
     "adhan": "^4.4.6",
-    "expo": "~57.0.26",
+    "expo": "~57.0.27",
     "expo-blur": "~57.0.3",
     "expo-camera": "~57.0.6",
     "expo-clipboard": "~57.0.2",
@@ -22,10 +22,10 @@
     "expo-haptics": "~57.0.3",
     "expo-image-manipulator": "~57.0.21",
     "expo-linear-gradient": "~57.0.2",
-    "expo-linking": "~57.0.11",
+    "expo-linking": "~57.0.12",
     "expo-location": "~57.0.20",
-    "expo-notifications": "~57.0.21",
-    "expo-router": "~57.0.24",
+    "expo-notifications": "~57.0.22",
+    "expo-router": "~57.0.25",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
@@ -77,5 +77,13 @@
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.test.ts"
     ]
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "jest",
+        "@types/jest"
+      ]
+    }
   }
 }
