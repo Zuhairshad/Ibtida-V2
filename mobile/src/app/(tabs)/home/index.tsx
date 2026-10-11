@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native';
 import { DailyOverview } from '../../../components/DailyOverview';
+import { QuickTile3D, type TileArt } from '../../../components/QuickTile3D';
 import { DayStrip } from '../../../components/DayStrip';
 import { Icon, MosqueLogo, type IconName } from '../../../components/Icon';
 import { InsightSheet } from '../../../components/InsightSheet';
@@ -66,11 +67,11 @@ export default function Home() {
   const tPct = Math.max(0, Math.min(100, ((next.idx - 1 + frac) / 4) * 100));
   const h = HADITH[had];
 
-  const quick: { title: string; sub: string; icon: IconName; tint: string; ink: string; go: () => void }[] = [
-    { title: tx('prayerTimes'), sub: `${prayerName(lang, next.name)} · ${fmtTime(next.at)}`, icon: 'prayer', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
-    { title: 'Daily adhkar', sub: `${nowCat.k} · ${catMinutes(nowCat)} min`, icon: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: nowCat.k } }) },
-    { title: 'Quran', sub: qLast ? `${SURAHS[qLast.s - 1].name} · ${surahPct(qLast.s, qLast.a)}%` : 'Start reading', icon: 'book', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
-    { title: 'Ibadah Lock', sub: 'Focus while you recite', icon: 'lock', tint: t.tLav, ink: t.lav, go: () => router.push('/focus-setup') },
+  const quick: { title: string; sub: string; icon: IconName; art: TileArt; tint: string; ink: string; go: () => void }[] = [
+    { title: tx('prayerTimes'), sub: `${prayerName(lang, next.name)} · ${fmtTime(next.at)}`, icon: 'prayer', art: 'mat', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
+    { title: 'Daily adhkar', sub: `${nowCat.k} · ${catMinutes(nowCat)} min`, icon: 'beads', art: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: nowCat.k } }) },
+    { title: 'Quran', sub: qLast ? `${SURAHS[qLast.s - 1].name} · ${surahPct(qLast.s, qLast.a)}%` : 'Start reading', icon: 'book', art: 'quran', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
+    { title: 'Ibadah Lock', sub: 'Focus while you recite', icon: 'lock', art: 'lock', tint: t.tLav, ink: t.lav, go: () => router.push('/focus-setup') },
   ];
   // Same order as the onboarding intents (prayer, adhkar, Quran, focus): picked ones come first.
   const ordered = quick.map((q, i) => ({ q, i })).sort((a, b) => Number(!!intents[b.i]) - Number(!!intents[a.i]) || a.i - b.i).map(x => x.q);
@@ -232,14 +233,7 @@ export default function Home() {
 
         <FadeIn delay={220} style={{ paddingTop: 12, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {ordered.map(qk => (
-            <Tap key={qk.title} scale={0.96} onPress={() => { buzz(6); qk.go(); }}
-              style={{ width: (width - 42) / 2, borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}>
-              <View style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: qk.tint, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name={qk.icon} color={qk.ink} />
-              </View>
-              <Txt style={{ fontSize: 16, fontWeight: 700, marginTop: 14 }}>{qk.title}</Txt>
-              <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 4 }}>{qk.sub}</Txt>
-            </Tap>
+            <QuickTile3D key={qk.title} art={qk.art} title={qk.title} sub={qk.sub} onPress={qk.go} style={{ width: (width - 42) / 2 }} />
           ))}
         </FadeIn>
 

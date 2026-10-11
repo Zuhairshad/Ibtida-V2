@@ -64,6 +64,12 @@ export function Breathe({ style, bg, dur = 9000 }: { style: StyleProp<ViewStyle>
   );
 }
 
+/** A gentle float (rises `lift` px and settles), for illustrations. Still under reduced motion. */
+export function Float({ children, dur = 4200, delay = 0, lift = 3, style }: { children: ReactNode; dur?: number; delay?: number; lift?: number; style?: StyleProp<ViewStyle> }) {
+  const { v, rm } = useLoop(dur, delay);
+  return <Animated.View style={[style, rm ? null : { transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, -lift] }) }] }]}>{children}</Animated.View>;
+}
+
 /** ibGlow — opacity .55 ↔ 1. */
 export function Glow({ children, dur = 3600, style }: { children: ReactNode; dur?: number; style?: StyleProp<ViewStyle> }) {
   const { v, rm } = useLoop(dur);
