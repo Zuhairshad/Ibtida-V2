@@ -6,18 +6,29 @@ import { DayStrip } from '../../../components/DayStrip';
 import { Icon } from '../../../components/Icon';
 import { LocationSheet } from '../../../components/LocationSheet';
 import { Breathe, FadeIn } from '../../../components/motion';
-import { buzz, Chips, Cta, IconBtn, IconChip, Label, Ring, say, Screen, SerifTitle, Sheet, Tap, Txt } from '../../../components/ui';
+import { buzz, Chips, Cta, IconBtn, IconChip, Label, Ring, say, Screen, SerifTitle, Sheet, Switch, Tap, Txt } from '../../../components/ui';
 import { METHODS, PRAYER_META, type PrayerName } from '../../../data/content';
 import { clock, setLog, usePrayerNow } from '../../../lib/hooks';
 import { useCompass } from '../../../lib/compass';
 import { delta, unwrap } from '../../../lib/compassMath';
-import { enableNotifications } from '../../../lib/notifications';
+import { enableNotifications, previewAdhan } from '../../../lib/notifications';
+import { ADHAN_CHOICES, adhanFile, hasSound, TAKBIR } from '../../../lib/sounds';
 import { addDays, dayKey, fmtTime, jamaatAt, qibla, timesFor } from '../../../lib/prayer';
 import { prayerName, useLang } from '../../../lib/i18n';
 import { ltr } from '../../../data/reminders';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 import { FIXED, G, bgImage } from '../../../theme/tokens';
+
+/** What the chosen adhan sound actually plays in this build, said plainly. */
+function soundNote(sound: number, short: boolean) {
+  const c = ADHAN_CHOICES[sound] ?? ADHAN_CHOICES[0];
+  if (c.key === 'silent') return 'A silent notification at each prayer time.';
+  const f = adhanFile(sound, short);
+  if (f === 'default') return `The ${c.label} recording isn’t in this build yet, so your phone’s notification sound plays.`;
+  if (short && c.key !== 'chime' && !hasSound(TAKBIR)) return 'The short opening isn’t in this build yet, so the full recording plays.';
+  return '';
+}
 
 const ORDER: (PrayerName | 'Sunrise')[] = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
@@ -117,6 +128,7 @@ export default function Prayer() {
   const { lang, ur, t: tx } = useLang();
   const adhan = useApp(s => s.adhan);
   const sound = useApp(s => s.sound);
+  const adhanShort = useApp(s => s.adhanShort);
   const allLogs = useApp(s => s.logs);
   const [day, setDay] = useState(0);
   const [qOpen, setQOpen] = useState(params.qibla === '1');
@@ -313,7 +325,23 @@ export default function Prayer() {
               </View>
             </View>
             <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 4 }}>ADHAN SOUND</Label>
-            <Chips labels={['Makkah', 'Madinah', 'Soft chime', 'Silent']} isOn={i => sound === i} onPick={i => set({ sound: i })} />
+            <Chips labels={ADHAN_CHOICES.map(c => c.label)} isOn={i => sound === i} onPick={i => set({ sound: i })} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12, marginHorizontal: 4 }}>
+              <View style={{ flex: 1 }}>
+                <Txt style={{ fontSize: 14.5, fontWeight: 700 }}>Short opening only</Txt>
+                <Txt style={{ fontSize: 12, lineHeight: 17, color: t.t2, marginTop: 2 }}>“Allahu Akbar, Allahu Akbar” instead of the full adhan</Txt>
+              </View>
+              <Switch on={adhanShort} onToggle={() => set({ adhanShort: !adhanShort })} label="Short opening only" />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, marginHorizontal: 4 }}>
+              <Txt style={{ flex: 1, fontSize: 12, lineHeight: 17, color: t.t4 }}>
+                {soundNote(sound, adhanShort)} Plays at your notification volume; a phone on silent stays silent.
+              </Txt>
+              <Tap onPress={() => { buzz(5); previewAdhan().catch(() => {}); }} accessibilityRole="button" accessibilityLabel="Hear the adhan sound"
+                style={{ paddingVertical: 8, paddingHorizontal: 14, borderRadius: 16, backgroundColor: t.ctl3 }}>
+                <Txt style={{ fontSize: 13, fontWeight: 700 }}>Hear it</Txt>
+              </Tap>
+            </View>
             {day === 0 && <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
               <Cta label="Missed" kind="secondary" height={56} size={16} style={{ flex: 1 }}
                 onPress={() => { setLog(key, detail, 'missed'); setDetail(null); say(`${detail} added to Qada`); }} />

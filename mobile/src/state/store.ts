@@ -129,6 +129,8 @@ export type AppState = {
   adj: Adjust;
   /** Fajr wake alarm sound key (see ALARM_SOUNDS). */
   alarmSound: string;
+  /** Play only the adhan's opening ("Allahu Akbar, Allahu Akbar") at prayer times. */
+  adhanShort: boolean;
   /** Recurring Ibadah Lock windows (time, duration, days). */
   locks: LockSched[];
   /** Emergency unlock of a scheduled window: apps open normally until this epoch ms. */
@@ -201,6 +203,7 @@ const initial: AppState = {
   jamaat: {},
   adj: {},
   alarmSound: 'alarm',
+  adhanShort: false,
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },
   streak: 0,
   act: {},

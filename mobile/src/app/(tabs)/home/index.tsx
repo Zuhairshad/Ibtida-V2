@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native';
+import { DailyOverview } from '../../../components/DailyOverview';
 import { DayStrip } from '../../../components/DayStrip';
 import { Icon, MosqueLogo, type IconName } from '../../../components/Icon';
 import { InsightSheet } from '../../../components/InsightSheet';
@@ -225,7 +226,11 @@ export default function Home() {
           </View>
         </FadeIn>
 
-        <FadeIn delay={220} style={{ paddingTop: 22, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        <FadeIn delay={200} style={{ paddingTop: 22, paddingHorizontal: 16 }}>
+          <DailyOverview now={now} />
+        </FadeIn>
+
+        <FadeIn delay={220} style={{ paddingTop: 12, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {ordered.map(qk => (
             <Tap key={qk.title} scale={0.96} onPress={() => { buzz(6); qk.go(); }}
               style={{ width: (width - 42) / 2, borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}>

@@ -125,7 +125,7 @@ const stamp = (k: string, at = Date.now()) => { stamps[k] = at; persistSoon(); }
 // ---------------------------------------------------------------------------------------------
 const PROFILE_KEYS: (keyof AppState)[] = [
   'name', 'city', 'method', 'hanafi', 'privacy', 'theme', 'adhan', 'sound', 'vib', 'notifs', 'wakeVerify',
-  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj', 'alarmSound', 'tasAfter', 'tasTargets', 'tasLife', 'customDhikr', 'dhKey',
+  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj', 'alarmSound', 'adhanShort', 'tasAfter', 'tasTargets', 'tasLife', 'customDhikr', 'dhKey',
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 

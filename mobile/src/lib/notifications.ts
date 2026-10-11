@@ -7,6 +7,7 @@ import { PH, type PrayerName } from '../data/content';
 import { ayahFor, compose, durUr, ltr, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
 import { getState, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
+import { ADHAN_CHOICES, adhanFile, soundFile, TAKBIR } from './sounds';
 import { FajrAlarm, wakeAt } from './fajrAlarm';
 import { addDays, dayKey, fmtTime, jamaatAt, nextPrayer, timesFor } from './prayer';
 
@@ -27,36 +28,24 @@ const MIN = 60_000;
 
 /* ------------------------------------------------------------- Sounds */
 
-/** Index into the "Adhan sound" chips: Makkah, Madinah, Soft chime, Silent. */
-const SOUND_KEYS = ['makkah', 'madinah', 'chime', 'silent'] as const;
-
 /**
- * HOOK POINT — adhan audio. No audio ships yet, so every non-silent option plays the
- * system default. To add real adhan recordings:
- *   1. add the files (e.g. `assets/sounds/adhan_makkah.wav`) to the `sounds` array of the
- *      expo-notifications plugin in app.json,
- *   2. put the bare file name here (e.g. `'adhan_makkah.wav'`),
- *   3. bump CHANNEL_VERSION — Android channel sounds are fixed once a channel exists.
- * iOS plays at most 30 s of a notification sound.
+ * Adhan sounds come from the files bundled in assets/sounds (see src/lib/sounds.ts). Android
+ * fixes a channel's sound when the channel is created, so each sound gets its own channel, named
+ * after the file; bump CHANNEL_VERSION if a file's contents change. iOS plays at most 30 s.
  */
-const ADHAN_AUDIO: Record<(typeof SOUND_KEYS)[number], string | null> = {
-  makkah: null,
-  madinah: null,
-  chime: null,
-  silent: null,
-};
-const CHANNEL_VERSION = 1;
+const CHANNEL_VERSION = 2;
+
+const chanFor = (file: string | 'default' | null) => `adhan-${file === null ? 'silent' : file.replace(/\.[a-z0-9]+$/, '')}-v${CHANNEL_VERSION}`;
 
 const CH = {
-  adhan: (sound: number) => `adhan-${SOUND_KEYS[sound] || SOUND_KEYS[0]}-v${CHANNEL_VERSION}`,
+  adhan: (sound: number, short = false) => chanFor(adhanFile(sound, short)),
   wake: `wake-alarm-v${CHANNEL_VERSION}`,
   reminders: `reminders-v${CHANNEL_VERSION}`,
 };
 
-function adhanSound(sound: number): Notifications.NotificationContentInput['sound'] {
-  const key = SOUND_KEYS[sound] || SOUND_KEYS[0];
-  if (key === 'silent') return false;
-  return ADHAN_AUDIO[key] || 'default';
+function adhanSound(sound: number, short = false): Notifications.NotificationContentInput['sound'] {
+  const f = adhanFile(sound, short);
+  return f === null ? false : f;
 }
 
 let channelsReady: Promise<void> | null = null;
@@ -64,14 +53,16 @@ function ensureChannels() {
   if (Platform.OS !== 'android') return Promise.resolve();
   channelsReady ??= (async () => {
     const vibrationPattern = [0, 250, 250, 250];
-    for (let i = 0; i < SOUND_KEYS.length; i++) {
-      const key = SOUND_KEYS[i];
-      const silent = key === 'silent';
-      await Notifications.setNotificationChannelAsync(CH.adhan(i), {
-        name: `Adhan · ${['Makkah', 'Madinah', 'Soft chime', 'Silent'][i]}`,
+    // One channel per distinct sound (full adhan, short opening, chime, system default, silent).
+    const files = new Set<string | 'default' | null>();
+    ADHAN_CHOICES.forEach((_, i) => { files.add(adhanFile(i, false)); files.add(adhanFile(i, true)); });
+    for (const f of files) {
+      const silent = f === null;
+      await Notifications.setNotificationChannelAsync(chanFor(f), {
+        name: `Adhan · ${silent ? 'Silent' : f === 'default' ? 'System sound' : f === soundFile(TAKBIR) ? 'Allahu Akbar (short)' : ADHAN_CHOICES.find(c => c.file && soundFile(c.file) === f)?.label ?? f}`,
         description: 'A notification at each prayer time you have switched on.',
         importance: Notifications.AndroidImportance.HIGH,
-        sound: silent ? null : ADHAN_AUDIO[key] || 'default',
+        sound: silent ? null : f,
         enableVibrate: !silent,
         vibrationPattern: silent ? null : vibrationPattern,
         lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -141,6 +132,20 @@ export async function previewReminder() {
   await Notifications.scheduleNotificationAsync({
     content: { title: p.title, body: p.body, sound: 'default' },
     trigger: Platform.OS === 'android' ? { channelId: CH.reminders } : null,
+  });
+}
+
+/** Plays the chosen adhan sound now, through the same channel the prayer notifications use. */
+export async function previewAdhan() {
+  if (!NATIVE) { say('Previews need the mobile app'); return; }
+  if (!(await enableNotifications())) return;
+  const s = getState();
+  const next = nextPrayer(s.city, new Date(), s.method, s.hanafi, s.adj);
+  const p = prayerNotice(s.notifLang ?? 'both', next.name, fmtTime(next.at), ayahFor(next.at, next.idx));
+  await ensureChannels();
+  await Notifications.scheduleNotificationAsync({
+    content: { title: p.title, body: p.body, sound: adhanSound(s.sound, s.adhanShort) },
+    trigger: Platform.OS === 'android' ? { channelId: CH.adhan(s.sound, s.adhanShort) } : null,
   });
 }
 
@@ -218,7 +223,7 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
         out.push({
           at: t, kind: `adhan.${p}.${key}`,
           ...prayerNotice(lang, p, fmtTime(t), ayahFor(day, i), undefined, jam(p, day)),
-          url: '/prayer', channelId: CH.adhan(s.sound), sound: adhanSound(s.sound),
+          url: '/prayer', channelId: CH.adhan(s.sound, s.adhanShort), sound: adhanSound(s.sound, s.adhanShort),
         });
       }
     });
@@ -340,7 +345,7 @@ if (NATIVE) {
 /** Only the fields that change what gets scheduled — tasbeeh taps must not reschedule. */
 function signature(s: Store) {
   return JSON.stringify([
-    s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.notifs, s.wakeVerify, s.wake,
+    s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.adhanShort, s.notifs, s.wakeVerify, s.wake,
     s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days]),
     s.locks, s.notifLang, s.notifQuotes, s.adj, s.jamaat, s.masjid, s.lang,
   ]);
