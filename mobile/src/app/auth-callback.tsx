@@ -21,7 +21,11 @@ export default function AuthCallback() {
     let done = false;
     handleAuthUrl(url).then(r => {
       if (done) return;
-      if (r.ok) {
+      if (r.ok && url.includes('next=password')) {
+        // A password-reset link: signed in by the link, now choose the new password.
+        set({ onboarded: true, signedIn: true });
+        router.replace({ pathname: '/password', params: { reset: '1' } });
+      } else if (r.ok) {
         set({ onboarded: true, signedIn: true });
         say('Bismillah — welcome to Ibtida');
         router.replace('/home');

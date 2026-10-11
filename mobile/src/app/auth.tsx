@@ -4,7 +4,7 @@ import { ScrollView, TextInput, View } from 'react-native';
 import { GoogleG } from '../components/Icon';
 import { FadeIn } from '../components/motion';
 import { BackBar, buzz, Cta, H1, Page, say, Seg, Tap, Txt } from '../components/ui';
-import { sendMagicLink, sessionEmail, signIn, signInWithGoogle, signUp, type AuthResult } from '../lib/account';
+import { sendMagicLink, sendPasswordReset, sessionEmail, signIn, signInWithGoogle, signUp, type AuthResult } from '../lib/account';
 import { enableNotifications } from '../lib/notifications';
 import { backendEnabled } from '../lib/supabase';
 import { getState, set } from '../state/store';
@@ -25,6 +25,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
   const [password, setPassword] = useState('');
+  const [show, setShow] = useState(false);
   const [magic, setMagic] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const bad = touched && email.length > 0 && !EMAIL.test(email);
@@ -79,10 +80,25 @@ export default function Auth() {
             <TextInput value={email} onChangeText={v => { setEmail(v); setTouched(true); }} placeholder="Email" placeholderTextColor={t.t4} accessibilityLabel="Email"
               autoCapitalize="none" autoComplete="email" keyboardType="email-address" style={[inputStyle, { outlineWidth: 0 }, { borderColor: bad ? t.errTx : t.bord }]} />
             {bad && <Txt style={{ fontSize: 12.5, color: t.errTx, paddingHorizontal: 6 }}>Enter a valid email address</Txt>}
-            <TextInput value={password} onChangeText={setPassword} secureTextEntry placeholder="Password" placeholderTextColor={t.t4} accessibilityLabel="Password"
-              autoComplete={mode === 0 ? 'new-password' : 'current-password'} onSubmitEditing={submit} style={[inputStyle, { outlineWidth: 0 }, { borderColor: t.bord }]} />
+            <View>
+              <TextInput value={password} onChangeText={setPassword} secureTextEntry={!show} placeholder="Password" placeholderTextColor={t.t4} accessibilityLabel="Password"
+                autoCapitalize="none" autoCorrect={false} autoComplete={mode === 0 ? 'new-password' : 'current-password'} onSubmitEditing={submit}
+                style={[inputStyle, { outlineWidth: 0, paddingRight: 76 }, { borderColor: t.bord }]} />
+              <Tap onPress={() => setShow(x => !x)} accessibilityRole="button" accessibilityLabel={show ? 'Hide password' : 'Show password'}
+                style={{ position: 'absolute', right: 6, top: 6, height: 44, minWidth: 64, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' }}>
+                <Txt style={{ fontSize: 13.5, fontWeight: 700, color: t.acc }}>{show ? 'Hide' : 'Show'}</Txt>
+              </Tap>
+            </View>
           </View>
-          <Cta label={busy ? 'One moment…' : mode === 0 ? 'Create account' : 'Sign in'} height={58} size={17} style={{ marginTop: 16 }} onPress={() => {
+          {mode === 1 && backendEnabled && (
+            <Tap onPress={() => {
+              if (!EMAIL.test(email.trim())) { setTouched(true); if (!email) setEmail(' '); say('Enter your email first, then tap Forgot password'); return; }
+              attempt(() => sendPasswordReset(email.trim()), () => setMagic(`Check your inbox — we sent a link to ${email.trim()} to choose a new password.`));
+            }} accessibilityRole="button" style={{ alignSelf: 'flex-end', minHeight: 44, justifyContent: 'center', paddingHorizontal: 6 }}>
+              <Txt style={{ fontSize: 13.5, fontWeight: 600, color: t.t3 }}>Forgot password?</Txt>
+            </Tap>
+          )}
+          <Cta label={busy ? 'One moment…' : mode === 0 ? 'Create account' : 'Sign in'} height={58} size={17} style={{ marginTop: mode === 1 && backendEnabled ? 6 : 16 }} onPress={() => {
             if (!backendEnabled && email && !EMAIL.test(email)) { setTouched(true); return; }
             if (!backendEnabled) { enter(); return; }
             submit();

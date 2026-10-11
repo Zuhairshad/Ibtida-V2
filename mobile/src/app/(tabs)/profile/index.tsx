@@ -41,6 +41,7 @@ export default function Profile() {
     ['Notifications', 'bell', t.acc, '/profile/notifications', ''],
     ['Privacy', 'shield', t.mint, '/profile/privacy', s.privacy.some(Boolean) ? 'Custom' : 'Private'],
     ['Offline & sync', 'wifiOff', t.peri, '/offline', backendEnabled && s.signedIn ? 'Synced' : 'On device'],
+    ...(backendEnabled && s.signedIn ? [['Change password', 'lock', t.t3, '/password', ''] as [string, IconName, string, string, string]] : []),
   ];
   return (
     <Screen>

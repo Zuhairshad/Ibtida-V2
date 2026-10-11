@@ -86,13 +86,13 @@ test('"I already have an account" opens sign-in and signs in', async ({ page, er
   await expect(page.getByText('Enter a valid email address')).toBeVisible();
   // A wrong password is rejected by the server and keeps the user on sign-in.
   await page.getByLabel('Email').fill(TEST_USER.email);
-  await page.getByLabel('Password').fill('wrong-password');
+  await page.getByLabel('Password', { exact: true }).fill('wrong-password');
   await button(page, 'Sign in').click();
   await expect(page.getByText('Email or password doesn’t match').first()).toBeVisible();
   await expect(page).toHaveURL(/\/auth/);
   // The browser logs the deliberate 400 from the wrong password; that one is expected.
   errors.splice(0, errors.length, ...errors.filter(e => !/status of 400/.test(e)));
-  await page.getByLabel('Password').fill(TEST_USER.password);
+  await page.getByLabel('Password', { exact: true }).fill(TEST_USER.password);
   await button(page, 'Sign in').click();
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.getByText('Small steps.')).toHaveCount(0);

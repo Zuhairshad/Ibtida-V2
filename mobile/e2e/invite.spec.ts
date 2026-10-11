@@ -14,7 +14,7 @@ test('an invitation link survives sign-in and joins the right circle', async ({ 
   await button(page, 'Sign in to join').click();
   await expect(page).toHaveURL(/\/auth/);
   await page.getByLabel('Email').fill(TEST_USER.email);
-  await page.getByLabel('Password').fill(TEST_USER.password);
+  await page.getByLabel('Password', { exact: true }).fill(TEST_USER.password);
   await button(page, 'Sign in').click();
 
   // Back on the invitation after signing in.

@@ -44,7 +44,26 @@ export async function signUp(email: string, password: string): Promise<AuthResul
 
 export async function signIn(email: string, password: string): Promise<AuthResult> {
   if (!supabase) return offline;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  let { error } = await supabase.auth.signInWithPassword({ email, password });
+  // A pasted password often carries a space or line break at the end that can't be seen.
+  if (error && password.trim() !== password && password.trim().length >= 6) {
+    ({ error } = await supabase.auth.signInWithPassword({ email, password: password.trim() }));
+  }
+  return error ? { ok: false, message: friendly(error) } : { ok: true };
+}
+
+/** Emails a link that opens the app on the new-password screen. */
+export async function sendPasswordReset(email: string): Promise<AuthResult> {
+  if (!supabase) return offline;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: Linking.createURL('auth-callback', { queryParams: { next: 'password' } }) });
+  return error ? { ok: false, message: friendly(error) } : { ok: true };
+}
+
+/** Sets a new password for the signed-in account (also finishes a reset link). */
+export async function changePassword(password: string): Promise<AuthResult> {
+  if (!supabase) return offline;
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error && /different from the old/i.test(error.message)) return { ok: false, message: 'Choose a password different from your current one' };
   return error ? { ok: false, message: friendly(error) } : { ok: true };
 }
 

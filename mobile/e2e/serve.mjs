@@ -4,7 +4,7 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
-const root = join(import.meta.dirname, '..', 'dist-web');
+const root = process.env.E2E_DIST || join(import.meta.dirname, '..', 'dist-web');
 const port = Number(process.env.PORT || 8089);
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css',

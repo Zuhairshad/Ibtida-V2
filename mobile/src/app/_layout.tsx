@@ -52,6 +52,7 @@ function Shell() {
         <Stack.Screen name="circle-new" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="circle-goal" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="name" />
+        <Stack.Screen name="password" />
         <Stack.Screen name="lock-schedule" options={{ animation: 'slide_from_bottom' }} />
         {/* Same for scheduled lock times: every blocked app re-opens ibtida://lock-scheduled. */}
         <Stack.Screen name="lock-scheduled" getId={() => 'scheduled-lock'} options={{ animation: 'fade', gestureEnabled: false }} />
