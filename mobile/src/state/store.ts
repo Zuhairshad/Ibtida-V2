@@ -129,6 +129,9 @@ export type AppState = {
   adj: Adjust;
   /** Fajr wake alarm sound key (see ALARM_SOUNDS). */
   alarmSound: string;
+  /** Travel dua reminder. `home` stays on this phone only (never synced). */
+  travelOn: boolean;
+  home: { lat: number; lng: number; radiusKm: number } | null;
   /** Play only the adhan's opening ("Allahu Akbar, Allahu Akbar") at prayer times. */
   adhanShort: boolean;
   /** Recurring Ibadah Lock windows (time, duration, days). */
@@ -204,6 +207,8 @@ const initial: AppState = {
   adj: {},
   alarmSound: 'alarm',
   adhanShort: false,
+  travelOn: false,
+  home: null,
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },
   streak: 0,
   act: {},

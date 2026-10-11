@@ -35,6 +35,10 @@ export async function mockSupabase(page: Page) {
     }
     if (url.pathname === '/auth/v1/user') return json(200, session(TEST_USER.email).user);
     if (url.pathname.startsWith('/auth/v1/')) return json(200, {});
+    // The Quran Foundation proxy (EXPO_PUBLIC_QURAN_SOURCE=quran.foundation in .env) answers with a
+    // body the app doesn't accept, so it falls back to AlQuran Cloud (mocked in quranMock.ts) —
+    // the same path a real proxy failure takes — without a 404 in the console.
+    if (url.pathname === '/functions/v1/quran') return json(200, { source: 'unavailable-in-tests' });
     if (url.pathname === '/rest/v1/rpc/circle_invite_preview') {
       const code = String((req.postDataJSON() as { p_code?: string } | null)?.p_code ?? '').toUpperCase();
       if (code === INVITE.code) return json(200, { status: 'ok', circleName: INVITE.name, members: 4, joined: joined.has(page), expiresAt: null });

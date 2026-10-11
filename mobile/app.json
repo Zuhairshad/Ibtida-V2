@@ -52,7 +52,10 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Ibtida uses your location on-device to calculate prayer times and the Qibla direction."
+          "locationWhenInUsePermission": "Ibtida uses your location on-device to calculate prayer times and the Qibla direction.",
+          "locationAlwaysAndWhenInUsePermission": "Ibtida checks only whether you have left your home area, to remind you of the dua for travel. Your location stays on your phone.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isIosBackgroundLocationEnabled": false
         }
       ],
       [

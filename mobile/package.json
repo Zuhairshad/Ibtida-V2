@@ -29,6 +29,7 @@
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
+    "expo-task-manager": "~57.0.21",
     "expo-web-browser": "~57.0.3",
     "geomagnetism": "^0.2.0",
     "jpeg-js": "^0.4.4",

@@ -20,6 +20,8 @@ import { startBackend } from '../lib/account';
 import { FajrAlarm, useFajrAlarm } from '../lib/fajrAlarm';
 import { openedFromNotification, useNotifications } from '../lib/notifications';
 import { useLockScheduleSync } from '../lib/shield';
+// Defines the travel geofence task at startup, as the OS may wake the app just to run it.
+import '../lib/travel';
 import { hydrate, useApp } from '../state/store';
 import { ThemeProvider, useT } from '../theme/ThemeProvider';
 
