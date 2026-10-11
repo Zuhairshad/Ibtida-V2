@@ -23,7 +23,9 @@ export default function Admin() {
   const [admin, setAdmin] = useState<boolean | null>(null);
   const [posts, setPosts] = useState<Inspiration[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const nowMs = useNow(60_000).getTime();
+  const [loadedAt, setLoadedAt] = useState(0);
+  // The minute clock can lag behind a post published seconds ago; the reload time can't.
+  const nowMs = Math.max(useNow(60_000).getTime(), loadedAt);
 
   const load = useCallback(() => {
     let live = true;
@@ -32,7 +34,7 @@ export default function Admin() {
       if (!live) return;
       setAdmin(ok);
       if (!ok) return;
-      try { const list = await adminList(); if (live) { setPosts(list); setError(null); } } catch (e) { if (live) setError(e instanceof Error ? e.message : 'Couldn’t load posts'); }
+      try { const list = await adminList(); if (live) { setLoadedAt(Date.now()); setPosts(list); setError(null); } } catch (e) { if (live) setError(e instanceof Error ? e.message : 'Couldn’t load posts'); }
     })();
     return () => { live = false; };
   }, []);
