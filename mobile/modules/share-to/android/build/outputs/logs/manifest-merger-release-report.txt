@@ -1,0 +1,48 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:1:1-19:12
+INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:1:1-19:12
+	package
+		INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:1:11-69
+queries
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:3:3-7:13
+package#com.whatsapp
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:4:5-44
+	android:name
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:4:14-41
+package#com.whatsapp.w4b
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:5:5-48
+	android:name
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:5:14-45
+package#com.instagram.android
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:6:5-53
+	android:name
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:6:14-50
+application
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:9:3-18:17
+provider#expo.modules.shareto.ShareToFileProvider
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:11:5-17:16
+	android:grantUriPermissions
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:15:7-41
+	android:authorities
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:13:7-53
+	android:exported
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:14:7-31
+	android:name
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:12:7-62
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:7-110
+	android:resource
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:69-107
+	android:name
+		ADDED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:18-68
+uses-sdk
+INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml
+INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml

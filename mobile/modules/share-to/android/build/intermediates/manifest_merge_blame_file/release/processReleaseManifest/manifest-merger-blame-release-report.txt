@@ -1,0 +1,43 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="expo.modules.shareto" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+6    <!-- Only these apps need to be visible, to offer "Share to WhatsApp / Instagram" (Android 11+). -->
+7    <queries>
+7-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:3:3-7:13
+8        <package android:name="com.whatsapp" />
+8-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:4:5-44
+8-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:4:14-41
+9        <package android:name="com.whatsapp.w4b" />
+9-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:5:5-48
+9-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:5:14-45
+10        <package android:name="com.instagram.android" />
+10-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:6:5-53
+10-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:6:14-50
+11    </queries>
+12
+13    <application>
+13-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:9:3-18:17
+14
+15        <!-- Hands a designed image (in Ibtida's cache) to the chosen app, read-only, for that share only. -->
+16        <provider
+16-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:11:5-17:16
+17            android:name="expo.modules.shareto.ShareToFileProvider"
+17-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:12:7-62
+18            android:authorities="${applicationId}.shareto"
+18-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:13:7-53
+19            android:exported="false"
+19-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:14:7-31
+20            android:grantUriPermissions="true" >
+20-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:15:7-41
+21            <meta-data
+21-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:7-110
+22                android:name="android.support.FILE_PROVIDER_PATHS"
+22-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:18-68
+23                android:resource="@xml/share_to_paths" />
+23-->/Users/shad/Ibtida-V2/mobile/modules/share-to/android/src/main/AndroidManifest.xml:16:69-107
+24        </provider>
+25    </application>
+26
+27</manifest>

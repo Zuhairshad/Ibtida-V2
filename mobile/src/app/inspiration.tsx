@@ -57,13 +57,15 @@ export default function InspirationFeed() {
   const { groups, loading, error, live, refresh } = useInspirationFeed();
   const now = useNow(60_000).getTime();
   const today = groups[0]?.day === dayOf(now) ? groups[0] : null;
+  // "Live" only when the feed itself loaded and updates are connected.
+  const isLive = live && !error;
 
   return (
     <Screen tabs={false} top={54}>
       <BackBar title="Inspiration" right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 14 }} accessibilityLabel={live ? 'Live: new posts appear here' : 'Updates when you open this screen'}>
-          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: live ? t.mint : t.t4 }} />
-          <Txt style={{ fontSize: 12, fontWeight: 700, color: live ? t.mint : t.t4 }}>{live ? 'LIVE' : 'OFFLINE'}</Txt>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginRight: 14 }} accessibilityLabel={isLive ? 'Live: new posts appear here' : 'Updates when you open this screen'}>
+          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: isLive ? t.mint : t.t4 }} />
+          <Txt style={{ fontSize: 12, fontWeight: 700, color: isLive ? t.mint : t.t4 }}>{isLive ? 'LIVE' : 'OFFLINE'}</Txt>
         </View>
       } />
       <Statement a="Today’s light." b="Reflect, then share." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
