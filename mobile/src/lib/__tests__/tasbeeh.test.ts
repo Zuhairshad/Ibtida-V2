@@ -71,3 +71,17 @@ describe('goals', () => {
     expect(getState().goals[0].prog).toBe(3);
   });
 });
+
+describe('Ummah total from the free counter', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { tasbeehDelta } = require('../sync') as typeof import('../sync');
+  const life = (n: number, rounds = 0) => ({ 'b:SubhanAllah': { n, rounds } });
+  it('counts the tap that starts a new round (33 → 1 must not be lost)', () => {
+    expect(tasbeehDelta({ tasLife: life(33, 1) }, { tasLife: life(34, 1) })).toBe(1);
+  });
+  it('counts undo as −1, and never counts reset or switching dhikr', () => {
+    expect(tasbeehDelta({ tasLife: life(34) }, { tasLife: life(33) })).toBe(-1);
+    const same = life(34);
+    expect(tasbeehDelta({ tasLife: same }, { tasLife: same })).toBe(0);
+  });
+});

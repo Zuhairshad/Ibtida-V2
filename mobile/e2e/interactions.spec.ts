@@ -740,3 +740,20 @@ test.describe('search', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe('goal management', () => {
+  test('a goal’s target can be changed and the goal removed', async ({ page, seed }) => {
+    await seed(withSample());
+    await page.goto('/adhkar/goals');
+    await page.getByRole('button', { name: 'Edit Durood Sharif' }).click();
+    const input = page.getByLabel('Daily target').filter({ visible: true });
+    await input.fill('20');
+    await page.getByRole('button', { name: 'Save', exact: true }).filter({ visible: true }).click();
+    // Today's 33 counts are kept but capped at the new target.
+    await storedWhen(page, s => s.goals.find((g: { id: number }) => g.id === 1)?.target === 20 && s.goals.find((g: { id: number }) => g.id === 1)?.prog === 20);
+    await page.getByRole('button', { name: 'Edit Istighfar' }).click();
+    page.once('dialog', d => d.accept());
+    await page.getByRole('button', { name: 'Remove goal' }).filter({ visible: true }).click();
+    await storedWhen(page, s => !s.goals.some((g: { id: number }) => g.id === 2));
+  });
+});

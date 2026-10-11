@@ -21,7 +21,7 @@ import { currentUserId, onSession, supabase } from './supabase';
  * offline is uploaded later.
  */
 
-type OpType = 'log' | 'goal' | 'wake' | 'emergency' | 'profile' | 'dhikr' | 'cg' | 'join' | 'ameen' | 'circle-contrib';
+type OpType = 'log' | 'goal' | 'goal-del' | 'wake' | 'emergency' | 'profile' | 'dhikr' | 'cg' | 'join' | 'ameen' | 'circle-contrib';
 export type Op = {
   k: string; t: OpType; uid: string;
   p: Record<string, unknown>;
@@ -129,6 +129,15 @@ const PROFILE_KEYS: (keyof AppState)[] = [
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 
+const lifeSum = (l: AppState['tasLife'] | undefined) => Object.values(l ?? {}).reduce((a, x) => a + (x?.n ?? 0), 0);
+
+/** Free-counter dhikr to add to the Ummah total between two states: taps (+n) or one undo (−1), else 0. */
+export function tasbeehDelta(a: Pick<AppState, 'tasLife'>, b: Pick<AppState, 'tasLife'>) {
+  if (a.tasLife === b.tasLife) return 0;
+  const d = lifeSum(b.tasLife) - lifeSum(a.tasLife);
+  return d > 0 || d === -1 ? d : 0;
+}
+
 export const emergencyKey = (e: Emergency) => `${e.when}|${e.after}|${e.reason}`.slice(0, 200);
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
@@ -152,6 +161,13 @@ function diff(a: AppState, b: AppState) {
 
   // Goals and their progress (+ tasbeeh counts made against a goal)
   if (a.goals !== b.goals) {
+    // Removed goals are deleted on the server too, with a tombstone so a pull can't bring them back.
+    const kept = new Set(b.goals.map(g => g.id));
+    a.goals.forEach(g => {
+      if (kept.has(g.id)) return;
+      stamp(`goaldel:${g.id}`);
+      enqueue('goal-del', `goaldel:${g.id}`, { id: g.id });
+    });
     const old = new Map(a.goals.map(g => [g.id, g]));
     b.goals.forEach(g => {
       const o = old.get(g.id);
@@ -166,12 +182,11 @@ function diff(a: AppState, b: AppState) {
     });
   }
 
-  // Free tasbeeh counter
-  if (a.tasN !== b.tasN && a.dh === b.dh) {
-    const d = b.tasN - a.tasN;
-    if (d > 0) addDhikr(d, null);
-    else if (d === -1) addDhikr(-1, null);
-  }
+  // Free tasbeeh counter. Counted from the lifetime totals, which change only by taps (+n) and
+  // undo (−1): the round count itself drops back to 1 when a new round starts, and to 0 on reset or
+  // when switching dhikr, none of which may add to or subtract from the Ummah total.
+  const td = tasbeehDelta(a, b);
+  if (td) addDhikr(td, null);
 
   if (a.wakeLog !== b.wakeLog) {
     const seen = new Set(a.wakeLog.map(w => w.at));
@@ -251,6 +266,12 @@ async function run(op: Op) {
         streak: g.streak, remind: g.remind, week: g.week, sched: g.sched ?? null, cg_name: g.cg,
         community_goal_id: await goalIdFor(g.cg), updated_at: iso(stamps[`goal:${g.id}`]),
       }, { onConflict: 'user_id,client_id' }));
+      return;
+    }
+    case 'goal-del': {
+      // Recreated since (same id is never reused, but be safe): nothing to delete.
+      if (s.goals.some(x => x.id === op.p.id)) return;
+      check(await db.from('adhkar_goals').delete().eq('user_id', uid).eq('client_id', op.p.id as number));
       return;
     }
     case 'wake': {
@@ -455,6 +476,8 @@ export async function pullAndMerge() {
     const k = `goal:${id}`;
     const rt = Date.parse(r.updated_at);
     const local = byId.get(id);
+    // Removed on this phone after the server's last change: keep it removed (and retry the delete).
+    if (!local && (stamps[`goaldel:${id}`] || 0) >= rt) { enqueue('goal-del', `goaldel:${id}`, { id }); return; }
     if (!local || rt > (stamps[k] || 0)) {
       const g: Goal = {
         id, name: r.title, target: r.target, prog: r.progress, streak: r.streak ?? 0, remind: r.remind ?? '8:00 pm',
