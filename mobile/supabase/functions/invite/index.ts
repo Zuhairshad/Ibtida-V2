@@ -26,5 +26,5 @@ Deno.serve(async req => {
   const code = cleanCode(url.searchParams.get('c'));
   // The circle preview is only needed for the plain-text fallback page.
   const p = code && url.searchParams.get('app') === '0' ? await preview(code) : null;
-  return respond(req.url, req.headers.get('user-agent') ?? '', p);
+  return respond(req.url, req.headers.get('user-agent') ?? '', p, projectUrl ? `${projectUrl}/functions/v1/invite` : undefined);
 });

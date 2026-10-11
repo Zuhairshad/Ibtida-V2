@@ -134,4 +134,5 @@ $$;
 revoke all on function public.circle_invite_preview(text) from public;
 grant execute on function public.circle_invite_preview(text) to anon, authenticated;
 grant execute on function public.join_circle_by_code(text) to authenticated;
+revoke all on function public.regenerate_circle_invite(uuid, integer) from public;
 grant execute on function public.regenerate_circle_invite(uuid, integer) to authenticated;

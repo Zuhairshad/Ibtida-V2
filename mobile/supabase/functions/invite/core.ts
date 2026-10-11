@@ -41,15 +41,19 @@ export function fallbackText(code: string | null, p: Preview | null): string {
   }
 }
 
-/** The response for one request. `preview` is only needed for the fallback text. */
-export function respond(reqUrl: string, userAgent: string, preview: Preview | null): Response {
+/**
+ * The response for one request. `preview` is only needed for the fallback text. `publicUrl` is the
+ * function's public address: inside Supabase, `reqUrl` is an internal http URL without /functions/v1.
+ */
+export function respond(reqUrl: string, userAgent: string, preview: Preview | null, publicUrl?: string): Response {
   const url = new URL(reqUrl);
   const code = cleanCode(url.searchParams.get('c'));
   const headers = { 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' };
   if (!code || url.searchParams.get('app') === '0') {
     return new Response(fallbackText(code, preview), { status: code ? 200 : 400, headers: { ...headers, 'content-type': 'text/plain; charset=utf-8' } });
   }
-  const fallback = new URL(url);
+  const fallback = new URL(publicUrl || `${url.origin}${url.pathname}`);
+  url.searchParams.forEach((v, k) => fallback.searchParams.set(k, v));
   fallback.searchParams.set('app', '0');
   const location = /Android/i.test(userAgent) ? intentUrl(code, fallback.toString()) : appUrl(code);
   return new Response(null, { status: 302, headers: { ...headers, location } });

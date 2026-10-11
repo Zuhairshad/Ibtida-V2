@@ -27,6 +27,10 @@ describe('invite redirect (Edge Function)', () => {
     expect(loc.startsWith('intent://join?code=K7Q2M9XA#Intent;scheme=ibtida;package=app.ibtida;')).toBe(true);
     expect(decodeURIComponent(loc)).toContain(`${base}?c=k7q2m9xa&app=0`);
   });
+  (hasResponse ? it : it.skip)('the fallback uses the public address, not the internal one', () => {
+    const loc = respond('http://p.supabase.co/invite?c=K7Q2M9XA', 'Android', null, base).headers.get('location')!;
+    expect(decodeURIComponent(loc)).toContain(`S.browser_fallback_url=${base}?c=K7Q2M9XA&app=0;`);
+  });
   (hasResponse ? it : it.skip)('other devices get the app link; bad codes get a plain message', () => {
     expect(respond(`${base}?c=K7Q2M9XA`, 'iPhone', null).headers.get('location')).toBe('ibtida://join?code=K7Q2M9XA');
     expect(respond(`${base}?c=%3Cscript%3E`, 'iPhone', null).status).toBe(400);
