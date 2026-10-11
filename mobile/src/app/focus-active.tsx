@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { Glow, usePop } from '../components/motion';
 import { buzz, Chips, Cta, Ring, say, Sheet, Txt } from '../components/ui';
-import { APPS, mmss } from '../data/content';
+import { mmss } from '../data/content';
 import { DOW, fmtTime } from '../lib/prayer';
 import { appName, IbadahLock, lockPackages } from '../lib/shield';
 import { countGoal, getState, set, useApp } from '../state/store';
@@ -57,7 +57,7 @@ function Lock() {
       setBlocked(running.blocked);
     } else {
       native.current = IbadahLock.start({
-        packages: lockPackages(focus.apps),
+        packages: lockPackages(focus.apps, focus.pkgs),
         endsAt: limit ? startedAt.current + limit * 1000 : null,
         returnUrl: `ibtida://focus-active?goal=${goal.id}&resume=1`,
       }).then(r => setShielding(r.shielding)).catch(() => setShielding(false));
@@ -103,7 +103,7 @@ function Lock() {
 
   if (!goal) return null;
   const n = goal.prog;
-  const apps = APPS.filter((_, i) => focus.apps[i]);
+  const apps = lockPackages(focus.apps, focus.pkgs).map(appName);
   const tap = () => {
     pop();
     const prog = countGoal(goal.id, 1)?.prog ?? getState().goals.find(g => g.id === goal.id)!.prog;

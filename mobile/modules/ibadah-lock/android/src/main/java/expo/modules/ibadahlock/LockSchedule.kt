@@ -1,7 +1,10 @@
 package expo.modules.ibadahlock
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.provider.Settings
@@ -21,7 +24,9 @@ data class LockWindow(
   val duration: Int,
   /** Monday = bit 0 … Sunday = bit 6, for the day the window opens. */
   val days: Int,
-  val enabled: Boolean
+  val enabled: Boolean,
+  /** Apps this window locks; empty locks every app except the essentials. */
+  val packages: Set<String> = emptySet()
 )
 
 object LockSchedule {
@@ -51,6 +56,7 @@ object LockSchedule {
       .putString(K_WINDOWS, serialize(windows))
       .putString(K_RETURN_URL, returnUrl ?: DEFAULT_RETURN_URL)
       .commit()
+    armNext(ctx)
   }
 
   fun windows(ctx: Context): List<LockWindow> = parse(prefs(ctx).getString(K_WINDOWS, "[]") ?: "[]")
@@ -60,9 +66,24 @@ object LockSchedule {
   fun returnUrl(ctx: Context): String = prefs(ctx).getString(K_RETURN_URL, null) ?: DEFAULT_RETURN_URL
 
   /** The window running at [now] (not skipped), as (id, startMs, endMs); null when none is. */
-  fun active(ctx: Context, now: Long): Triple<String, Long, Long>? {
+  fun active(ctx: Context, now: Long): Triple<String, Long, Long>? =
+    running(ctx, now).maxByOrNull { it.second.third }?.second
+
+  /**
+   * The running window that locks [pkg] at [now], or null when [pkg] may open. A window with no
+   * app list locks every app except the essentials; one with a list locks only those apps.
+   */
+  fun lockingWindow(ctx: Context, now: Long, pkg: String): Triple<String, Long, Long>? {
+    if (isAllowed(ctx, pkg)) return null
+    return running(ctx, now)
+      .filter { (w, _) -> w.packages.isEmpty() || pkg in w.packages }
+      .maxByOrNull { it.second.third }?.second
+  }
+
+  /** Every window running at [now] (not skipped), with its (id, startMs, endMs). */
+  private fun running(ctx: Context, now: Long): List<Pair<LockWindow, Triple<String, Long, Long>>> {
     val skipUntil = prefs(ctx).getLong(K_SKIP_UNTIL, 0L)
-    var best: Triple<String, Long, Long>? = null
+    val out = ArrayList<Pair<LockWindow, Triple<String, Long, Long>>>()
     for (w in windows(ctx)) {
       if (!w.enabled || w.duration <= 0) continue
       // A window may have opened yesterday and run past midnight.
@@ -79,12 +100,58 @@ object LockSchedule {
         if (w.days and (1 shl dow) == 0) continue
         val startMs = cal.timeInMillis
         val endMs = startMs + w.duration * 60_000L
-        if (now in startMs until endMs && endMs > skipUntil) {
-          if (best == null || endMs > best.third) best = Triple(w.id, startMs, endMs)
+        if (now in startMs until endMs && endMs > skipUntil) out.add(w to Triple(w.id, startMs, endMs))
+      }
+    }
+    return out
+  }
+
+  /** The next time any enabled window opens after [now], or null. */
+  fun nextStart(ctx: Context, now: Long): Long? {
+    var best: Long? = null
+    for (w in windows(ctx)) {
+      if (!w.enabled || w.duration <= 0 || w.days == 0) continue
+      for (ahead in 0..7) {
+        val cal = Calendar.getInstance().apply {
+          timeInMillis = now
+          add(Calendar.DAY_OF_YEAR, ahead)
+          set(Calendar.HOUR_OF_DAY, w.start / 60)
+          set(Calendar.MINUTE, w.start % 60)
+          set(Calendar.SECOND, 0)
+          set(Calendar.MILLISECOND, 0)
         }
+        val dow = (cal.get(Calendar.DAY_OF_WEEK) + 5) % 7
+        if (w.days and (1 shl dow) == 0 || cal.timeInMillis <= now) continue
+        if (best == null || cal.timeInMillis < best) best = cal.timeInMillis
+        break
       }
     }
     return best
+  }
+
+  /**
+   * Arms an exact alarm for the next window start. When it fires, the service locks the app that is
+   * already open — without it, a lock only took effect the next time an app was opened.
+   */
+  fun armNext(ctx: Context) {
+    val am = ctx.getSystemService(AlarmManager::class.java) ?: return
+    val op = startPending(ctx)
+    am.cancel(op)
+    val at = nextStart(ctx, System.currentTimeMillis()) ?: return
+    try {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || am.canScheduleExactAlarms()) {
+        am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, op)
+      } else {
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, op)
+      }
+    } catch (e: SecurityException) {
+      am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, op)
+    }
+  }
+
+  private fun startPending(ctx: Context): PendingIntent {
+    val i = Intent(ctx, LockScheduleReceiver::class.java).setAction(LockScheduleReceiver.ACTION_WINDOW_START)
+    return PendingIntent.getBroadcast(ctx, 0x1B0C, i, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
   }
 
   /** Lets apps through until [until] (an emergency unlock of the current window). */
@@ -117,7 +184,7 @@ object LockSchedule {
     null
   }
 
-  private fun keyboardPackage(ctx: Context): String? = try {
+  fun keyboardPackage(ctx: Context): String? = try {
     Settings.Secure.getString(ctx.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)?.substringBefore('/')
   } catch (e: Exception) {
     null
@@ -132,7 +199,8 @@ object LockSchedule {
         start = o.optInt("start", 0).coerceIn(0, 24 * 60 - 1),
         duration = o.optInt("duration", 0).coerceIn(0, MAX_DURATION),
         days = o.optInt("days", 0) and 0x7F,
-        enabled = o.optBoolean("enabled", true)
+        enabled = o.optBoolean("enabled", true),
+        packages = o.optJSONArray("packages")?.let { a -> (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() }.toSet() } ?: emptySet()
       )
     }
   } catch (e: Exception) {
@@ -144,6 +212,7 @@ object LockSchedule {
     ws.forEach { w ->
       arr.put(org.json.JSONObject().apply {
         put("id", w.id); put("start", w.start); put("duration", w.duration); put("days", w.days); put("enabled", w.enabled)
+        put("packages", JSONArray(w.packages.toList()))
       })
     }
     return arr.toString()

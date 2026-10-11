@@ -10,6 +10,7 @@ import { useReducedMotion } from '../components/motion';
 import { buzz, buzzError, Cta, say, Tap, Txt } from '../components/ui';
 import { usePrayerNow } from '../lib/hooks';
 import { dayKey, fmtTime } from '../lib/prayer';
+import { FajrAlarm } from '../lib/fajrAlarm';
 import { classifyFrame, ITEM_FRAMES, itemLabel, loadItemModel } from '../lib/itemScan';
 import { fmtCountdown, readWakeTag, WAKE_WINDOW_MS, wakeTagUrl, type WakeKind } from '../lib/wakeTag';
 import { getState, set, useApp } from '../state/store';
@@ -99,18 +100,23 @@ function Scan() {
   const testKind: WakeKind | null = test === 'W' || test === 'M' ? test : null;
   const mode = useApp(s => s.wakeMode);
   const [perm, requestPerm, getPerm] = useCameraPermissions();
-  const [stage, setStage] = useState(testKind === 'M' ? 2 : 1);
+  // Reopened between the two scans (from the "now your prayer mat" notification): carry on at stage 2.
+  const [paused] = useState(() => {
+    const r = testKind ? null : FajrAlarm.getRinging();
+    return r && r.silencedUntil > Date.now() ? r.silencedUntil - WAKE_WINDOW_MS : null;
+  });
+  const [stage, setStage] = useState(testKind === 'M' || paused ? 2 : 1);
   const cam = useRef<CameraView>(null);
   const [modelState, setModelState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [seeing, setSeeing] = useState<{ name: string; p: number; match: number } | null>(null);
   const [torch, setTorch] = useState(false);
   const [camErr, setCamErr] = useState<string | null>(null);
-  const [wuduAt, setWuduAt] = useState<number | null>(null);
+  const [wuduAt, setWuduAt] = useState<number | null>(paused);
   const [now, setNow] = useState(() => Date.now());
 
   // Refs mirror state so bursts of barcode frames between renders see the latest stage.
-  const stageRef = useRef(testKind === 'M' ? 2 : 1);
-  const wuduAtRef = useRef<number | null>(null);
+  const stageRef = useRef(testKind === 'M' || paused ? 2 : 1);
+  const wuduAtRef = useRef<number | null>(paused);
   const lastTag = useRef<{ data: string; at: number }>({ data: '', at: 0 });
   const lastAct = useRef(0);
 
@@ -156,6 +162,8 @@ function Scan() {
     if (s === 1 && kind === 'W') {
       buzz([30, 40, 30]);
       goStage(2, n);
+      // A ringing alarm goes quiet now, and rings again if the mat isn't scanned in time.
+      FajrAlarm.silence(n + WAKE_WINDOW_MS).catch(() => {});
       say(`${how === 'item' ? 'Sink recognised' : 'Wudu scan verified'} · 10 min to reach the mat`);
       return;
     }
@@ -164,6 +172,7 @@ function Scan() {
       goStage(3, null);
       const d = new Date(n);
       set(st => ({ wakeLog: [...st.wakeLog, { date: dayKey(d), at: n }].slice(-90) }));
+      FajrAlarm.stop().catch(() => {});
       say('Wake verified · alarm stopped');
     }
   }, [goStage, testKind]);

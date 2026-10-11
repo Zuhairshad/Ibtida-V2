@@ -53,6 +53,21 @@ export type ScheduleWindow = {
   /** Monday = bit 0 … Sunday = bit 6. */
   days: number;
   enabled: boolean;
+  /** Package ids this window locks; empty or missing locks every app except the essentials. */
+  packages?: string[];
+};
+
+/** A launchable app on this phone. `icon` is a PNG data URI (or null if it couldn't be drawn). */
+export type InstalledApp = { packageName: string; label: string; icon: string | null };
+
+export type LockStatus = {
+  /** The Accessibility service is switched on. */
+  service: boolean;
+  /** Exact alarms allowed: lets a window lock the app already open at its start minute. */
+  exactAlarms: boolean;
+  batteryUnrestricted: boolean;
+  /** Epoch ms of the next window start, or null. */
+  nextStart: number | null;
 };
 
 export type ActiveWindow = { id: string; startsAt: number; endsAt: number; blocked: number };
@@ -69,6 +84,8 @@ declare class IbadahLockNative extends NativeModule<Events> {
   setSchedule(json: string, returnUrl: string | null): Promise<boolean>;
   getActiveWindow(): ActiveWindow | null;
   skipWindow(until: number): Promise<void>;
+  getInstalledApps(iconSize: number): Promise<InstalledApp[]>;
+  getStatus(): LockStatus;
 }
 
 // Only Android has a working implementation; the iOS stub is never loaded on purpose so a missing
@@ -145,4 +162,24 @@ export async function skipWindow(until: number): Promise<void> {
 
 export function onBlockedAttempt(listener: (e: BlockedAttempt) => void): Subscription {
   return native ? native.addListener('onBlockedAttempt', listener) : NOOP_SUB;
+}
+
+/** Launchable apps on this phone, sorted by name. Empty where app listing isn't available. */
+export async function getInstalledApps(iconSize = 72): Promise<InstalledApp[]> {
+  if (!native) return [];
+  try {
+    return await native.getInstalledApps(iconSize);
+  } catch {
+    return [];
+  }
+}
+
+/** Permission and schedule status, or null where shielding isn't available. */
+export function getStatus(): LockStatus | null {
+  if (!native) return null;
+  try {
+    return native.getStatus();
+  } catch {
+    return null;
+  }
 }

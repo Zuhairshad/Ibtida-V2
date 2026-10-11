@@ -1,8 +1,16 @@
 package expo.modules.ibadahlock
 
+import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
+import android.util.Base64
+import java.io.ByteArrayOutputStream
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -87,11 +95,61 @@ class IbadahLockModule : Module() {
       LockSchedule.skipUntil(context, until.toLong())
     }
 
+    /**
+     * Apps the user can open from the launcher (name, package and a small PNG icon), for choosing
+     * what a lock covers. Needs only the <queries> launcher filter, not QUERY_ALL_PACKAGES.
+     */
+    AsyncFunction("getInstalledApps") { iconSize: Int ->
+      val ctx = context
+      val pm = ctx.packageManager
+      val main = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+      val px = iconSize.coerceIn(24, 192)
+      pm.queryIntentActivities(main, 0)
+        .map { it.activityInfo }
+        .filter { it.packageName != ctx.packageName && !Exempt.isExempt(ctx, it.packageName) }
+        .distinctBy { it.packageName }
+        .map { info ->
+          mapOf(
+            "packageName" to info.packageName,
+            "label" to info.loadLabel(pm).toString(),
+            "icon" to iconPng(info.loadIcon(pm), px)
+          )
+        }
+        .sortedBy { (it["label"] as String).lowercase() }
+    }
+
+    /** What the lock needs: the Accessibility service, exact alarms (to lock on time) and battery exemption. */
+    Function("getStatus") {
+      val ctx = context
+      val am = ctx.getSystemService(AlarmManager::class.java)
+      val power = ctx.getSystemService(PowerManager::class.java)
+      val next = LockSchedule.nextStart(ctx, System.currentTimeMillis())
+      mapOf(
+        "service" to isLockServiceEnabled(ctx),
+        "exactAlarms" to (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || am?.canScheduleExactAlarms() == true),
+        "batteryUnrestricted" to (power?.isIgnoringBatteryOptimizations(ctx.packageName) == true),
+        "nextStart" to next?.toDouble()
+      )
+    }
+
     AsyncFunction("stop") {
       val ctx = context
       LockSession.clear(ctx)
       IbadahLockAccessibilityService.refresh()
     }
+  }
+
+  private fun iconPng(d: Drawable, px: Int): String? = try {
+    val bmp = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bmp)
+    d.setBounds(0, 0, px, px)
+    d.draw(canvas)
+    val out = ByteArrayOutputStream()
+    bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
+    bmp.recycle()
+    "data:image/png;base64," + Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP)
+  } catch (e: Exception) {
+    null
   }
 
   companion object {

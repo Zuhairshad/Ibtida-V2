@@ -4,8 +4,19 @@ import { Platform, ScrollView, View } from 'react-native';
 import { Icon } from '../components/Icon';
 import { BackBar, buzz, Chips, Cta, H1, Label, Option, Page, say, Seg, Switch, Tap, Txt } from '../components/ui';
 import { APPS } from '../data/content';
-import { IbadahLock, useShieldPermission } from '../lib/shield';
-import { activeLock, daysLabel, durLabel, rangeLabel } from '../lib/lockTimes';
+import { AppPicker } from '../components/AppPicker';
+import { IbadahLock, lockPackages, useLockableApps, useLockStatus, useShieldPermission } from '../lib/shield';
+import { FajrAlarm } from '../lib/fajrAlarm';
+import { activeLock, daysLabel, durLabel, rangeLabel, upcomingLocks, type LockSched } from '../lib/lockTimes';
+import { DOW, fmtTime } from '../lib/prayer';
+
+const nextLabel = (d: Date) => {
+  const today = new Date();
+  const same = d.toDateString() === today.toDateString();
+  const tom = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toDateString() === d.toDateString();
+  const day = same ? 'today' : tom ? 'tomorrow' : `${DOW[d.getDay()][0]}${DOW[d.getDay()].slice(1).toLowerCase()}`;
+  return `${day} ${fmtTime(d)}`;
+};
 import { set, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
@@ -17,6 +28,7 @@ export default function FocusSetup() {
   const goals = useApp(s => s.goals).filter(g => g.prog < g.target);
   const put = (p: Partial<typeof focus>) => set(s => ({ focus: { ...s.focus, ...p } }));
   const shield = useShieldPermission();
+  const lockable = useLockableApps();
   const params = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState(params.tab === '1' ? 1 : 0);
   return (
@@ -25,7 +37,7 @@ export default function FocusSetup() {
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         <View style={{ paddingTop: 4, paddingHorizontal: 22 }}>
           <H1>Ibadah Lock</H1>
-          <Txt style={{ fontSize: 15, lineHeight: 22.5, color: t.t3, marginTop: 8 }}>{tab === 0 ? 'Distractions stay locked until your dhikr is done.' : 'Lock every app at the times you choose, on the days you choose.'}</Txt>
+          <Txt style={{ fontSize: 15, lineHeight: 22.5, color: t.t3, marginTop: 8 }}>{tab === 0 ? 'Distractions stay locked until your dhikr is done.' : 'Lock apps at the times you choose, on the days you choose.'}</Txt>
         </View>
         <View style={{ paddingTop: 16, paddingHorizontal: 22 }}>
           <Seg labels={['Lock now', 'Schedule']} value={tab} onChange={setTab} height={44} size={14} />
@@ -46,7 +58,9 @@ export default function FocusSetup() {
         </View>
         <Label style={{ marginTop: 20, marginBottom: 10, marginHorizontal: 26 }}>APPS TO LOCK</Label>
         <View style={{ paddingHorizontal: 22 }}>
- <Chips wrap labels={APPS} isOn={i => focus.apps[i]} onPick={i => { const a = focus.apps.slice(); a[i] = !a[i]; put({ apps: a }); }} />
+          {lockable.fromDevice
+            ? <AppPicker {...lockable} selected={focus.pkgs ?? lockPackages(focus.apps)} onChange={pkgs => put({ pkgs })} />
+            : <Chips wrap labels={APPS} isOn={i => focus.apps[i]} onPick={i => { const a = focus.apps.slice(); a[i] = !a[i]; put({ apps: a }); }} />}
         </View>
         </>)}
         <ShieldNote {...shield} />
@@ -55,7 +69,7 @@ export default function FocusSetup() {
         {tab === 1 ? <Cta label="Add lock time" icon="plus" onPress={() => router.push('/lock-schedule')} /> : <Cta label="Activate Ibadah Lock" icon="lock" disabled={goals.length === 0} onPress={() => {
           if (!goals.length) return;
           buzz([20, 40, 20]);
-          const n = focus.apps.filter(Boolean).length;
+          const n = lockPackages(focus.apps, focus.pkgs).length;
           say(!n ? 'Ibadah Lock on' : shield.supported && shield.granted ? `Ibadah Lock on · ${n} apps shielded` : 'Ibadah Lock on · in-app only');
           router.replace({ pathname: '/focus-active', params: { goal: String(goals[Math.min(focus.goal, goals.length - 1)].id) } });
         }} />}
@@ -71,6 +85,15 @@ function Schedules() {
   const locks = useApp(s => s.locks);
   const skip = useApp(s => s.lockSkip);
   const running = activeLock(locks, new Date(), skip);
+  const status = useLockStatus();
+  const enforced = !status || status.service;
+  const ruleState = (l: LockSched) => {
+    if (!l.on) return { text: 'Off', ink: t.t4 };
+    if (running?.lock.id === l.id) return { text: 'Active now', ink: t.acc };
+    if (!enforced) return { text: 'Needs permission', ink: t.rose };
+    const next = upcomingLocks([l], new Date(), 7)[0];
+    return { text: next ? `Next ${nextLabel(next.start)}` : 'Scheduled', ink: t.mint };
+  };
   const toggle = (id: string) => set(s => ({ locks: s.locks.map(l => (l.id === id ? { ...l, on: !l.on } : l)) }));
   return (
     <View style={{ paddingTop: 16, paddingHorizontal: 22, gap: 10 }}>
@@ -90,16 +113,23 @@ function Schedules() {
         </View>
       )}
       {locks.map(l => (
-        <Tap key={l.id} scale={0.985} onPress={() => router.push({ pathname: '/lock-schedule', params: { id: l.id } })} accessibilityLabel={`Lock time ${rangeLabel(l)}, ${daysLabel(l.days)}, ${l.on ? 'on' : 'off'}`}
+        <Tap key={l.id} scale={0.985} onPress={() => router.push({ pathname: '/lock-schedule', params: { id: l.id } })} accessibilityLabel={`Lock time ${rangeLabel(l)}, ${daysLabel(l.days)}, ${ruleState(l).text}`}
           style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 16, paddingLeft: 18, paddingRight: 14, flexDirection: 'row', alignItems: 'center', gap: 12, opacity: l.on ? 1 : 0.6 }}>
           <View style={{ flex: 1 }}>
             <Txt style={{ fontSize: 19, fontWeight: 800 }}>{rangeLabel(l)}</Txt>
-            <Txt style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>{durLabel(l.dur)} · {daysLabel(l.days)}</Txt>
+            <Txt style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>{durLabel(l.dur)} · {daysLabel(l.days)} · {l.apps?.length ? `${l.apps.length} ${l.apps.length === 1 ? 'app' : 'apps'}` : 'All apps'}</Txt>
+            <Txt style={{ fontSize: 12.5, fontWeight: 700, color: ruleState(l).ink, marginTop: 4 }}>{ruleState(l).text}</Txt>
           </View>
           <Switch on={l.on} onToggle={() => toggle(l.id)} label={`${rangeLabel(l)} ${l.on ? 'on' : 'off'}`} />
         </Tap>
       ))}
-      {locks.length > 0 && <Txt style={{ fontSize: 12.5, lineHeight: 19, color: t.t4, marginTop: 2 }}>During a lock time every app except calls, messages, emergency, keyboard and clock opens Ibtida instead.</Txt>}
+      {locks.length > 0 && <Txt style={{ fontSize: 12.5, lineHeight: 19, color: t.t4, marginTop: 2 }}>During a lock time the chosen apps (or every app) open Ibtida instead. Calls, messages, emergency, keyboard and clock always work.</Txt>}
+      {status && status.service && !status.exactAlarms && (
+        <Tap onPress={() => FajrAlarm.openSettings('exactAlarm')} accessibilityRole="button"
+          style={{ borderRadius: 20, backgroundColor: t.noteBg, padding: 14 }}>
+          <Txt style={{ fontSize: 13, lineHeight: 19, color: t.noteTx }}>Allow <Txt style={{ fontSize: 13, fontWeight: 800, color: t.noteTx }}>Alarms & reminders</Txt> so a lock starts on the minute even if an app is already open. Tap to allow.</Txt>
+        </Tap>
+      )}
     </View>
   );
 }

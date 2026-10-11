@@ -38,7 +38,9 @@ describe('labels and native shape', () => {
   });
   it('maps to the native bitmask', () => {
     expect(daysMask(WEEKDAYS)).toBe(0b0011111);
-    expect(toNativeWindows([lock()])).toEqual([{ id: 'a', start: 300, duration: 45, days: 31, enabled: true }]);
+    expect(toNativeWindows([lock()])).toEqual([{ id: 'a', start: 300, duration: 45, days: 31, enabled: true, packages: [] }]);
+    // A rule can lock only the apps it lists; an empty list means every app except the essentials.
+    expect(toNativeWindows([{ ...lock(), apps: ['com.instagram.android'] }])[0].packages).toEqual(['com.instagram.android']);
   });
 });
 

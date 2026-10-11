@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
 import { AppState as RNAppState } from 'react-native';
-import { CITIES, PH, type City, type PrayerName } from '../data/content';
+import { CITIES, DHIKR, PH, type City, type PrayerName } from '../data/content';
 import { isAyahRef } from '../data/surahs';
 import type { LockSched } from '../lib/lockTimes';
 import type { Adjust } from '../lib/prayer';
 import type { NotifLang } from '../data/reminders';
+import type { CustomDhikr, TasAfter } from '../lib/tasbeeh';
 
 /** Reminder time from the goal-schedule wheels: h indexes 1–12, m indexes 00/15/30/45, a 0=AM 1=PM, days Mon…Sun. */
 export type Sched = { h: number; m: number; a: number; days: number[] };
@@ -20,6 +21,8 @@ export type Goal = {
   day?: string;
   /** Day keys on which the daily target was reached (newest last, capped). */
   hist?: string[];
+  /** Set when the goal was made from the user's own dhikr (see CustomDhikr). */
+  dhikrId?: string;
 };
 export type Circle = {
   id: number; name: string; priv: string; members: number; code: string; role: 'Owner' | 'Member';
@@ -50,6 +53,8 @@ export type AppState = {
   hydrated: boolean;
   onboarded: boolean;
   signedIn: boolean;
+  /** The account the local data belongs to (Supabase user id); '' for data made before any sign-in. */
+  accountId: string;
   name: string;
   email: string;
   theme: ThemePref;
@@ -69,7 +74,17 @@ export type AppState = {
   vib: boolean;
   goals: Goal[];
   dh: number;
+  /** Count in the current tasbeeh round (0 … target; never past it). */
   tasN: number;
+  /** The dhikr being counted (see src/lib/tasbeeh.ts); replaces the older `dh` index. */
+  dhKey: string;
+  /** What the next tap does after a round completes. */
+  tasAfter: TasAfter;
+  /** Target overrides per dhikr key. */
+  tasTargets: Record<string, number>;
+  /** Lifetime counts and completed rounds per dhikr key, kept apart from the current round. */
+  tasLife: Record<string, { n: number; rounds: number }>;
+  customDhikr: CustomDhikr[];
   joined: boolean[];
   ameen: Record<string, boolean>;
   urdu: Record<string, boolean>;
@@ -94,7 +109,8 @@ export type AppState = {
   showTr: boolean;
   rTheme: number;
   emergencies: Emergency[];
-  focus: { dur: number; goal: number; apps: boolean[] };
+  /** `pkgs`: apps chosen from this phone's installed apps (Android builds); otherwise `apps` toggles the shortlist. */
+  focus: { dur: number; goal: number; apps: boolean[]; pkgs?: string[] };
   /** Adhkar reading: text size step (index into AZ_SIZES) and background (index into AZ_BGS). */
   azSize: number;
   azBg: number;
@@ -109,6 +125,8 @@ export type AppState = {
   jamaat: Jamaat;
   /** Manual start-time adjustment per prayer, in minutes (to match a local timetable). */
   adj: Adjust;
+  /** Fajr wake alarm sound key (see ALARM_SOUNDS). */
+  alarmSound: string;
   /** Recurring Ibadah Lock windows (time, duration, days). */
   locks: LockSched[];
   /** Emergency unlock of a scheduled window: apps open normally until this epoch ms. */
@@ -124,6 +142,7 @@ export type AppState = {
 
 const initial: AppState = {
   hydrated: false,
+  accountId: '',
   onboarded: false,
   signedIn: false,
   name: '',
@@ -142,6 +161,11 @@ const initial: AppState = {
   goals: [],
   dh: 0,
   tasN: 0,
+  dhKey: 'b:SubhanAllah',
+  tasAfter: 'repeat',
+  tasTargets: {},
+  tasLife: {},
+  customDhikr: [],
   joined: [false, false, false],
   ameen: {},
   urdu: {},
@@ -173,6 +197,7 @@ const initial: AppState = {
   masjid: '',
   jamaat: {},
   adj: {},
+  alarmSound: 'alarm',
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },
   streak: 0,
   act: {},
@@ -243,6 +268,23 @@ export function setFromRemote(patch: Partial<AppState> | ((s: AppState) => Parti
   try { set(patch); } finally { remoteDepth--; }
 }
 
+/**
+ * Personal data that belongs to one account. When a different account signs in on this phone it
+ * starts from its own server copy, never from the previous person's logs, goals or history.
+ * Device preferences (theme, city, method, notification settings) stay.
+ */
+const ACCOUNT_KEYS = [
+  'name', 'email', 'logs', 'goals', 'wakeLog', 'emergencies', 'circles', 'joined', 'ameen', 'marks', 'qLast', 'qHist', 'qMax',
+  'streak', 'act', 'az', 'tasN', 'tasLife', 'customDhikr', 'tasTargets', 'jamaat', 'masjid', 'token',
+] as const satisfies readonly (keyof AppState)[];
+
+export function resetAccountData(accountId: string) {
+  const fresh: Partial<AppState> = { accountId };
+  for (const k of ACCOUNT_KEYS) (fresh as Record<string, unknown>)[k] = initial[k];
+  fresh.token = newToken();
+  setFromRemote(fresh);
+}
+
 export async function resetAll() {
   await AsyncStorage.removeItem(KEY).catch(() => {});
   state = { ...initial, hydrated: true, token: newToken() };
@@ -270,6 +312,22 @@ export function migrateMarks(marks: unknown): Record<string, boolean> {
 const isPos = (p: unknown): p is QPos =>
   !!p && typeof p === 'object' && isAyahRef((p as QPos).s, (p as QPos).a) && typeof (p as QPos).at === 'number';
 
+function migrateTasbeeh(saved: Partial<AppState>): Partial<AppState> {
+  const dhKey = typeof saved.dhKey === 'string' ? saved.dhKey : `b:${DHIKR[saved.dh ?? 0]?.label ?? DHIKR[0].label}`;
+  const custom = Array.isArray(saved.customDhikr) ? saved.customDhikr : [];
+  const targets = saved.tasTargets && typeof saved.tasTargets === 'object' ? saved.tasTargets : {};
+  const target = targets[dhKey] ?? DHIKR.find(d => `b:${d.label}` === dhKey)?.t ?? custom.find(c => `c:${c.id}` === dhKey)?.target ?? 33;
+  const n = Math.max(0, saved.tasN ?? 0);
+  return {
+    dhKey,
+    tasN: n > target ? n % target : n,
+    tasAfter: saved.tasAfter === 'next' || saved.tasAfter === 'stop' ? saved.tasAfter : 'repeat',
+    tasTargets: targets,
+    tasLife: saved.tasLife && typeof saved.tasLife === 'object' ? saved.tasLife : {},
+    customDhikr: custom,
+  };
+}
+
 function migrate(saved: Partial<AppState>): Partial<AppState> {
   return {
     token: saved.token || newToken(),
@@ -286,6 +344,10 @@ function migrate(saved: Partial<AppState>): Partial<AppState> {
     lang: saved.lang === 'ur' ? 'ur' : 'en',
     jamaat: saved.jamaat && typeof saved.jamaat === 'object' ? saved.jamaat : {},
     adj: saved.adj && typeof saved.adj === 'object' ? saved.adj : {},
+    // The counter used to run past its target ("37 / 33"): keep only the current round.
+    ...migrateTasbeeh(saved),
+    // Wake verification is for Fajr only; earlier versions offered it for every prayer.
+    wakeVerify: [!!saved.wakeVerify?.[0], false, false, false, false],
   };
 }
 
@@ -404,15 +466,19 @@ export function rollDay() {
 export function countGoal(id: number, delta: number): Goal | undefined {
   rollDay();
   let out: Goal | undefined;
+  let applied = 0;
   set(s => ({
     goals: s.goals.map(g => {
       if (g.id !== id) return g;
-      const next = { ...g, prog: Math.max(0, g.prog + delta) };
+      // Never past the target: extra taps after completion are not counted (or sent to circles).
+      const prog = Math.max(0, Math.min(g.target, g.prog + delta));
+      applied = prog - g.prog;
+      const next = { ...g, prog };
       out = { ...next, ...goalStats(next) };
       return out;
     }),
   }));
-  if (out) addAct('d', delta);
+  if (out && applied) addAct('d', applied);
   return out;
 }
 

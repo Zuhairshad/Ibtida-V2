@@ -320,11 +320,11 @@ export default function Prayer() {
               <Cta label="Prayed on time" height={56} size={16} style={{ flex: 1.4 }}
                 onPress={() => { buzz([10, 30, 16]); setLog(key, detail, 'prayed'); setDetail(null); say(`${detail} logged · May Allah accept it`); }} />
             </View>}
-            <Tap onPress={() => { setDetail(null); router.push('/mat-tag'); }}
+            {detail === 'Fajr' && <Tap onPress={() => { setDetail(null); router.push('/prayer/wake-alarm'); }}
               style={{ marginTop: 12, height: 54, borderRadius: 22, boxShadow: t.hair, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
               <Icon name="qr" color={t.acc} />
               <Txt style={{ fontSize: 14.5, fontWeight: 700, color: t.acc }}>Set up wake verification</Txt>
-            </Tap>
+            </Tap>}
           </>
         )}
       </Sheet>

@@ -20,17 +20,23 @@ import java.lang.ref.WeakReference
  */
 class IbadahLockAccessibilityService : AccessibilityService() {
   private var lastCountedPkg: String? = null
+  private var lastForeground: String? = null
   private var lastCountedAt = 0L
 
   override fun onServiceConnected() {
     super.onServiceConnected()
     instance = WeakReference(this)
     applySession(LockSession.read(this))
+    // Reconnected (after a reboot or the service being turned back on): arm the next window start.
+    LockSchedule.armNext(this)
   }
 
   override fun onAccessibilityEvent(event: AccessibilityEvent?) {
     if (event == null || event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
     val pkg = event.packageName?.toString() ?: return
+    // Remember what is on screen, so a window that opens later can lock it straight away. The
+    // notification shade and the keyboard sit on top of an app; they don't replace it.
+    if (pkg != "com.android.systemui" && pkg != LockSchedule.keyboardPackage(this)) lastForeground = pkg
     if (pkg == packageName) return
     val now = System.currentTimeMillis()
 
@@ -45,9 +51,12 @@ class IbadahLockAccessibilityService : AccessibilityService() {
       return
     }
 
-    // 2. A scheduled window: locks every app except the essentials.
-    val window = LockSchedule.active(this, now) ?: return
-    if (LockSchedule.isAllowed(this, pkg)) return
+    // 2. A scheduled window: locks its chosen apps, or every app except the essentials.
+    enforceSchedule(pkg, now)
+  }
+
+  private fun enforceSchedule(pkg: String, now: Long) {
+    val window = LockSchedule.lockingWindow(this, now, pkg) ?: return
     returnToIbtida(LockSchedule.returnUrl(this))
     if (countOnce(pkg, now)) IbadahLockModule.notifyBlocked(pkg, LockSchedule.incrementBlocked(this, window.second), now)
   }
@@ -112,6 +121,15 @@ class IbadahLockAccessibilityService : AccessibilityService() {
 
     @Volatile
     private var instance: WeakReference<IbadahLockAccessibilityService>? = null
+
+    /** A window just opened: lock the app already on screen, if this window covers it. */
+    fun enforceNow() {
+      val service = instance?.get() ?: return
+      Handler(Looper.getMainLooper()).post {
+        val pkg = service.lastForeground ?: return@post
+        if (pkg != service.packageName) service.enforceSchedule(pkg, System.currentTimeMillis())
+      }
+    }
 
     /** Called after JS starts or stops a session or changes the schedule, if the service is running. */
     fun refresh() {

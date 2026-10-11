@@ -2,10 +2,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, ScrollView, View } from 'react-native';
 import { Icon } from '../components/Icon';
-import { BackBar, buzz, Chips, Cta, H1, Label, Page, say, Tap, Txt, useBack, WheelSet } from '../components/ui';
+import { AppPicker } from '../components/AppPicker';
+import { BackBar, buzz, Chips, Cta, H1, Label, Page, say, Seg, Tap, Txt, useBack, WheelSet } from '../components/ui';
 import { clock12, daysLabel, DUR_MAX, DUR_MIN, durLabel, overlaps, rangeLabel, type LockSched } from '../lib/lockTimes';
 import { enableNotifications } from '../lib/notifications';
-import { IbadahLock } from '../lib/shield';
+import { IbadahLock, useLockableApps } from '../lib/shield';
 import { getState, set, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
@@ -27,6 +28,9 @@ export default function LockSchedule() {
   const [m, setM] = useState(existing ? Math.round(existing.m / 5) * 5 % 60 : 0);
   const [dur, setDur] = useState(existing?.dur ?? 45);
   const [days, setDays] = useState<number[]>(existing?.days.slice() ?? [1, 1, 1, 1, 1, 1, 1]);
+  const [pick, setPick] = useState(!!existing?.apps?.length);
+  const [apps, setApps] = useState<string[]>(existing?.apps ?? []);
+  const lockable = useLockableApps();
 
   const h12 = (h % 12 || 12) - 1;
   const pm = h >= 12 ? 1 : 0;
@@ -34,10 +38,12 @@ export default function LockSchedule() {
   const draft = { h, m, dur, days };
   const clash = others.some(o => overlaps(draft, o));
   const noDays = !days.some(Boolean);
+  const noApps = pick && apps.length === 0;
 
   const save = () => {
     if (noDays) { say('Choose at least one day'); return; }
-    const lock: LockSched = { id: existing?.id ?? `lock-${Date.now().toString(36)}`, h, m, dur, days, on: true };
+    if (noApps) { say('Choose at least one app, or lock all apps'); return; }
+    const lock: LockSched = { id: existing?.id ?? `lock-${Date.now().toString(36)}`, h, m, dur, days, on: true, ...(pick ? { apps } : {}) };
     set(s => ({ locks: existing ? s.locks.map(l => (l.id === lock.id ? lock : l)) : [...s.locks, lock] }));
     buzz([20, 40, 20]);
     const shielding = IbadahLock.isSupported() && IbadahLock.isPermissionGranted();
@@ -96,13 +102,19 @@ export default function LockSchedule() {
         </View>
         <Chips flex labels={PRESETS.map(p => p[0])} isOn={i => PRESETS[i][1].every((v, k) => v === days[k])} onPick={i => setDays(PRESETS[i][1].slice())} height={38} size={12.5} style={{ marginTop: 10, paddingHorizontal: 22 }} />
 
+        <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>WHICH APPS</Label>
+        <View style={{ paddingHorizontal: 22 }}>
+          <Seg labels={['All apps', 'Chosen apps']} value={pick ? 1 : 0} onChange={i => setPick(i === 1)} height={44} size={14} />
+          {pick && <View style={{ marginTop: 12 }}><AppPicker {...lockable} selected={apps} onChange={setApps} /></View>}
+        </View>
+
         <View style={{ marginTop: 20, marginHorizontal: 22, borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, padding: 18, flexDirection: 'row', gap: 12 }}>
           <Icon name="lock" color={t.acc} />
           <View style={{ flex: 1 }}>
             <Txt style={{ fontSize: 15.5, fontWeight: 700 }}>{noDays ? 'Pick the days' : `${clock12(h, m)} for ${durLabel(dur)} · ${daysLabel(days)}`}</Txt>
             <Txt style={{ fontSize: 13, lineHeight: 19.5, color: t.t2, marginTop: 6 }}>
               {Platform.OS === 'android'
-                ? 'During this time, opening any app brings you to Ibtida instead. Calls, messages, emergency, your keyboard and clock alarms always work.'
+                ? `During this time, opening ${pick ? (apps.length ? `${apps.length === 1 ? 'that app' : `those ${apps.length} apps`}` : 'a chosen app') : 'any app'} brings you to Ibtida instead. Calls, messages, emergency, your keyboard and clock alarms always work.`
                 : 'During this time Ibtida reminds you and opens your worship. Locking other apps needs Android, or iOS Screen Time approval from Apple.'}
             </Txt>
             {clash && <Txt style={{ fontSize: 12.5, color: t.acc, marginTop: 8 }}>Overlaps another lock time — they’ll simply run together.</Txt>}
@@ -110,7 +122,7 @@ export default function LockSchedule() {
         </View>
       </ScrollView>
       <View style={{ paddingHorizontal: 22, paddingTop: 10, gap: 10 }}>
-        <Cta label={existing ? 'Save lock time' : 'Accept & schedule lock'} icon="lock" disabled={noDays} onPress={save} />
+        <Cta label={existing ? 'Save lock time' : 'Accept & schedule lock'} icon="lock" disabled={noDays || noApps} onPress={save} />
         {existing && <Cta label="Remove lock time" kind="danger" height={50} size={14.5} onPress={remove} />}
       </View>
     </Page>

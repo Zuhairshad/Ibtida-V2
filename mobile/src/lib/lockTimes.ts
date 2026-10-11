@@ -14,6 +14,8 @@ export type LockSched = {
   /** Mon…Sun, 1 = on. */
   days: number[];
   on: boolean;
+  /** Android package ids to lock; missing or empty locks every app except the essentials. */
+  apps?: string[];
 };
 
 export const DUR_MIN = 5;
@@ -26,7 +28,7 @@ const monIdx = (d: Date) => (d.getDay() + 6) % 7;
 export const daysMask = (days: number[]) => days.reduce((a, on, i) => (on ? a | (1 << i) : a), 0);
 
 export const toNativeWindows = (locks: LockSched[]) =>
-  locks.map(l => ({ id: l.id, start: l.h * 60 + l.m, duration: Math.max(0, Math.min(DUR_MAX, l.dur)), days: daysMask(l.days), enabled: l.on }));
+  locks.map(l => ({ id: l.id, start: l.h * 60 + l.m, duration: Math.max(0, Math.min(DUR_MAX, l.dur)), days: daysMask(l.days), enabled: l.on, packages: l.apps ?? [] }));
 
 /** "5:05 am" */
 export function clock12(h: number, m: number) {

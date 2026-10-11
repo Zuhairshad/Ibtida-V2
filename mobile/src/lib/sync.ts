@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState as RNAppState } from 'react-native';
 import { COMMUNITY_GOALS, PH, type PrayerName } from '../data/content';
 import {
-  getState, isRemoteWrite, setFromRemote, subscribe,
+  getState, isRemoteWrite, resetAccountData, setFromRemote, subscribe,
   type AppState, type Emergency, type Goal, type PrayerLog, type WakeEntry,
 } from '../state/store';
 import { currentUserId, onSession, supabase } from './supabase';
@@ -125,7 +125,7 @@ const stamp = (k: string, at = Date.now()) => { stamps[k] = at; persistSoon(); }
 // ---------------------------------------------------------------------------------------------
 const PROFILE_KEYS: (keyof AppState)[] = [
   'name', 'city', 'method', 'hanafi', 'privacy', 'theme', 'adhan', 'sound', 'vib', 'notifs', 'wakeVerify',
-  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj',
+  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj', 'alarmSound', 'tasAfter', 'tasTargets', 'tasLife', 'customDhikr', 'dhKey',
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 
@@ -516,6 +516,17 @@ export async function pullAndMerge() {
 async function onSignedIn(uid: string) {
   if (pulledFor === uid) return;
   pulledFor = uid;
+  const owner = getState().accountId;
+  if (owner && owner !== uid) {
+    // Another account's data is on this phone (they signed out, someone else signed in): start
+    // clean and pull this account's own copy instead of merging the previous person's history.
+    outbox = outbox.filter(o => o.uid === uid);
+    resetAccountData(uid);
+    prev = getState();
+  } else if (!owner) {
+    // Data made before any sign-in becomes this account's ("save your journey").
+    setFromRemote({ accountId: uid });
+  }
   if (!getState().signedIn) setFromRemote({ signedIn: true, onboarded: true });
   try {
     await pullAndMerge();

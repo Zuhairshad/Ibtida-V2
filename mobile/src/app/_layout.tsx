@@ -17,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LaunchAyah } from '../components/LaunchAyah';
 import { ToastHost } from '../components/ui';
 import { startBackend } from '../lib/account';
+import { FajrAlarm, useFajrAlarm } from '../lib/fajrAlarm';
 import { openedFromNotification, useNotifications } from '../lib/notifications';
 import { useLockScheduleSync } from '../lib/shield';
 import { hydrate, useApp } from '../state/store';
@@ -26,9 +27,10 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Shell() {
   const t = useT();
-  // Opening from a notification goes straight to it, without the launch verse.
-  const [fromNotif] = useState(openedFromNotification);
+  // Opening from a notification or a ringing alarm goes straight to it, without the launch verse.
+  const [fromNotif] = useState(() => openedFromNotification() || !!FajrAlarm.getRinging());
   useNotifications();
+  useFajrAlarm();
   useLockScheduleSync();
   useEffect(() => { SystemUI.setBackgroundColorAsync(t.bg).catch(() => {}); }, [t.bg]);
   return (

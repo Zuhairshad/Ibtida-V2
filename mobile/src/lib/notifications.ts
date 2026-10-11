@@ -7,6 +7,7 @@ import { PH, type PrayerName } from '../data/content';
 import { ayahFor, compose, durUr, ltr, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
 import { getState, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
+import { FajrAlarm, wakeAt } from './fajrAlarm';
 import { addDays, dayKey, fmtTime, jamaatAt, nextPrayer, timesFor } from './prayer';
 
 /**
@@ -179,7 +180,7 @@ function goalTime(g: Goal, day: Date, fajr: Date): Date | null {
   return null;
 }
 
-export function planNotifications(s: Store, now = new Date()): Planned[] {
+export function planNotifications(s: Store, now = new Date(), nativeAlarm = FajrAlarm.isSupported()): Planned[] {
   const out: Planned[] = [];
   const [prayerOn, adhkarOn, goalsOn, quranOn] = s.notifs;
   const lang = s.notifLang ?? 'both';
@@ -201,20 +202,19 @@ export function planNotifications(s: Store, now = new Date()): Planned[] {
 
     PH.forEach((p: PrayerName, i) => {
       const t = times[p];
-      if (s.wakeVerify[i]) {
-        // Fajr wakes at the user's chosen time when it falls before Fajr; otherwise at the prayer.
-        let wakeAt = t;
-        if (p === 'Fajr') {
-          const w = at(day, to24(s.wake.h, s.wake.a), WAKE_MINS[s.wake.m] ?? 0);
-          if (w < t && t.getTime() - w.getTime() < 4 * 3600_000) wakeAt = w;
-        }
+      // The Fajr wake alarm. Android builds ring it natively (see fajrAlarm.ts); this notification
+      // is the fallback elsewhere, so the alarm never sounds twice.
+      const alarmAt = i === 0 && s.wakeVerify[0] ? wakeAt(s, day, t) : null;
+      if (alarmAt && !nativeAlarm) {
         out.push({
-          at: wakeAt, kind: `wake.${p}.${key}`,
+          at: alarmAt, kind: `wake.${p}.${key}`,
           ...prayerNotice(lang, p, fmtTime(t), ayahFor(day, i),
             { en: 'Scan your wudu station to stop the alarm.', ur: 'الارم بند کرنے کے لیے وضو کی جگہ اسکین کریں۔' }, jam(p, day)),
           url: '/wake-scan', channelId: CH.wake, sound: 'default', urgent: true,
         });
-      } else if (prayerOn && s.adhan[p]) {
+      }
+      // The adhan, unless the wake alarm is already sounding at that very minute.
+      if (prayerOn && s.adhan[p] && !(alarmAt && alarmAt.getTime() === t.getTime())) {
         out.push({
           at: t, kind: `adhan.${p}.${key}`,
           ...prayerNotice(lang, p, fmtTime(t), ayahFor(day, i), undefined, jam(p, day)),

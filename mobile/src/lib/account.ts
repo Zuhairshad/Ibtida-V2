@@ -71,10 +71,22 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   if (enabled === null) return { ok: false, message: 'You’re offline — try again when connected' };
   if (!enabled) return { ok: false, message: 'Google sign-in isn’t available yet — use email for now' };
   const redirectTo = authRedirect();
-  const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo, skipBrowserRedirect: true } });
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    // Always show the account chooser, so signing out and back in can pick a different account.
+    options: { redirectTo, skipBrowserRedirect: true, queryParams: { prompt: 'select_account' } },
+  });
   if (error || !data.url) return { ok: false, message: friendly(error || { message: '' }) };
-  const res = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-  if (res.type !== 'success') return { ok: false, message: 'Google sign-in was cancelled' };
+  let res: WebBrowser.WebBrowserAuthSessionResult;
+  try {
+    res = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+  } catch {
+    return { ok: false, message: 'Couldn’t open Google sign-in — try again' };
+  }
+  if (res.type === 'cancel' || res.type === 'dismiss') return { ok: false, message: 'Google sign-in was cancelled' };
+  if (res.type !== 'success') return { ok: false, message: 'Google sign-in didn’t finish — try again' };
+  // Supabase sends people to its Site URL instead when this app's link isn't on its allow list.
+  if (!res.url.includes('auth-callback')) return { ok: false, message: 'Google sign-in isn’t set up for this app yet — use email for now' };
   return handleAuthUrl(res.url);
 }
 
@@ -109,6 +121,13 @@ async function completeAuth(url: string): Promise<AuthResult> {
     return error ? { ok: false, message: friendly(error) } : { ok: true };
   }
   return { ok: false, message: 'That sign-in link is incomplete — request a new one' };
+}
+
+/** The signed-in account's email (from the session, e.g. after Google sign-in). */
+export async function sessionEmail(): Promise<string> {
+  if (!supabase) return '';
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user.email ?? '';
 }
 
 export async function signOut() {

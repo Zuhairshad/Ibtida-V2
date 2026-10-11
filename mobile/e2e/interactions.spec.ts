@@ -72,17 +72,34 @@ test.describe('prayer', () => {
     await expect(visibleText(page, /great-circle bearing/)).toBeVisible();
   });
 
-  test('wake alarm toggles persist and Test the alarm opens the camera scan', async ({ page, seed }) => {
-    await seed(withSample());
+  test('wake alarm is Fajr-only, persists, and the test opens the camera scan', async ({ page, seed }) => {
+    // Older installs could turn verification on for other prayers; only Fajr survives.
+    await seed(withSample({ wakeVerify: [false, false, false, false, true] }));
     await page.goto('/prayer/wake-alarm');
-    await page.getByRole('switch', { name: 'Isha' }).click();
-    await storedWhen(page, s => s.wakeVerify?.[4] === true);
+    for (const p of ['Dhuhr', 'Asr', 'Maghrib', 'Isha']) await expect(page.getByRole('switch', { name: p })).toHaveCount(0);
+    await expect(visibleText(page, 'Off')).toBeVisible();
+    await page.getByRole('switch', { name: 'Fajr wake alarm' }).click();
+    await storedWhen(page, s => s.wakeVerify?.[0] === true && s.wakeVerify.slice(1).every((v: boolean) => !v));
+    // No native alarm on web: it says so instead of pretending.
+    await expect(visibleText(page, 'Reminder only')).toBeVisible();
     await expect(visibleText(page, /No wake verified yet/)).toBeVisible();
-    await button(page, 'Test the alarm').click();
+    await button(page, 'Test the scan').click();
     await expect(visibleText(page, 'Scan your wudu station')).toBeVisible();
     // Release builds scan automatically; the dev-only simulate button must not ship.
     await expect(button(page, 'Simulate scan')).toHaveCount(0);
     await tapLabel(page, 'Close');
+    await expect(page).toHaveURL(/\/prayer\/wake-alarm$/);
+  });
+
+  test('wake verification is offered from Fajr only', async ({ page, seed }) => {
+    await seed(withSample());
+    await page.goto('/prayer');
+    await page.getByRole('button', { name: /^Asr, begins \d/ }).click();
+    await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toBeVisible();
+    await expect(visibleText(page, 'Set up wake verification')).toHaveCount(0);
+    await labelled(page, 'Close').click();
+    await page.getByRole('button', { name: /^Fajr, begins \d/ }).click();
+    await visibleText(page, 'Set up wake verification').click();
     await expect(page).toHaveURL(/\/prayer\/wake-alarm$/);
   });
 });
@@ -152,23 +169,89 @@ test.describe('quran reader', () => {
 });
 
 test.describe('adhkar', () => {
-  test('tasbeeh counts to the end of a round', async ({ page, seed, errors }) => {
+  test('tasbeeh stops at its target, celebrates once, then starts the next round', async ({ page, seed, errors }) => {
     await seed({ tasN: 30, dh: 0 });
     await page.goto('/tasbeeh');
-    const counter = labelled(page, /^Count\. \d+ of 33$/);
+    const counter = labelled(page, /^Count\. \d+ of \d+$/);
     await expect(counter).toHaveAttribute('aria-label', 'Count. 30 of 33');
     for (let i = 0; i < 3; i++) await counter.click();
     await expect(counter).toHaveAttribute('aria-label', 'Count. 33 of 33');
-    await expect(visibleText(page, 'SubhanAllah · round of 33 complete')).toBeVisible();
-    await storedWhen(page, s => s.tasN === 33);
+    await expect(visibleText(page, '33 completed').first()).toBeVisible();
+    await storedWhen(page, s => s.tasN === 33 && s.tasLife?.['b:SubhanAllah']?.rounds === 1 && s.tasLife['b:SubhanAllah'].n === 3);
 
-    // Next round starts from the lit-bead reset, switching dhikr resets the count.
+    // Never "34 of 33": once the celebration has passed, the next tap begins round two at 1.
+    await page.waitForTimeout(800);
     await counter.click();
-    await expect(counter).toHaveAttribute('aria-label', 'Count. 34 of 33');
+    await expect(counter).toHaveAttribute('aria-label', 'Count. 1 of 33');
+    await expect(visibleText(page, /Lifetime 4 · 1 round/)).toBeVisible();
     await button(page, 'Allahu Akbar').click();
     await expect(labelled(page, 'Count. 0 of 34')).toBeVisible();
     await button(page, 'Reset').click();
     expect(errors).toEqual([]);
+  });
+
+  test('an old over-count like 37 / 33 is repaired on load', async ({ page, seed }) => {
+    await seed({ tasN: 37, dh: 0 });
+    await page.goto('/tasbeeh');
+    await expect(labelled(page, 'Count. 4 of 33')).toBeVisible();
+  });
+
+  test('custom target: validated, and the round follows it', async ({ page, seed, errors }) => {
+    await seed();
+    await page.goto('/tasbeeh');
+    await button(page, 'Target 33, change').click();
+    const input = page.getByLabel('Custom target');
+    await input.fill('0');
+    await expect(visibleText(page, 'A whole number from 1 to 100,000')).toBeVisible();
+    await expect(button(page, 'Save target')).toBeDisabled();
+    await input.fill('70');
+    await button(page, 'Save target').click();
+    await storedWhen(page, s => s.tasTargets?.['b:SubhanAllah'] === 70);
+    await expect(labelled(page, 'Count. 0 of 70')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('add, use, edit and remove a custom dhikr without losing its count', async ({ page, seed, errors }) => {
+    await seed();
+    await page.goto('/tasbeeh');
+    await button(page, 'Add custom dhikr').click();
+    await expect(page).toHaveURL(/\/dhikr-edit$/);
+    await button(page, 'Add dhikr').click();
+    await expect(visibleText(page, 'Give it a name')).toBeVisible();
+    await page.getByLabel('Dhikr name').fill('SubhanAllahil-Azim');
+    await page.getByLabel('Arabic text').fill('سُبْحَانَ اللهِ الْعَظِيمِ');
+    await page.getByLabel('Transliteration').fill('Subhan Allahil-Azim');
+    await page.getByLabel('Custom target').fill('25');
+    await button(page, 'Add dhikr').click();
+    await expect(page).toHaveURL(/\/tasbeeh$/);
+    const counter = labelled(page, /^Count\./);
+    await expect(counter).toHaveAttribute('aria-label', 'Count. 0 of 25');
+    await counter.click();
+    await counter.click();
+    const s = await storedWhen(page, x => x.customDhikr?.length === 1 && x.tasN === 2);
+    const key = `c:${s.customDhikr[0].id}`;
+    expect(s.dhKey).toBe(key);
+
+    // Remove it: hidden from the counter, but its lifetime count stays.
+    await page.goto(`/dhikr-edit?id=${s.customDhikr[0].id}`);
+    page.once('dialog', d => d.accept());
+    await button(page, 'Remove dhikr').click();
+    const after = await storedWhen(page, x => x.customDhikr?.[0]?.archived === true);
+    expect(after.tasLife[key].n).toBe(2);
+    expect(errors).toEqual([]);
+  });
+
+  test('a goal can use any whole-number target', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/goal-new');
+    const input = page.getByLabel('Daily target');
+    await input.fill('-5');
+    await expect(input).toHaveValue('5');
+    await input.fill('');
+    await expect(button(page, 'Create goal')).toBeDisabled();
+    await input.fill('150');
+    await button(page, 'Create goal').click();
+    await storedWhen(page, s => s.goals?.some((g: { target: number }) => g.target === 150));
   });
 
   test('the last taps are saved immediately when the app is backgrounded', async ({ page, seed }) => {
@@ -196,6 +279,9 @@ test.describe('adhkar', () => {
     await expect(counter).toHaveAttribute('aria-label', 'Count. 98 of 100');
     await counter.click();
     await counter.click();
+    // An extra eager tap before Goal complete opens must not count a 101st.
+    await counter.click();
+    await expect(counter).toHaveAttribute('aria-label', 'Count. 100 of 100');
     await expect(page).toHaveURL(/\/goal-done/);
     await expect(visibleText(page, 'Durood Sharif complete. May Allah accept your worship.')).toBeVisible();
     await storedWhen(page, s => s.goals[0].prog === 100);
@@ -209,12 +295,13 @@ test.describe('adhkar', () => {
     await page.goto('/tasbeeh?goal=2'); // Istighfar, seeded at 100 / 100
     const counter = labelled(page, /^Count\./);
     await expect(counter).toHaveAttribute('aria-label', 'Count. 100 of 100');
-    await expect(visibleText(page, /^0 remaining/)).toBeVisible();
-    // Extra counts are kept, but don't re-trigger the Goal complete screen.
+    await expect(visibleText(page, 'Goal complete for today')).toBeVisible();
+    // Extra taps are not counted and don't re-trigger the Goal complete screen.
     await counter.click();
-    await expect(counter).toHaveAttribute('aria-label', 'Count. 101 of 100');
+    await counter.click();
+    await expect(counter).toHaveAttribute('aria-label', 'Count. 100 of 100');
     await expect(page).toHaveURL(/\/tasbeeh/);
-    await expect(visibleText(page, /^0 remaining/)).toBeVisible();
+    await storedWhen(page, s => s.goals.find((g: { id: number }) => g.id === 2).prog === 100);
   });
 
   test('category tiles open their adhkar with real counts', async ({ page, seed }) => {

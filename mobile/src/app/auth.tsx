@@ -4,7 +4,7 @@ import { ScrollView, TextInput, View } from 'react-native';
 import { GoogleG } from '../components/Icon';
 import { FadeIn } from '../components/motion';
 import { BackBar, buzz, Cta, H1, Page, say, Seg, Tap, Txt } from '../components/ui';
-import { sendMagicLink, signIn, signInWithGoogle, signUp, type AuthResult } from '../lib/account';
+import { sendMagicLink, sessionEmail, signIn, signInWithGoogle, signUp, type AuthResult } from '../lib/account';
 import { enableNotifications } from '../lib/notifications';
 import { backendEnabled } from '../lib/supabase';
 import { set } from '../state/store';
@@ -34,9 +34,10 @@ export default function Auth() {
     if (router.canDismiss()) router.dismissAll();
     router.replace('/home');
   };
-  const enter = () => {
+  const enter = async () => {
     buzz([10, 30, 10]);
-    set({ onboarded: true, signedIn: true, email: email.trim() });
+    // Google sign-in fills no email field here: take the account's own address.
+    set({ onboarded: true, signedIn: true, email: email.trim() || (await sessionEmail()) });
     say('Bismillah — welcome to Ibtida');
     home();
     // Entering the app is when reminders start to matter, so ask now rather than at launch.
