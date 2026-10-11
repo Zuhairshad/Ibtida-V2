@@ -163,7 +163,6 @@ type Planned = {
 };
 
 const MINS15 = [0, 15, 30, 45];
-const WAKE_MINS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 /** 12-hour wheel → 24-hour clock. */
 const to24 = (h: number, a: number) => ((h + 1) % 12) + (a ? 12 : 0);
 /** Mon…Sun flag index for a JS date. */

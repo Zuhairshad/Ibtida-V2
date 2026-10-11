@@ -27,9 +27,9 @@ export default function Travel() {
     setWatching(await travelWatching());
   }, []);
   useEffect(() => {
-    refresh();
+    const first = setTimeout(refresh, 0);
     const sub = AppState.addEventListener('change', s => { if (s === 'active') refresh(); });
-    return () => sub.remove();
+    return () => { clearTimeout(first); sub.remove(); };
   }, [refresh]);
 
   // Keep the OS geofence in step with the settings.

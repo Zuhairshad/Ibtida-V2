@@ -10,6 +10,9 @@ import { FajrAlarm } from '../lib/fajrAlarm';
 import { activeLock, daysLabel, durLabel, rangeLabel, upcomingLocks, type LockSched } from '../lib/lockTimes';
 import { DOW, fmtTime } from '../lib/prayer';
 
+import { set, useApp } from '../state/store';
+import { useT } from '../theme/ThemeProvider';
+
 const nextLabel = (d: Date) => {
   const today = new Date();
   const same = d.toDateString() === today.toDateString();
@@ -17,8 +20,6 @@ const nextLabel = (d: Date) => {
   const day = same ? 'today' : tom ? 'tomorrow' : `${DOW[d.getDay()][0]}${DOW[d.getDay()].slice(1).toLowerCase()}`;
   return `${day} ${fmtTime(d)}`;
 };
-import { set, useApp } from '../state/store';
-import { useT } from '../theme/ThemeProvider';
 
 export default function FocusSetup() {
   const t = useT();

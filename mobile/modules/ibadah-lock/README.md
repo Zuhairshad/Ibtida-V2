@@ -51,6 +51,16 @@ in Expo Go the module is missing and every call is a no-op.
   enabled the service listens to all packages (package names only); with none, it goes back to
   Ibtida's package or the session's apps. `skipWindow(until)` is the emergency unlock.
 
+- **On time** (`LockScheduleReceiver`): an exact alarm fires at each window start; the service then
+  locks the app that is already on screen (it remembers the last foreground package, ignoring the
+  notification shade and keyboard). Before this, a window only took effect when an app was next
+  opened. The alarm is re-armed after each start, on schedule changes, on service connect, and after
+  boot / app update / time or zone change / exact-alarm permission change.
+- **Per-rule apps**: a window may carry `packages`; it then locks only those apps (empty = every app
+  except the essentials). `getInstalledApps(iconSize)` lists launchable apps with name and PNG icon,
+  using a `<queries>` launcher filter (no `QUERY_ALL_PACKAGES`). `getStatus()` reports the service,
+  exact alarms, battery exemption and the next window start.
+
 Known limits: picture-in-picture windows (for example YouTube PiP) don't raise a window-state
 event, so they aren't intercepted. The user can switch the service off in Settings at any time
 (by design). On Android 13+ a sideloaded APK may show the switch greyed out until the user opens
