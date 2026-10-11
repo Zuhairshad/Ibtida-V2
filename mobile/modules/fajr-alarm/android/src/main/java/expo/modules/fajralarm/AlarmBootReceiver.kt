@@ -25,9 +25,9 @@ class AlarmBootReceiver : BroadcastReceiver() {
       when {
         now - r.since > AlarmStore.MAX_RING_MS -> AlarmStore.setRinging(ctx, null)
         r.silencedUntil > now -> AlarmStore.armResume(ctx, r.silencedUntil)
-        // Android 15 doesn't let a boot broadcast start a media foreground service, but an exact
-        // alarm may: re-ring through one a moment from now.
-        else -> AlarmStore.armResume(ctx, now + 2000)
+        // Re-ring through an exact alarm once the system's post-boot window (20 s) has passed, so
+        // the start counts as an alarm, not a boot start (Android 15 restricts those).
+        else -> AlarmStore.armResume(ctx, now + 30_000)
       }
     }
   }

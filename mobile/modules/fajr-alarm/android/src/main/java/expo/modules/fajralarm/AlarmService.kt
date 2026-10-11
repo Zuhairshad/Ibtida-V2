@@ -42,6 +42,7 @@ class AlarmService : Service() {
       ACTION_RING -> ring()
       ACTION_SILENCE -> silence(intent.getLongExtra(EXTRA_UNTIL, 0L))
       ACTION_STOP -> finish(missed = false)
+      ACTION_IN_APP -> inApp()
       else -> {
         // Restarted by the system (START_STICKY) with no intent: resume if an alarm is still due.
         val r = AlarmStore.ringing(this)
@@ -56,7 +57,13 @@ class AlarmService : Service() {
     if (r == null) { stopSelf(); return }
     val now = System.currentTimeMillis()
     if (now - r.since > AlarmStore.MAX_RING_MS) { finish(missed = true); return }
-    goForeground(ringingNotification(r))
+    if (!goForeground(ringingNotification(r))) {
+      // Refused (rare): show the alarm notification anyway and try again shortly through an exact alarm.
+      nm().notify(NOTIF_ID, ringingNotification(r))
+      AlarmStore.armResume(this, now + 30_000)
+      stopSelf()
+      return
+    }
     acquireWake()
     startSound(r.alarm.sound)
     startVibration()
@@ -74,6 +81,26 @@ class AlarmService : Service() {
     }
   }
 
+  /**
+   * The scanner is open: keep ringing, but swap the pop-up banner (which covers the scanner's
+   * buttons) for a quiet notification in the shade.
+   */
+  private fun inApp() {
+    val r = AlarmStore.ringing(this) ?: run { stopSelf(); return }
+    if (r.silencedUntil > System.currentTimeMillis()) return
+    val n = builder(CH_WAITING)
+      .setSmallIcon(smallIcon())
+      .setContentTitle(r.alarm.title)
+      .setContentText("Ringing until you scan your wudu station")
+      .setCategory(Notification.CATEGORY_ALARM)
+      .setOngoing(true)
+      .setVisibility(Notification.VISIBILITY_PUBLIC)
+      .setContentIntent(openApp(r.alarm.url))
+      .build()
+      .apply { flags = flags or Notification.FLAG_NO_CLEAR }
+    nm().notify(NOTIF_ID, n)
+  }
+
   /** Wudu scanned: quiet until [until], then ring again unless the prayer mat is scanned first. */
   private fun silence(until: Long) {
     val r = AlarmStore.ringing(this) ?: run { stopSelf(); return }
@@ -81,7 +108,7 @@ class AlarmService : Service() {
     main.removeCallbacksAndMessages(TOKEN_CAP)
     AlarmStore.setRinging(this, r.copy(silencedUntil = until))
     AlarmStore.armResume(this, until)
-    goForeground(waitingNotification(r.alarm, until))
+    if (!goForeground(waitingNotification(r.alarm, until))) nm().notify(NOTIF_ID, waitingNotification(r.alarm, until))
     broadcastChanged()
     stopForegroundCompat(detach = true)
     releaseWake()
@@ -189,12 +216,27 @@ class AlarmService : Service() {
 
   private fun nm() = getSystemService(NotificationManager::class.java)!!
 
-  private fun goForeground(n: Notification) {
+  /**
+   * Becomes a foreground service. Android 14+: `systemExempted` (allowed for exact-alarm apps
+   * continuing an alarm, including right after boot), else `mediaPlayback`. Returns false — instead
+   * of crashing into a restart loop — when the system refuses both.
+   */
+  private fun goForeground(n: Notification): Boolean {
     ensureChannels(this)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-    } else {
-      startForeground(NOTIF_ID, n)
+    return try {
+      when {
+        Build.VERSION.SDK_INT >= 34 -> try {
+          startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED)
+        } catch (e: Exception) {
+          startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        else -> startForeground(NOTIF_ID, n)
+      }
+      true
+    } catch (e: Exception) {
+      Log.w(TAG, "Could not start the alarm in the foreground", e)
+      false
     }
   }
 
@@ -274,6 +316,7 @@ class AlarmService : Service() {
     const val ACTION_RING = "app.ibtida.alarm.RING"
     const val ACTION_SILENCE = "app.ibtida.alarm.SILENCE"
     const val ACTION_STOP = "app.ibtida.alarm.STOP"
+    const val ACTION_IN_APP = "app.ibtida.alarm.IN_APP"
     const val ACTION_CHANGED = "app.ibtida.alarm.CHANGED"
     const val EXTRA_UNTIL = "until"
     const val SOUND_SYSTEM = "alarm"

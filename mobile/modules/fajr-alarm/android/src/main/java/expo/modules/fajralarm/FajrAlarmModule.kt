@@ -97,6 +97,15 @@ class FajrAlarmModule : Module() {
       true
     }
 
+    /** The scanner is on screen: keep ringing, without the pop-up banner over it. */
+    AsyncFunction("inApp") {
+      val ctx = context
+      val r = AlarmStore.ringing(ctx) ?: return@AsyncFunction false
+      if (r.silencedUntil > System.currentTimeMillis()) return@AsyncFunction false
+      ctx.startService(Intent(ctx, AlarmService::class.java).setAction(AlarmService.ACTION_IN_APP))
+      true
+    }
+
     /** The wake is verified: stop the alarm for good. */
     AsyncFunction("stop") {
       val ctx = context

@@ -100,6 +100,8 @@ function Scan() {
   const testKind: WakeKind | null = test === 'W' || test === 'M' ? test : null;
   const mode = useApp(s => s.wakeMode);
   const [perm, requestPerm, getPerm] = useCameraPermissions();
+  // While ringing, the alarm's pop-up banner would cover this screen's buttons: quiet it.
+  useEffect(() => { if (!testKind) FajrAlarm.inApp().catch(() => {}); }, [testKind]);
   // Reopened between the two scans (from the "now your prayer mat" notification): carry on at stage 2.
   const [paused] = useState(() => {
     const r = testKind ? null : FajrAlarm.getRinging();

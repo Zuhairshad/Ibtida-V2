@@ -1,0 +1,7 @@
+expo.modules.ibadahlock.ibadah-lock-pngs-0 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/build/generated/res/pngs/release
+expo.modules.ibadahlock.ibadah-lock-resValues-1 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/build/generated/res/resValues/release
+expo.modules.ibadahlock.ibadah-lock-mergeReleaseResources-2 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+expo.modules.ibadahlock.ibadah-lock-mergeReleaseResources-3 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+expo.modules.ibadahlock.ibadah-lock-release-4 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/build/intermediates/merged_res/release/mergeReleaseResources
+expo.modules.ibadahlock.ibadah-lock-main-5 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/res
+expo.modules.ibadahlock.ibadah-lock-release-6 /Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/release/res

@@ -1,0 +1,126 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="expo.modules.fajralarm" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+6    <!--
+7       A real alarm clock: exact alarms, a lock-screen alarm screen, a foreground service that keeps
+8       the sound going until the wake is verified, and rescheduling after a reboot.
+9    -->
+10    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+10-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:4:3-72
+10-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:4:20-69
+11    <uses-permission
+11-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:5:3-104
+12        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+12-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:5:20-74
+13        android:maxSdkVersion="32" />
+13-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:5:75-101
+14    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+14-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:6:3-79
+14-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:6:20-76
+15    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+15-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:7:3-79
+15-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:7:20-76
+16    <uses-permission android:name="android.permission.WAKE_LOCK" />
+16-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:8:3-66
+16-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:8:20-63
+17    <uses-permission android:name="android.permission.VIBRATE" />
+17-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:9:3-64
+17-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:9:20-61
+18    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+18-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:10:3-75
+18-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:10:20-72
+19    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+19-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:11:3-90
+19-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:11:20-87
+20    <!-- For exact-alarm apps continuing an alarm; unlike mediaPlayback it may start right after boot (Android 15). -->
+21    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+21-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:13:3-91
+21-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:13:20-88
+22    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+22-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:14:3-75
+22-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:14:20-72
+23    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+23-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:15:3-93
+23-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:15:20-90
+24
+25    <application>
+25-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:17:3-55:17
+26
+27        <!-- Fires and resumes alarms: only AlarmManager (through our own PendingIntents) can reach it. -->
+28        <receiver
+28-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:19:5-22:40
+29            android:name="expo.modules.fajralarm.AlarmReceiver"
+29-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:20:7-58
+30            android:directBootAware="true"
+30-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:22:7-37
+31            android:exported="false" />
+31-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:21:7-31
+32
+33        <!-- System events after which alarms must be re-armed. -->
+34        <receiver
+34-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:25:5-37:16
+35            android:name="expo.modules.fajralarm.AlarmBootReceiver"
+35-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:26:7-62
+36            android:directBootAware="true"
+36-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:28:7-37
+37            android:exported="true" >
+37-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:27:7-30
+38            <intent-filter>
+38-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:29:7-36:23
+39                <action android:name="android.intent.action.BOOT_COMPLETED" />
+39-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:30:9-71
+39-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:30:17-68
+40                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+40-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:31:9-78
+40-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:31:17-75
+41                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+41-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:32:9-76
+41-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:32:17-73
+42                <action android:name="android.intent.action.TIME_SET" />
+42-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:33:9-65
+42-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:33:17-62
+43                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+43-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:34:9-73
+43-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:34:17-70
+44                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+44-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:35:9-99
+44-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:35:17-96
+45            </intent-filter>
+46        </receiver>
+47
+48        <service
+48-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:39:5-43:70
+49            android:name="expo.modules.fajralarm.AlarmService"
+49-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:40:7-57
+50            android:directBootAware="true"
+50-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:42:7-37
+51            android:exported="false"
+51-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:41:7-31
+52            android:foregroundServiceType="systemExempted|mediaPlayback" />
+52-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:43:7-67
+53
+54        <activity
+54-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:45:5-54:72
+55            android:name="expo.modules.fajralarm.AlarmActivity"
+55-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:46:7-58
+56            android:directBootAware="true"
+56-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:48:7-37
+57            android:excludeFromRecents="true"
+57-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:49:7-40
+58            android:exported="false"
+58-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:47:7-31
+59            android:launchMode="singleInstance"
+59-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:50:7-42
+60            android:showWhenLocked="true"
+60-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:51:7-36
+61            android:taskAffinity="app.ibtida.alarm"
+61-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:53:7-46
+62            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+62-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:54:7-69
+63            android:turnScreenOn="true" />
+63-->/Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/AndroidManifest.xml:52:7-34
+64    </application>
+65
+66</manifest>

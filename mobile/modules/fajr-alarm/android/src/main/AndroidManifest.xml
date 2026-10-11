@@ -9,6 +9,8 @@
   <uses-permission android:name="android.permission.VIBRATE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+  <!-- For exact-alarm apps continuing an alarm; unlike mediaPlayback it may start right after boot (Android 15). -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
   <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
@@ -38,7 +40,7 @@
       android:name="expo.modules.fajralarm.AlarmService"
       android:exported="false"
       android:directBootAware="true"
-      android:foregroundServiceType="mediaPlayback" />
+      android:foregroundServiceType="systemExempted|mediaPlayback" />
 
     <activity
       android:name="expo.modules.fajralarm.AlarmActivity"

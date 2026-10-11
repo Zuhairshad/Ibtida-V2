@@ -1,0 +1,62 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="expo.modules.ibadahlock" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+6    <!-- The AccessibilityService itself is declared in the app manifest by plugin/index.js. -->
+7
+8
+9    <!--
+10       Lets the app list launchable apps for the lock picker (Android 11+ package visibility),
+11       without the broad QUERY_ALL_PACKAGES permission.
+12    -->
+13    <queries>
+13-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:6:3-11:13
+14        <intent>
+14-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:7:5-10:14
+15            <action android:name="android.intent.action.MAIN" />
+15-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:8:7-59
+15-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:8:15-56
+16
+17            <category android:name="android.intent.category.LAUNCHER" />
+17-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:9:7-67
+17-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:9:17-64
+18        </intent>
+19    </queries>
+20
+21    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+21-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:13:3-79
+21-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:13:20-76
+22
+23    <application>
+23-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:15:3-28:17
+24
+25        <!-- Locks the app already on screen when a scheduled window opens, and re-arms after reboot. -->
+26        <receiver
+26-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:17:5-27:16
+27            android:name="expo.modules.ibadahlock.LockScheduleReceiver"
+27-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:18:7-66
+28            android:exported="true" >
+28-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:19:7-30
+29            <intent-filter>
+29-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:20:7-26:23
+30                <action android:name="android.intent.action.BOOT_COMPLETED" />
+30-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:21:9-71
+30-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:21:17-68
+31                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+31-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:22:9-76
+31-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:22:17-73
+32                <action android:name="android.intent.action.TIME_SET" />
+32-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:23:9-65
+32-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:23:17-62
+33                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+33-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:24:9-73
+33-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:24:17-70
+34                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+34-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:25:9-99
+34-->/Users/shad/Ibtida-V2/mobile/modules/ibadah-lock/android/src/main/AndroidManifest.xml:25:17-96
+35            </intent-filter>
+36        </receiver>
+37    </application>
+38
+39</manifest>

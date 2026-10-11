@@ -1,0 +1,7 @@
+expo.modules.fajralarm.fajr-alarm-pngs-0 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/build/generated/res/pngs/release
+expo.modules.fajralarm.fajr-alarm-resValues-1 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/build/generated/res/resValues/release
+expo.modules.fajralarm.fajr-alarm-mergeReleaseResources-2 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+expo.modules.fajralarm.fajr-alarm-mergeReleaseResources-3 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+expo.modules.fajralarm.fajr-alarm-release-4 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/build/intermediates/merged_res/release/mergeReleaseResources
+expo.modules.fajralarm.fajr-alarm-main-5 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/main/res
+expo.modules.fajralarm.fajr-alarm-release-6 /Users/shad/Ibtida-V2/mobile/modules/fajr-alarm/android/src/release/res

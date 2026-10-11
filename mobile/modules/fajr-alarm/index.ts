@@ -49,6 +49,7 @@ declare class FajrAlarmNative extends NativeModule {
   getRinging(): Ringing | null;
   silence(until: number): Promise<boolean>;
   stop(): Promise<boolean>;
+  inApp(): Promise<boolean>;
   availableSounds(names: string[]): string[];
   preview(sound: string, seconds: number): Promise<boolean>;
   stopPreview(): Promise<void>;
@@ -81,6 +82,11 @@ export const getRinging = (): Ringing | null => (native ? safe(() => native.getR
 /** Wudu verified: quiet until `until` (epoch ms), then rings again unless stopped. */
 export async function silence(until: number) {
   return native ? native.silence(until) : false;
+}
+
+/** The scanner is open: keep ringing, but without the pop-up banner covering it. */
+export async function inApp() {
+  return native ? native.inApp() : false;
 }
 
 /** Wake verified: the alarm stops for good. */
