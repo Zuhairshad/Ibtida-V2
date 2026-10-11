@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { getState, set } from '../state/store';
+import { say } from './feedback';
 import { refreshLive, resetLive } from './live';
 import { supabase, supabaseKey, supabaseUrl } from './supabase';
 import { flushBeforeSignOut, startSync } from './sync';
@@ -130,7 +131,18 @@ export async function sessionEmail(): Promise<string> {
   return data.session?.user.email ?? '';
 }
 
+let signingOut = false;
+
 export async function signOut() {
+  signingOut = true;
+  try {
+    await signOutNow();
+  } finally {
+    signingOut = false;
+  }
+}
+
+async function signOutNow() {
   if (supabase) {
     await flushBeforeSignOut();
     await supabase.auth.signOut().catch(() => {});
@@ -146,6 +158,14 @@ export function startBackend() {
   started = true;
   startSync();
   if (!supabase) return;
+  // The session ended without the user signing out (refresh token revoked or expired): say so,
+  // instead of looking signed in while nothing syncs. Offline refresh failures don't emit this.
+  supabase.auth.onAuthStateChange(event => {
+    if (event !== 'SIGNED_OUT' || signingOut || !getState().signedIn) return;
+    set({ signedIn: false });
+    resetLive().catch(() => {});
+    say('You were signed out — sign in again to keep syncing');
+  });
   Linking.getInitialURL().then(u => { if (u) handleAuthUrl(u).catch(() => {}); }).catch(() => {});
   Linking.addEventListener('url', ({ url }) => { handleAuthUrl(url).catch(() => {}); });
   refreshLive().catch(() => {});

@@ -46,3 +46,4 @@ playwright-report/
 /android
 screenshots/
 supabase/functions/quran/.secrets.tmp.env
+qa/

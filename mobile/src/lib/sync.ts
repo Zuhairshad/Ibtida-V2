@@ -26,6 +26,8 @@ export type Op = {
   k: string; t: OpType; uid: string;
   p: Record<string, unknown>;
   tries: number; after: number;
+  /** Bumped by every merge, so a push in flight can tell it was changed underneath it. */
+  v?: number;
 };
 
 const OUTBOX_KEY = 'ibtida.v7.outbox';
@@ -92,6 +94,7 @@ function enqueue(t: OpType, k: string, p: Record<string, unknown> = {}, merge?: 
   const existing = outbox.find(o => o.k === k && o.uid === uid);
   if (existing) {
     if (merge) merge(existing); else existing.p = p;
+    existing.v = (existing.v ?? 0) + 1;
     existing.after = 0;
   } else {
     outbox.push({ k, t, uid, p, tries: 0, after: 0 });
@@ -113,6 +116,7 @@ function addDhikr(n: number, cg: string | null) {
   const o = outbox.find(x => x.k === k && x.uid === uid);
   if (o) {
     o.p.n = Math.max(0, (o.p.n as number) + n);
+    o.v = (o.v ?? 0) + 1;
     if (o.p.n === 0) outbox = outbox.filter(x => x !== o);
     persistSoon();
   }
@@ -241,6 +245,11 @@ function profilePayload(s: AppState) {
   };
 }
 
+/** Counter ops are uploaded as amounts: taps made while one is in flight are added to `p.n`. */
+const COUNTERS: OpType[] = ['dhikr', 'cg', 'circle-contrib'];
+/** Takes an uploaded amount off a counter op, keeping taps that arrived meanwhile. */
+const sent = (op: Op, amount: number) => { op.p.n = Math.max(0, (op.p.n as number) - amount); };
+
 /** Throws on failure so the caller can back off. */
 async function run(op: Op) {
   const db = supabase!;
@@ -297,14 +306,16 @@ async function run(op: Op) {
         const amount = Math.min(n, MAX_BATCH);
         check(await db.rpc('log_dhikr', { p_amount: amount, p_goal_id: goal }));
         n -= amount;
-        op.p.n = n; // a partial batch that succeeded is never sent twice
+        sent(op, amount); // a partial batch that succeeded is never sent twice
       }
       return;
     }
     case 'cg': {
       const goal = await goalIdFor(op.p.cg as string);
-      if (!goal) return;
-      check(await db.rpc('contribute_to_goal', { p_goal_id: goal, p_amount: op.p.n as number }));
+      if (!goal) { op.p.n = 0; return; }
+      const amount = op.p.n as number;
+      check(await db.rpc('contribute_to_goal', { p_goal_id: goal, p_amount: amount }));
+      sent(op, amount);
       return;
     }
     case 'circle-contrib': {
@@ -313,7 +324,7 @@ async function run(op: Op) {
         const amount = Math.min(n, MAX_BATCH);
         check(await db.rpc('contribute_to_goal', { p_goal_id: op.p.goal as string, p_amount: amount }));
         n -= amount;
-        op.p.n = n;
+        sent(op, amount);
       }
       return;
     }
@@ -351,8 +362,11 @@ export function syncNow(): Promise<boolean> {
     for (const op of outbox.slice()) {
       if (op.uid !== uid || op.after > now) { if (op.uid === uid) ok = false; continue; }
       try {
+        const v = op.v ?? 0;
         await run(op);
-        outbox = outbox.filter(o => o !== op);
+        // Changed while uploading (more taps, a newer edit): keep it for the next push.
+        const more = COUNTERS.includes(op.t) ? (op.p.n as number) > 0 : (op.v ?? 0) !== v;
+        if (more) { op.tries = 0; op.after = 0; } else outbox = outbox.filter(o => o !== op);
       } catch (e) {
         op.tries += 1;
         if (permanent(e as { code?: string }) && op.tries >= 5) {
