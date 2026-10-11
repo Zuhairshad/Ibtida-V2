@@ -295,7 +295,7 @@ function Scan() {
       ? (itemMode ? `Fill the frame with your sink or basin. ${itemHint}` : 'Point the camera at the QR tag by your sink.')
       : testKind
         ? (itemMode ? `Fill the frame with your prayer mat, seen from above. ${itemHint}` : 'Point the camera at the QR tag on your prayer mat.')
-        : `${fmtCountdown(left)} left to reach the mat.${itemMode ? ` ${itemHint}` : ' The alarm keeps ringing until then.'}`;
+        : `${fmtCountdown(left)} left to reach the mat.${itemMode ? ` ${itemHint}` : ' The alarm is paused and rings again if time runs out.'}`;
 
   return (
     <View style={{ flex: 1, backgroundColor: FIXED.scanBg, ...bgImage(live ? undefined : G.scan) }}>
