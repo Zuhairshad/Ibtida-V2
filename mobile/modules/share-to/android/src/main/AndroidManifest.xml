@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Only these apps need to be visible, to offer "Share to WhatsApp / Instagram" (Android 11+). -->
+  <queries>
+    <package android:name="com.whatsapp" />
+    <package android:name="com.whatsapp.w4b" />
+    <package android:name="com.instagram.android" />
+  </queries>
+
+  <application>
+    <!-- Hands a designed image (in Ibtida's cache) to the chosen app, read-only, for that share only. -->
+    <provider
+      android:name="expo.modules.shareto.ShareToFileProvider"
+      android:authorities="${applicationId}.shareto"
+      android:exported="false"
+      android:grantUriPermissions="true">
+      <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/share_to_paths" />
+    </provider>
+  </application>
+</manifest>

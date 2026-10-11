@@ -74,7 +74,23 @@
         }
       ],
       "./modules/ibadah-lock/plugin",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ibtida uses a photo you choose only as the background of a post you design. It stays on your phone.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Ibtida saves the posts you design to your gallery when you tap Save.",
+          "photosPermission": "Ibtida saves the posts you design to your gallery when you tap Save.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false

@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Icon, type IconName } from '../../../components/Icon';
 import { LangSeg } from '../../../components/LangSeg';
@@ -6,6 +7,7 @@ import { FadeIn } from '../../../components/motion';
 import { Cta, IconChip, ListCard, Ring, say, Screen, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
 import { METHODS, PH } from '../../../data/content';
 import { signOut } from '../../../lib/account';
+import { checkAdmin } from '../../../lib/inspiration';
 import { initials } from '../../../lib/hooks';
 import { backendEnabled } from '../../../lib/supabase';
 import { addDays, dayKey } from '../../../lib/prayer';
@@ -19,12 +21,17 @@ export default function Profile() {
   const t = useT();
   const router = useRouter();
   const s = useApp(x => x);
+  // Admin entry only for accounts the database lists as admins (re-checked on every write).
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => { if (s.signedIn) checkAdmin().then(setIsAdmin).catch(() => {}); else setIsAdmin(false); }, [s.signedIn]);
   // Consistency over the last 7 days from the on-device prayer log.
   let prayed = 0;
   for (let i = 0; i < 7; i++) { const l = s.logs[dayKey(addDays(new Date(), -i))] || {}; prayed += PH.filter(p => l[p] === 'prayed').length; }
   const pct = Math.round((prayed / 35) * 100);
   const marks = Object.values(s.marks).filter(Boolean).length;
   const menu: [string, IconName, string, string, string][] = [
+    ['Inspiration studio', 'spark', t.gold, '/inspiration', ''],
+    ...(isAdmin ? [['Admin · publish', 'shield', t.acc, '/admin', ''] as [string, IconName, string, string, string]] : []),
     ['Goals', 'beads', t.acc, '/adhkar/goals', `${s.goals.length} active`],
     ['Quran bookmarks', 'bookmark', t.mint, '/home/quran', marks ? String(marks) : ''],
     ['Masjid & timings', 'people', t.gold, '/jamaat', Object.keys(s.jamaat).length ? `${Object.keys(s.jamaat).length} jamaat` : ''],

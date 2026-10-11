@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native';
 import { DailyOverview } from '../../../components/DailyOverview';
+import { InspirationCard } from '../../../components/InspirationCard';
 import { QuickTile3D, type TileArt } from '../../../components/QuickTile3D';
 import { DayStrip } from '../../../components/DayStrip';
 import { Icon, MosqueLogo, type IconName } from '../../../components/Icon';
@@ -229,6 +230,10 @@ export default function Home() {
 
         <FadeIn delay={200} style={{ paddingTop: 22, paddingHorizontal: 16 }}>
           <DailyOverview now={now} />
+        </FadeIn>
+
+        <FadeIn delay={210} style={{ paddingTop: 12, paddingHorizontal: 16 }}>
+          <InspirationCard />
         </FadeIn>
 
         <FadeIn delay={220} style={{ paddingTop: 12, paddingHorizontal: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
