@@ -122,7 +122,7 @@ export async function enableNotifications(): Promise<boolean> {
 
 /** Fires a reminder straight away so the user can hear how it sounds. */
 export async function previewReminder() {
-  if (!NATIVE) { say('Previews need the mobile app'); return; }
+  if (!NATIVE) { say('Previews need the mobile app', 'error'); return; }
   if (!(await enableNotifications())) return;
   const s = getState();
   // The next prayer's notification, exactly as it will arrive.
@@ -137,7 +137,7 @@ export async function previewReminder() {
 
 /** Plays the chosen adhan sound now, through the same channel the prayer notifications use. */
 export async function previewAdhan() {
-  if (!NATIVE) { say('Previews need the mobile app'); return; }
+  if (!NATIVE) { say('Previews need the mobile app', 'error'); return; }
   if (!(await enableNotifications())) return;
   const s = getState();
   const next = nextPrayer(s.city, new Date(), s.method, s.hanafi, s.adj);

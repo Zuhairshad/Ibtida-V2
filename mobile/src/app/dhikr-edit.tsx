@@ -110,7 +110,7 @@ export default function DhikrEdit() {
 
         <View style={{ marginTop: 18, marginHorizontal: -16 }}>
           <SwitchRow label="Make it a daily goal" sub={linked ? 'Linked to your goal · its streak is kept' : 'Track it each day, with a reminder at a time you pick'} icon="beads" on={asGoal}
-            onToggle={() => { if (linked) { say('Remove the goal from Goals to unlink it'); return; } setAsGoal(x => !x); }} />
+            onToggle={() => { if (linked) { say('Remove the goal from Goals to unlink it', 'error'); return; } setAsGoal(x => !x); }} />
         </View>
       </ScrollView>
       <View style={{ paddingHorizontal: 22, gap: 10 }}>

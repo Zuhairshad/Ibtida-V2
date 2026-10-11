@@ -159,7 +159,7 @@ function ShieldNote({ supported, granted }: { supported: boolean; granted: boole
           In settings: <Txt style={{ fontSize: 13, fontWeight: 700, color: t.tx }}>Installed apps → Ibtida Ibadah Lock → On</Txt>
         </Txt>
         <Cta label="Open settings" icon="shield" kind="secondary" height={50} size={15} style={{ marginTop: 14 }}
-          onPress={() => { buzz(8); IbadahLock.openPermissionSettings().catch(() => say('Open Settings → Accessibility')); }} />
+          onPress={() => { buzz(8); IbadahLock.openPermissionSettings().catch(() => say('Open Settings → Accessibility', 'error')); }} />
         <Txt style={{ fontSize: 12, lineHeight: 18, color: t.t4, marginTop: 10 }}>
           Switch greyed out? Open Ibtida’s App info → ⋮ → Allow restricted settings, then try again. Without it, the lock still runs inside Ibtida.
         </Txt>

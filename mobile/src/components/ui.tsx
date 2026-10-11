@@ -535,9 +535,15 @@ export function ToastHost() {
         paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10,
         opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-10, 0] }) }],
       }}>
-      <View style={{ width: 26, height: 26, borderRadius: 13, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name="check" size={15} color={FIXED.ink} />
-      </View>
+      {toast.kind === 'error' ? (
+        <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: t.errTx, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="x" size={14} color={FIXED.ink} />
+        </View>
+      ) : (
+        <View style={{ width: 26, height: 26, borderRadius: 13, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="check" size={15} color={FIXED.ink} />
+        </View>
+      )}
       <Txt style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{toast.msg}</Txt>
     </Animated.View>
   );
