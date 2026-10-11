@@ -10,13 +10,14 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LaunchAyah } from '../components/LaunchAyah';
 import { ToastHost } from '../components/ui';
 import { startBackend } from '../lib/account';
-import { useNotifications } from '../lib/notifications';
+import { openedFromNotification, useNotifications } from '../lib/notifications';
 import { useLockScheduleSync } from '../lib/shield';
 import { hydrate, useApp } from '../state/store';
 import { ThemeProvider, useT } from '../theme/ThemeProvider';
@@ -25,6 +26,8 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function Shell() {
   const t = useT();
+  // Opening from a notification goes straight to it, without the launch verse.
+  const [fromNotif] = useState(openedFromNotification);
   useNotifications();
   useLockScheduleSync();
   useEffect(() => { SystemUI.setBackgroundColorAsync(t.bg).catch(() => {}); }, [t.bg]);
@@ -50,6 +53,7 @@ function Shell() {
         <Stack.Screen name="lock-scheduled" getId={() => 'scheduled-lock'} options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="search" options={{ animation: 'fade' }} />
       </Stack>
+      <LaunchAyah skip={fromNotif} />
       <ToastHost />
     </View>
   );

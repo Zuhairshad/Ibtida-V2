@@ -1,9 +1,11 @@
 /**
  * Reminder and notification wording in English and Urdu, with a short motivating hadith for each
  * kind of reminder. Every quote is an authentic narration with its source; Quran verse text is
- * never written here (see src/lib/quran.ts).
+ * never written here — prayer notifications use the generated, verbatim ayat in ./ayat.ts.
  */
+import { PRAYER_AYAT, type Ayah } from './ayat';
 import type { PrayerName } from './content';
+import { SURAHS } from './surahs';
 
 export type NotifLang = 'en' | 'ur' | 'both';
 export type Quote = { en: string; ur: string; src: string };
@@ -53,11 +55,46 @@ export const PRAYER_UR: Record<PrayerName | 'Sunrise', string> = {
   Fajr: 'فجر', Sunrise: 'طلوعِ آفتاب', Dhuhr: 'ظہر', Asr: 'عصر', Maghrib: 'مغرب', Isha: 'عشاء',
 };
 
+const dayNum = (day: Date) => Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
+
 /** Same quote all day for a reminder (so the schedule stays stable), a different one each day. */
 export function quoteFor(kind: QuoteKind, day: Date, salt = 0): Quote {
   const list = QUOTES[kind];
-  const n = Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
-  return list[(n + salt) % list.length];
+  return list[(dayNum(day) + salt) % list.length];
+}
+
+/** The ayah for one prayer on one day: stable for that slot, different across the day's prayers and from day to day. */
+export function ayahFor(day: Date, salt = 0): Ayah {
+  return PRAYER_AYAT[(dayNum(day) * 3 + salt) % PRAYER_AYAT.length];
+}
+
+/** "Al-Baqarah 2:153" / "البقرة 2:153". */
+export function ayahRef(a: Pick<Ayah, 's' | 'a'>, lang: 'en' | 'ur' = 'en') {
+  const m = SURAHS[a.s - 1];
+  return lang === 'ur' ? `${m.ar} ${ltr(`${a.s}:${a.a}`)}` : `${m.name} ${a.s}:${a.a}`;
+}
+
+const CALL: Record<'fajr' | 'prayer', Line> = {
+  fajr: { en: 'Prayer is better than sleep. Rise for Fajr.', ur: 'نماز نیند سے بہتر ہے۔ فجر کے لیے اٹھیں۔' },
+  prayer: { en: 'It’s time to pray. Come to success.', ur: 'نماز کا وقت ہو گیا ہے، کامیابی کی طرف آئیں۔' },
+};
+
+/**
+ * A prayer-time notification: the prayer and its time once in the title, then the ayah (Arabic,
+ * translation and reference) and one short reminder line, so it reads in full without opening the app.
+ * `reminder` replaces the default call (the wake alarm uses it for its scan instruction).
+ * `jamaat` is the congregation time the user entered for their masjid, if any; it is never computed.
+ */
+export function prayerNotice(lang: NotifLang, p: PrayerName, time: string, ayah: Ayah, reminder?: Line, jamaat?: { time: string; jumuah: boolean; masjid?: string }): { title: string; body: string } {
+  const call = reminder ?? CALL[p === 'Fajr' ? 'fajr' : 'prayer'];
+  const title = lang === 'en' ? `${p} · ${time}` : lang === 'ur' ? `${PRAYER_UR[p]} · ${ltr(time)}` : `${p} · ${time} · ${PRAYER_UR[p]}`;
+  const tr = lang === 'ur' ? `${ayah.ur} (${ayahRef(ayah, 'ur')})` : `“${ayah.en}” — ${ayahRef(ayah)}`;
+  const nudge = lang === 'en' ? call.en : lang === 'ur' ? call.ur : `${call.en}\n${call.ur}`;
+  const at = jamaat?.masjid ? ` · ${jamaat.masjid}` : '';
+  const jEn = jamaat && `${jamaat.jumuah ? 'Jumu‘ah' : 'Jamaat'} ${jamaat.time}${at}`;
+  const jUr = jamaat && `${jamaat.jumuah ? 'جمعہ' : 'جماعت'} ${ltr(jamaat.time)}${jamaat.masjid ? ` · ${ltr(jamaat.masjid)}` : ''}`;
+  const jam = !jamaat ? '' : lang === 'en' ? jEn : lang === 'ur' ? jUr : jEn;
+  return { title, body: [ayah.ar, tr, nudge, jam].filter(Boolean).join('\n') };
 }
 
 /** Durations in Urdu: "45 منٹ", "1 گھنٹہ 30 منٹ". */

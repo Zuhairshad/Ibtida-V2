@@ -34,7 +34,7 @@ function Loading() {
     (async () => {
       const s = getState();
       // 1. Prayer times for today, from the chosen city and method.
-      const tt = timesFor(s.city, new Date(), s.method, s.hanafi);
+      const tt = timesFor(s.city, new Date(), s.method, s.hanafi, s.adj);
       put(0, { pct: 100, note: `Fajr ${fmtTime(tt.Fajr)} · Maghrib ${fmtTime(tt.Maghrib)} · ${s.city.name.split(',')[0]}` });
 
       // 2. Save the Quran passages used in adhkar for offline use.

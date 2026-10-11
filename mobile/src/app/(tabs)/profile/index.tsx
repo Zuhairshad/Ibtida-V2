@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { Icon, type IconName } from '../../../components/Icon';
+import { LangSeg } from '../../../components/LangSeg';
 import { FadeIn } from '../../../components/motion';
 import { Cta, IconChip, ListCard, Ring, say, Screen, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
 import { METHODS, PH } from '../../../data/content';
@@ -26,6 +27,7 @@ export default function Profile() {
   const menu: [string, IconName, string, string, string][] = [
     ['Goals', 'beads', t.acc, '/adhkar/goals', `${s.goals.length} active`],
     ['Quran bookmarks', 'bookmark', t.mint, '/home/quran', marks ? String(marks) : ''],
+    ['Masjid & timings', 'people', t.gold, '/jamaat', Object.keys(s.jamaat).length ? `${Object.keys(s.jamaat).length} jamaat` : ''],
     ['Wake alarm', 'alarm', t.peri, '/prayer/wake-alarm', `${s.wakeVerify.filter(Boolean).length} on`],
     ['Emergency history', 'lock', t.lav, '/profile/emergency', String(s.emergencies.length)],
     ['Notifications', 'bell', t.acc, '/profile/notifications', ''],
@@ -67,6 +69,15 @@ export default function Profile() {
           <View style={{ width: 210 }}>
             <Seg labels={['Dark', 'Light', 'Auto']} value={THEMES.indexOf(s.theme)} onChange={i => set({ theme: THEMES[i] })} height={36} radius={18} inner={14} size={13} gap={3} />
           </View>
+        </View>
+      </View>
+      <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
+        <View style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 12, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+          <View>
+            <Txt style={{ fontSize: 15.5, fontWeight: 600 }}>Language</Txt>
+            <Txt style={{ fontSize: 11.5, color: t.t2, marginTop: 2 }}>Greeting and main screens</Txt>
+          </View>
+          <View style={{ width: 170 }}><LangSeg height={36} size={13} /></View>
         </View>
       </View>
       <ListCard style={{ marginTop: 10 }}>

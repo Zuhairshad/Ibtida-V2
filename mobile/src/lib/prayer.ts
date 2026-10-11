@@ -12,12 +12,36 @@ const METHOD_FNS = [
 
 export type DayTimes = Record<PrayerName | 'Sunrise', Date>;
 
-export function timesFor(city: City, date: Date, method: number, hanafi: boolean): DayTimes {
+/** Start-time adjustment per prayer in minutes (the user's own correction to match a local timetable). */
+export type Adjust = Partial<Record<PrayerName, number>>;
+const MAX_ADJ = 60;
+const shift = (d: Date, min = 0) => (min ? new Date(d.getTime() + Math.max(-MAX_ADJ, Math.min(MAX_ADJ, Math.round(min))) * 60000) : d);
+
+/** When each prayer begins. Jamaat times are never derived from these: see `jamaatAt`. */
+export function timesFor(city: City, date: Date, method: number, hanafi: boolean, adj: Adjust = {}): DayTimes {
   const params = (METHOD_FNS[method] || METHOD_FNS[0])();
   params.madhab = hanafi ? Madhab.Hanafi : Madhab.Shafi;
   const pt = new PrayerTimes(new Coordinates(city.lat, city.lng), date, params);
-  return { Fajr: pt.fajr, Sunrise: pt.sunrise, Dhuhr: pt.dhuhr, Asr: pt.asr, Maghrib: pt.maghrib, Isha: pt.isha };
+  return {
+    Fajr: shift(pt.fajr, adj.Fajr), Sunrise: pt.sunrise, Dhuhr: shift(pt.dhuhr, adj.Dhuhr),
+    Asr: shift(pt.asr, adj.Asr), Maghrib: shift(pt.maghrib, adj.Maghrib), Isha: shift(pt.isha, adj.Isha),
+  };
 }
+
+/**
+ * The jamaat time the user entered for this prayer on this day, or null when none is set.
+ * On Fridays Dhuhr's congregation is Jumu‘ah, so only the Jumu‘ah time is used then.
+ * Nothing here is calculated: an unset time stays unset.
+ */
+export function jamaatAt(jamaat: Partial<Record<PrayerName | 'Jumuah', number>>, p: PrayerName, day: Date): { at: Date; jumuah: boolean } | null {
+  const jumuah = p === 'Dhuhr' && day.getDay() === 5;
+  const min = jumuah ? jamaat.Jumuah : jamaat[p];
+  if (typeof min !== 'number' || !Number.isFinite(min) || min < 0 || min >= 1440) return null;
+  return { at: new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(min / 60), min % 60, 0, 0), jumuah };
+}
+
+/** "1:30 pm" from minutes after midnight. */
+export const fmtMin = (min: number) => fmtTime(new Date(2000, 0, 1, Math.floor(min / 60), min % 60));
 
 /** "4:21 pm" — the casing the v7 design uses everywhere. */
 export function fmtTime(d: Date) {
@@ -41,12 +65,12 @@ export type NextInfo = {
   phase: PrayerName;
 };
 
-export function nextPrayer(city: City, now: Date, method: number, hanafi: boolean): NextInfo {
-  const today = timesFor(city, now, method, hanafi);
+export function nextPrayer(city: City, now: Date, method: number, hanafi: boolean, adj: Adjust = {}): NextInfo {
+  const today = timesFor(city, now, method, hanafi, adj);
   for (let i = 0; i < PH.length; i++) {
     const t = today[PH[i]];
     if (t.getTime() > now.getTime()) {
-      const prev = i === 0 ? timesFor(city, new Date(now.getTime() - 864e5), method, hanafi).Isha : today[PH[i - 1]];
+      const prev = i === 0 ? timesFor(city, new Date(now.getTime() - 864e5), method, hanafi, adj).Isha : today[PH[i - 1]];
       return {
         idx: i, name: PH[i], at: t,
         secs: Math.max(0, Math.round((t.getTime() - now.getTime()) / 1000)),
@@ -55,7 +79,7 @@ export function nextPrayer(city: City, now: Date, method: number, hanafi: boolea
       };
     }
   }
-  const tomorrow = timesFor(city, new Date(now.getTime() + 864e5), method, hanafi);
+  const tomorrow = timesFor(city, new Date(now.getTime() + 864e5), method, hanafi, adj);
   return {
     idx: 0, name: 'Fajr', at: tomorrow.Fajr,
     secs: Math.max(0, Math.round((tomorrow.Fajr.getTime() - now.getTime()) / 1000)),

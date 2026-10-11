@@ -1,5 +1,7 @@
 import { CITIES } from '../../data/content';
-import { compose, durUr, ltr, QUOTES, quoteFor } from '../../data/reminders';
+import { LAUNCH_AYAT, PRAYER_AYAT } from '../../data/ayat';
+import { ayahFor, ayahRef, compose, durUr, ltr, prayerNotice, QUOTES, quoteFor } from '../../data/reminders';
+import { SURAHS } from '../../data/surahs';
 import { planNotifications } from '../notifications';
 import { getState } from '../../state/store';
 
@@ -38,20 +40,70 @@ describe('compose', () => {
   });
 });
 
+describe('ayat', () => {
+  it('are complete, with valid references', () => {
+    for (const a of [...PRAYER_AYAT, ...LAUNCH_AYAT]) {
+      expect(a.a).toBeGreaterThan(0);
+      expect(a.a).toBeLessThanOrEqual(SURAHS[a.s - 1].ayahs);
+      expect(a.ar).toMatch(/^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\s]+$/);
+      expect(a.en.length).toBeGreaterThan(20);
+      expect(a.ur).toMatch(/[؀-ۿ]/);
+    }
+  });
+  it('one per prayer slot: stable within a slot, varied across the day', () => {
+    const day = new Date(2026, 9, 7, 6);
+    expect(ayahFor(new Date(2026, 9, 7, 21), 2)).toBe(ayahFor(day, 2));
+    expect(new Set([0, 1, 2, 3, 4].map(i => ayahFor(day, i))).size).toBe(5);
+  });
+  it('references read naturally', () => {
+    expect(ayahRef({ s: 2, a: 153 })).toBe('Al-Baqarah 2:153');
+    expect(ayahRef({ s: 2, a: 153 }, 'ur')).toBe('البقرة \u20662:153\u2069');
+  });
+});
+
+describe('prayer notice', () => {
+  const a = PRAYER_AYAT[2];
+  it('names the prayer and time once, then the ayah, then a short reminder', () => {
+    const n = prayerNotice('en', 'Asr', '3:40 pm', a);
+    expect(n.title).toBe('Asr · 3:40 pm');
+    const lines = n.body.split('\n');
+    expect(lines).toEqual([a.ar, `“${a.en}” — Al-Baqarah 2:153`, 'It’s time to pray. Come to success.']);
+    expect(n.body).not.toMatch(/Asr|3:40/);
+  });
+  it('Urdu and both', () => {
+    const ur = prayerNotice('ur', 'Fajr', '5:00 am', a);
+    expect(ur.title).toBe('فجر · \u20665:00 am\u2069');
+    expect(ur.body.split('\n')[1]).toBe(`${a.ur} (البقرة \u20662:153\u2069)`);
+    expect(ur.body.split('\n')[2]).toMatch(/^نماز نیند سے بہتر ہے/);
+    const both = prayerNotice('both', 'Fajr', '5:00 am', a);
+    expect(both.title).toBe('Fajr · 5:00 am · فجر');
+    expect(both.body.split('\n')).toHaveLength(4);
+  });
+});
+
 describe('planned notifications', () => {
   const base = { ...getState(), hydrated: true, onboarded: true, city: CITIES[0], notifs: [true, true, false, true, false, false], wakeVerify: [false, false, false, false, false] };
-  it('are written in Urdu with a hadith when chosen', () => {
+  it('prayer notifications open with the ayah, in Urdu when chosen', () => {
     const plan = planNotifications({ ...base, notifLang: 'ur', notifQuotes: true }, new Date(2026, 9, 7, 0, 30));
     const fajr = plan.find(p => p.kind.startsWith('adhan.Fajr'))!;
-    expect(fajr.title).toBe('فجر کا وقت');
-    expect(fajr.body.split('\n')).toHaveLength(2);
+    expect(fajr.title).toMatch(/^فجر · /);
+    const lines = fajr.body.split('\n');
+    expect(lines).toHaveLength(3);
+    expect(PRAYER_AYAT.map(x => x.ar)).toContain(lines[0]);
     expect(plan.find(p => p.kind.startsWith('adhkar.am'))!.title).toBe('صبح کے اذکار');
     expect(plan.find(p => p.kind.startsWith('quran'))!.body).toMatch(/^فجر کے بعد/);
   });
-  it('drop the hadith when turned off', () => {
+  it('the hadith switch only affects other reminders', () => {
     const plan = planNotifications({ ...base, notifLang: 'en', notifQuotes: false }, new Date(2026, 9, 7, 0, 30));
     const fajr = plan.find(p => p.kind.startsWith('adhan.Fajr'))!;
-    expect(fajr.title).toBe('Time for Fajr');
-    expect(fajr.body).not.toMatch(/\n/);
+    expect(fajr.title).toMatch(/^Fajr · \d/);
+    expect(fajr.body.split('\n')).toHaveLength(3);
+    expect(plan.find(p => p.kind.startsWith('adhkar.am'))!.body).not.toMatch(/\n/);
+  });
+  it('the wake alarm keeps its scan instruction', () => {
+    const plan = planNotifications({ ...base, notifLang: 'en', wakeVerify: [true, false, false, false, false] }, new Date(2026, 9, 7, 0, 30));
+    const wake = plan.find(p => p.kind.startsWith('wake.Fajr'))!;
+    expect(wake.title).toMatch(/^Fajr · /);
+    expect(wake.body.split('\n')[2]).toBe('Scan your wudu station to stop the alarm.');
   });
 });

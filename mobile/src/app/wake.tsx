@@ -23,7 +23,7 @@ export default function Wake() {
     const s = getState();
     if (s.ob.wake) return;
     const d = new Date(); d.setDate(d.getDate() + 1);
-    const at = new Date(timesFor(s.city, d, s.method, s.hanafi).Fajr.getTime() - 15 * 60000);
+    const at = new Date(timesFor(s.city, d, s.method, s.hanafi, s.adj).Fajr.getTime() - 15 * 60000);
     const h = at.getHours();
     set({ wake: { h: (h % 12 || 12) - 1, m: Math.floor(at.getMinutes() / 5), a: h >= 12 ? 1 : 0 } });
   }, []);

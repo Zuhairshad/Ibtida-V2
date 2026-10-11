@@ -65,7 +65,7 @@ export const test = base.extend<Fixtures>({
         if (sessionStorage.getItem('e2e.seeded')) return;
         sessionStorage.setItem('e2e.seeded', '1');
         localStorage.setItem(key, value);
-      }, [STORAGE_KEY, JSON.stringify({ onboarded: true, ...state })] as const);
+      }, [STORAGE_KEY, JSON.stringify({ onboarded: true, launchAyah: false, ...state })] as const);
     });
   },
 });

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNow } from '../components/motion';
 import { PH, type PrayerName } from '../data/content';
-import { getState, refreshStreak, set, useApp, type PrayerLog } from '../state/store';
+import { refreshStreak, set, useApp, type PrayerLog } from '../state/store';
 import { dayKey, nextPrayer, timesFor } from './prayer';
 
 /** Live prayer schedule for today, re-evaluated every second. */
@@ -10,12 +10,13 @@ export function usePrayerNow() {
   const city = useApp(s => s.city);
   const method = useApp(s => s.method);
   const hanafi = useApp(s => s.hanafi);
+  const adj = useApp(s => s.adj);
   const key = dayKey(now);
   const logs = useApp(s => s.logs[key]) || {};
-  const times = useMemo(() => timesFor(city, now, method, hanafi), [city, method, hanafi, key]); // eslint-disable-line react-hooks/exhaustive-deps
-  const next = nextPrayer(city, now, method, hanafi);
+  const times = useMemo(() => timesFor(city, now, method, hanafi, adj), [city, method, hanafi, adj, key]); // eslint-disable-line react-hooks/exhaustive-deps
+  const next = nextPrayer(city, now, method, hanafi, adj);
   const doneCount = PH.filter(p => logs[p] === 'prayed').length;
-  return { now, key, city, method, hanafi, times, next, logs, doneCount };
+  return { now, key, city, method, hanafi, adj, times, next, logs, doneCount };
 }
 
 export function setLog(key: string, p: PrayerName, v: PrayerLog | null) {
@@ -52,5 +53,4 @@ export function clock(secs: number) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export const firstName = () => getState().name.trim().split(' ')[0] || 'friend';
 export const initials = (n: string) => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();

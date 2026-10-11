@@ -1,10 +1,10 @@
 import { View } from 'react-native';
 import type { IconName } from '../../../components/Icon';
 import { BackBar, Label, ListCard, Screen, Seg, Statement, SwitchRow, Txt } from '../../../components/ui';
-import { compose, ltr, PRAYER_UR, quoteFor, type NotifLang } from '../../../data/reminders';
+import { ayahFor, prayerNotice, type NotifLang } from '../../../data/reminders';
 import { usePrayerNow } from '../../../lib/hooks';
 import { enableNotifications } from '../../../lib/notifications';
-import { fmtTime } from '../../../lib/prayer';
+import { fmtTime, jamaatAt } from '../../../lib/prayer';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 
@@ -22,15 +22,13 @@ const LANGS: NotifLang[] = ['en', 'ur', 'both'];
 function Preview() {
   const t = useT();
   const lang = useApp(s => s.notifLang);
-  const quotes = useApp(s => s.notifQuotes);
-  const { next, city } = usePrayerNow();
-  const p = next.name;
-  const short = city.name.split(',')[0];
-  const n = compose(lang, { en: `Time for ${p}`, ur: `${PRAYER_UR[p]} کا وقت` },
-    { en: `${p} · ${fmtTime(next.at)} · ${short}`, ur: `${PRAYER_UR[p]} · ${ltr(fmtTime(next.at))} · ${ltr(short)}` },
-    quotes ? quoteFor(p === 'Fajr' ? 'fajr' : 'prayer', next.at, next.idx) : null);
+  const { next } = usePrayerNow();
+  const jamaat = useApp(s => s.jamaat);
+  const masjid = useApp(s => s.masjid);
+  const j = jamaatAt(jamaat, next.name, next.at);
+  const n = prayerNotice(lang, next.name, fmtTime(next.at), ayahFor(next.at, next.idx), undefined, j ? { time: fmtTime(j.at), jumuah: j.jumuah, masjid: masjid || undefined } : undefined);
   const lines = n.body.split('\n');
-  const isUr = (s: string) => /[؀-ۿ]/.test(s) && !/^[A-Za-z]/.test(s);
+  const isUr = (s: string) => /[؀-ۿ]/.test(s) && !/^[A-Za-z“]/.test(s);
   return (
     <View style={{ marginHorizontal: 16, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, padding: 16 }} accessibilityLabel="Notification preview">
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -38,9 +36,9 @@ function Preview() {
         <Txt style={{ fontSize: 12, fontWeight: 700, color: t.t2 }}>IBTIDA · {fmtTime(next.at)}</Txt>
       </View>
       <Txt style={{ fontSize: 15, fontWeight: 800, marginTop: 10 }}>{n.title}</Txt>
-      {lines.map((l, i) => (
-        <Txt key={i} ur={isUr(l)} style={{ fontSize: isUr(l) ? 14 : 13.5, lineHeight: isUr(l) ? 28 : 19.5, color: i === 0 ? t.t5 : t.t2, marginTop: 4, textAlign: isUr(l) ? 'right' : 'left' }}>{l}</Txt>
-      ))}
+      {lines.map((l, i) => i === 0
+        ? <Txt key={i} ar style={{ fontSize: 19, lineHeight: 36, color: t.t5, marginTop: 6, textAlign: 'right', writingDirection: 'rtl' }}>{l}</Txt>
+        : <Txt key={i} ur={isUr(l)} style={{ fontSize: isUr(l) ? 14 : 13.5, lineHeight: isUr(l) ? 28 : 19.5, color: t.t2, marginTop: 4, textAlign: isUr(l) ? 'right' : 'left' }}>{l}</Txt>)}
     </View>
   );
 }
@@ -49,6 +47,7 @@ export default function Notifications() {
   const n = useApp(s => s.notifs);
   const lang = useApp(s => s.notifLang);
   const quotes = useApp(s => s.notifQuotes);
+  const launch = useApp(s => s.launchAyah);
   return (
     <Screen top={54}>
       <BackBar title="Notifications" />
@@ -61,7 +60,8 @@ export default function Notifications() {
         <Seg labels={['English', 'اردو', 'Both · دونوں']} value={Math.max(0, LANGS.indexOf(lang))} onChange={i => set({ notifLang: LANGS[i] })} height={44} size={14} />
       </View>
       <ListCard style={{ marginTop: 10 }}>
-        <SwitchRow label="Daily hadith" sub="A short authentic hadith under each reminder, different every day" icon="spark" on={quotes} onToggle={() => set({ notifQuotes: !quotes })} />
+        <SwitchRow label="Daily hadith" sub="A short authentic hadith under adhkar, Quran and goal reminders · prayer times carry an ayah" icon="spark" on={quotes} onToggle={() => set({ notifQuotes: !quotes })} />
+        <SwitchRow label="Verse on opening" sub="A short ayah on prayer, remembrance and hope each time you open Ibtida" icon="book" on={launch !== false} onToggle={() => set({ launchAyah: launch === false })} />
       </ListCard>
       <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>PREVIEW</Label>
       <Preview />

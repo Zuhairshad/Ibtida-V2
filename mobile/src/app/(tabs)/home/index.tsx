@@ -11,8 +11,10 @@ import { adhkarCat, catMinutes } from '../../../data/adhkar';
 import { fmt, HADITH, MILESTONES, PH, type PrayerName } from '../../../data/content';
 import { useLive } from '../../../lib/live';
 import { SURAHS, surahPct } from '../../../data/surahs';
-import { firstName, fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hooks';
-import { DOW, fmtTime, hijri, MON, qibla } from '../../../lib/prayer';
+import { fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hooks';
+import { iso, prayerName, useFirstName, useLang } from '../../../lib/i18n';
+import { ltr } from '../../../data/reminders';
+import { DOW, fmtTime, hijri, jamaatAt, MON, qibla } from '../../../lib/prayer';
 import { useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 import { FIXED, G, bgImage } from '../../../theme/tokens';
@@ -35,6 +37,10 @@ export default function Home() {
   const streak = useApp(s => s.streak);
   const qLast = useApp(s => s.qLast);
   const intents = useApp(s => s.intents);
+  const jamaat = useApp(s => s.jamaat);
+  const name = useFirstName();
+  const { lang, ur, t: tx } = useLang();
+  const nextJ = jamaatAt(jamaat, next.name, next.at);
   const [day, setDay] = useState(0);
   const [phase, setPhase] = useState<PrayerName | null>(null);
   const [car, setCar] = useState(0);
@@ -60,7 +66,7 @@ export default function Home() {
   const h = HADITH[had];
 
   const quick: { title: string; sub: string; icon: IconName; tint: string; ink: string; go: () => void }[] = [
-    { title: 'Prayer times', sub: `${next.name} at ${fmtTime(next.at)}`, icon: 'prayer', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
+    { title: tx('prayerTimes'), sub: `${prayerName(lang, next.name)} · ${fmtTime(next.at)}`, icon: 'prayer', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
     { title: 'Daily adhkar', sub: `${nowCat.k} · ${catMinutes(nowCat)} min`, icon: 'beads', tint: t.tAmb, ink: t.acc, go: () => router.push({ pathname: '/session', params: { cat: nowCat.k } }) },
     { title: 'Quran', sub: qLast ? `${SURAHS[qLast.s - 1].name} · ${surahPct(qLast.s, qLast.a)}%` : 'Start reading', icon: 'book', tint: t.tMint, ink: t.mint, go: () => router.push('/home/quran') },
     { title: 'Ibadah Lock', sub: 'Focus while you recite', icon: 'lock', tint: t.tLav, ink: t.lav, go: () => router.push('/focus-setup') },
@@ -74,7 +80,12 @@ export default function Home() {
         <FadeIn style={{ paddingHorizontal: 22, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
           <View style={{ flex: 1 }}>
             <View style={{ marginLeft: 12 }}><MosqueLogo size={28} /></View>
-            <SerifTitle a="Salam," b={firstName()} style={{ marginTop: 2 }} />
+            {ur ? (
+              <View accessibilityRole="header" accessibilityLabel={`${tx('greet')} ${name}`} style={{ flexDirection: 'row-reverse', justifyContent: 'flex-end', alignItems: 'baseline', gap: 10, marginTop: 2, flexWrap: 'wrap' }}>
+                <Txt ur style={{ fontSize: 26, lineHeight: 54 }}>{tx('greet')}</Txt>
+                <Txt serif style={{ fontSize: 38, lineHeight: 46, color: t.t6 }} numberOfLines={1}>{iso(name)}</Txt>
+              </View>
+            ) : <SerifTitle a={tx('greet')} b={name} style={{ marginTop: 2 }} />}
           </View>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 30 }}>
             <IconBtn name="search" label="Search" onPress={() => router.push('/search')} />
@@ -121,16 +132,28 @@ export default function Home() {
               <View style={{ position: 'absolute', left: 24, right: 24, top: 24, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Icon name="pin" color="#FFFFFF" />
                 <View style={{ flex: 1 }}>
-                  <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.8)' }}>BASED ON YOUR LOCATION</Txt>
-                  <Txt style={{ fontSize: 18, fontWeight: 700, marginTop: 3, color: '#FFFFFF' }}>Prayer timeline</Txt>
+                  <Txt ur={ur} style={{ fontSize: 11.5, letterSpacing: ur ? 0 : 0.7, color: 'rgba(255,255,255,0.8)', textAlign: 'left' }}>{tx('basedOnLocation')}</Txt>
+                  <Txt ur={ur} style={{ fontSize: 18, fontWeight: 700, marginTop: 3, color: '#FFFFFF', textAlign: 'left' }}>{tx('timeline')}</Txt>
                 </View>
                 <Icon name="chev" color="#FFFFFF" />
               </View>
               <View style={{ position: 'absolute', left: 24, right: 24, bottom: 108 }}>
-                <Txt style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.96, color: '#FFFFFF' }}>NEXT PRAYER</Txt>
-                <Txt style={{ fontSize: 34, fontWeight: 800, lineHeight: 37, letterSpacing: -0.7, marginTop: 8, color: '#FFFFFF' }}>
-                  {next.name} begins in{'\n'}{fmtCountdown(next.secs)}
-                </Txt>
+                <Txt ur={ur} style={{ fontSize: 12, fontWeight: 700, letterSpacing: ur ? 0 : 0.96, color: '#FFFFFF', textAlign: 'left' }}>{tx('nextPrayer')}</Txt>
+                {ur ? (
+                  <>
+                    <Txt ur style={{ fontSize: 26, lineHeight: 52, marginTop: 4, color: '#FFFFFF', textAlign: 'left' }}>{tx('beginsIn', { p: prayerName(lang, next.name) })}</Txt>
+                    <Txt style={{ fontSize: 34, fontWeight: 800, lineHeight: 37, letterSpacing: -0.7, color: '#FFFFFF' }}>{fmtCountdown(next.secs)}</Txt>
+                  </>
+                ) : (
+                  <Txt style={{ fontSize: 34, fontWeight: 800, lineHeight: 37, letterSpacing: -0.7, marginTop: 8, color: '#FFFFFF' }}>
+                    {tx('beginsIn', { p: next.name })}{'\n'}{fmtCountdown(next.secs)}
+                  </Txt>
+                )}
+                {nextJ && (
+                  <Txt ur={ur} style={{ fontSize: 13.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)', marginTop: 8, textAlign: 'left' }}>
+                    {nextJ.jumuah ? tx('jumuah') : tx('jamaat')} · {ltr(fmtTime(nextJ.at))}
+                  </Txt>
+                )}
               </View>
               <View style={{ position: 'absolute', left: 24, right: 24, bottom: 28 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: 16 }}>

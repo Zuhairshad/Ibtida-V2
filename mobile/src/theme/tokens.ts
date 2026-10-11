@@ -108,6 +108,7 @@ export const G = {
   session: 'radial-gradient(120% 70% at 50% 0%, #2A2440 0%, #16171D 62%)',
   tasbeeh: 'radial-gradient(100% 60% at 50% 38%, #26203C 0%, #14151B 70%)',
   goalDone: 'radial-gradient(90% 55% at 50% 30%, #4A3420 0%, #16171D 70%)',
+  launch: 'radial-gradient(110% 65% at 50% 30%, #2A2440 0%, #14151B 68%)',
   focus: 'radial-gradient(100% 60% at 50% 35%, #1F2A2A 0%, #0F1013 70%)',
   scan: 'radial-gradient(80% 60% at 50% 45%, #1C2024, #07080A)',
   glowWarm: 'radial-gradient(circle, rgba(255,214,150,0.45), rgba(255,214,150,0) 65%)',

@@ -1,7 +1,8 @@
 import * as Clipboard from 'expo-clipboard';
 import { ScrollView, View } from 'react-native';
 import { fmt, MILESTONES, PH } from '../data/content';
-import { firstName, usePrayerNow } from '../lib/hooks';
+import { usePrayerNow } from '../lib/hooks';
+import { iso, tr, useFirstName, useLang } from '../lib/i18n';
 import { todayKey, useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED, G, bgImage } from '../theme/tokens';
@@ -13,6 +14,8 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
   const t = useT();
   const streak = useApp(s => s.streak);
   const goals = useApp(s => s.goals);
+  const name = useFirstName();
+  const { ur } = useLang();
   const circles = useApp(s => s.circles);
   const { logs, doneCount } = usePrayerNow();
   const act = useApp(s => s.act);
@@ -21,7 +24,7 @@ export function InsightSheet({ open, onClose, impact }: { open: boolean; onClose
     <Sheet open={open} onClose={onClose}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <View>
-          <Txt style={{ fontSize: 14, color: t.t2 }}>Assalamu Alaikum, {firstName()}</Txt>
+          <Txt ur={ur} style={{ fontSize: 14, color: t.t2 }}>{ur ? `${tr('ur', 'greet')} ${iso(name)}` : `Assalamu Alaikum, ${name}`}</Txt>
           <Txt style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, marginTop: 4 }}>Today’s insight</Txt>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 13, borderRadius: 18, backgroundColor: 'rgba(242,166,90,0.14)' }}>

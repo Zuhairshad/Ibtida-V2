@@ -8,8 +8,16 @@ import { PlaceSearch } from './PlaceSearch';
 import { IconChip, Cta, Label, Seg, say, Sheet, Tap, Txt } from './ui';
 
 export function MadhabSeg({ bg }: { bg?: string }) {
+  const t = useT();
   const hanafi = useApp(s => s.hanafi);
-  return <Seg labels={['Hanafi', 'Shafi‘i, Maliki, Hanbali']} value={hanafi ? 0 : 1} onChange={i => set({ hanafi: i === 0 })} height={44} radius={20} inner={16} bg={bg} size={14} />;
+  return (
+    <View>
+      <Seg labels={['Hanafi', 'Shafi‘i, Maliki, Hanbali']} value={hanafi ? 0 : 1} onChange={i => set({ hanafi: i === 0 })} height={44} radius={20} inner={16} bg={bg} size={14} />
+      <Txt style={{ fontSize: 12, lineHeight: 17.5, color: t.t4, marginTop: 8, marginHorizontal: 4 }}>
+        {hanafi ? 'Followed by Ahl-e-Sunnat (Barelvi, Deobandi): later Asr.' : 'Followed by Ahl-e-Hadith: earlier Asr.'}
+      </Txt>
+    </View>
+  );
 }
 
 export function useDetect() {

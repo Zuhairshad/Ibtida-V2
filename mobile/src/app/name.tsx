@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { FadeIn } from '../components/motion';
+import { LangSeg } from '../components/LangSeg';
 import { BackTitle, Steps } from '../components/Onboarding';
 import { BackBar, Cta, H1, Page, say, Txt } from '../components/ui';
 import { getState, set } from '../state/store';
@@ -42,6 +43,8 @@ export default function Name() {
         <BackTitle title="What should we call you?" sub="Used to greet you, and shown to circles you join. You can change it any time." />
         {input}
         <Txt style={{ fontSize: 13, color: t.t4, textAlign: 'center', marginTop: 12 }}>A first name is fine.</Txt>
+        <Txt style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.08, color: t.t4, marginTop: 30, marginBottom: 10, textAlign: 'center' }}>GREET ME IN · زبان</Txt>
+        <LangSeg />
         <View style={{ flex: 1 }} />
         <Cta label="Continue" disabled={!clean} onPress={save} />
       </FadeIn>

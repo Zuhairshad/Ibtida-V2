@@ -4,10 +4,10 @@ import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import { PH, type PrayerName } from '../data/content';
-import { compose, durUr, ltr, PRAYER_UR, quoteFor, type Line, type QuoteKind } from '../data/reminders';
+import { ayahFor, compose, durUr, ltr, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
 import { getState, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
-import { addDays, dayKey, fmtTime, timesFor } from './prayer';
+import { addDays, dayKey, fmtTime, jamaatAt, nextPrayer, timesFor } from './prayer';
 
 /**
  * Local notifications. Everything is a one-shot DATE trigger computed on-device for the
@@ -133,7 +133,10 @@ export async function previewReminder() {
   if (!NATIVE) { say('Previews need the mobile app'); return; }
   if (!(await enableNotifications())) return;
   const s = getState();
-  const p = compose(s.notifLang ?? 'both', { en: 'Preview', ur: 'نمونہ' }, { en: 'This is how your reminders will look and sound.', ur: 'آپ کی یاد دہانیاں ایسی دکھائی اور سنائی دیں گی۔' }, s.notifQuotes === false ? null : quoteFor('goal', new Date()));
+  // The next prayer's notification, exactly as it will arrive.
+  const next = nextPrayer(s.city, new Date(), s.method, s.hanafi, s.adj);
+  const j = jamaatAt(s.jamaat ?? {}, next.name, next.at);
+  const p = prayerNotice(s.notifLang ?? 'both', next.name, fmtTime(next.at), ayahFor(next.at, next.idx), undefined, j ? { time: fmtTime(j.at), jumuah: j.jumuah, masjid: s.masjid || undefined } : undefined);
   await Notifications.scheduleNotificationAsync({
     content: { title: p.title, body: p.body, sound: 'default' },
     trigger: Platform.OS === 'android' ? { channelId: CH.reminders } : null,
@@ -179,14 +182,21 @@ function goalTime(g: Goal, day: Date, fajr: Date): Date | null {
 export function planNotifications(s: Store, now = new Date()): Planned[] {
   const out: Planned[] = [];
   const [prayerOn, adhkarOn, goalsOn, quranOn] = s.notifs;
-  const short = s.city.name.split(',')[0];
   const lang = s.notifLang ?? 'both';
-  /** Title and body in the user's language, with the day's hadith for this kind of reminder. */
+  /**
+   * Title and body in the user's language, with the day's hadith for this kind of reminder.
+   * Prayer and wake notifications carry an ayah instead (see `prayerNotice`).
+   */
   const txt = (day: Date, kind: QuoteKind, title: Line, body: Line, salt = 0) =>
     compose(lang, title, body, s.notifQuotes === false ? null : quoteFor(kind, day, salt));
+  /** The jamaat time the user entered for this prayer, for the notification's last line. */
+  const jam = (p: PrayerName, day: Date) => {
+    const j = jamaatAt(s.jamaat ?? {}, p, day);
+    return j ? { time: fmtTime(j.at), jumuah: j.jumuah, masjid: s.masjid || undefined } : undefined;
+  };
   for (let d = 0; d <= HORIZON_DAYS; d++) {
     const day = addDays(now, d);
-    const times = timesFor(s.city, day, s.method, s.hanafi);
+    const times = timesFor(s.city, day, s.method, s.hanafi, s.adj);
     const key = dayKey(day);
 
     PH.forEach((p: PrayerName, i) => {
@@ -200,17 +210,14 @@ export function planNotifications(s: Store, now = new Date()): Planned[] {
         }
         out.push({
           at: wakeAt, kind: `wake.${p}.${key}`,
-          ...txt(day, p === 'Fajr' ? 'fajr' : 'prayer',
-            { en: `Wake for ${p}`, ur: `${PRAYER_UR[p]} کے لیے اٹھیں` },
-            { en: `${p} · ${fmtTime(t)} · scan your wudu station to stop`, ur: `${PRAYER_UR[p]} · ${ltr(fmtTime(t))} · الارم بند کرنے کے لیے وضو کی جگہ اسکین کریں` }),
+          ...prayerNotice(lang, p, fmtTime(t), ayahFor(day, i),
+            { en: 'Scan your wudu station to stop the alarm.', ur: 'الارم بند کرنے کے لیے وضو کی جگہ اسکین کریں۔' }, jam(p, day)),
           url: '/wake-scan', channelId: CH.wake, sound: 'default', urgent: true,
         });
       } else if (prayerOn && s.adhan[p]) {
         out.push({
           at: t, kind: `adhan.${p}.${key}`,
-          ...txt(day, p === 'Fajr' ? 'fajr' : 'prayer',
-            { en: `Time for ${p}`, ur: `${PRAYER_UR[p]} کا وقت` },
-            { en: `${p} · ${fmtTime(t)} · ${short}`, ur: `${PRAYER_UR[p]} · ${ltr(fmtTime(t))} · ${ltr(short)}` }, i),
+          ...prayerNotice(lang, p, fmtTime(t), ayahFor(day, i), undefined, jam(p, day)),
           url: '/prayer', channelId: CH.adhan(s.sound), sound: adhanSound(s.sound),
         });
       }
@@ -319,6 +326,11 @@ export function syncNotifications() {
 
 /* --------------------------------------------------------------- Hook */
 
+/** True when this launch came from tapping a notification (read before `useNotifications` clears it). */
+export function openedFromNotification() {
+  return NATIVE && !!Notifications.getLastNotificationResponse();
+}
+
 if (NATIVE) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
@@ -330,7 +342,7 @@ function signature(s: Store) {
   return JSON.stringify([
     s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.notifs, s.wakeVerify, s.wake,
     s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days]),
-    s.locks, s.notifLang, s.notifQuotes,
+    s.locks, s.notifLang, s.notifQuotes, s.adj, s.jamaat, s.masjid, s.lang,
   ]);
 }
 

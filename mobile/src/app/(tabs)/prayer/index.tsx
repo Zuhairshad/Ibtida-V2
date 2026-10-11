@@ -12,7 +12,9 @@ import { clock, setLog, usePrayerNow } from '../../../lib/hooks';
 import { useCompass } from '../../../lib/compass';
 import { delta, unwrap } from '../../../lib/compassMath';
 import { enableNotifications } from '../../../lib/notifications';
-import { addDays, dayKey, fmtTime, qibla, timesFor } from '../../../lib/prayer';
+import { addDays, dayKey, fmtTime, jamaatAt, qibla, timesFor } from '../../../lib/prayer';
+import { prayerName, useLang } from '../../../lib/i18n';
+import { ltr } from '../../../data/reminders';
 import { set, useApp } from '../../../state/store';
 import { useT } from '../../../theme/ThemeProvider';
 import { FIXED, G, bgImage } from '../../../theme/tokens';
@@ -109,7 +111,10 @@ export default function Prayer() {
   const t = useT();
   const router = useRouter();
   const params = useLocalSearchParams<{ qibla?: string }>();
-  const { now, next, city, method, hanafi } = usePrayerNow();
+  const { now, next, city, method, hanafi, adj } = usePrayerNow();
+  const jamaat = useApp(s => s.jamaat);
+  const masjid = useApp(s => s.masjid);
+  const { lang, ur, t: tx } = useLang();
   const adhan = useApp(s => s.adhan);
   const sound = useApp(s => s.sound);
   const allLogs = useApp(s => s.logs);
@@ -122,7 +127,9 @@ export default function Prayer() {
   const date = addDays(now, day);
   const key = dayKey(date);
   const logs = allLogs[key] || {};
-  const times = useMemo(() => timesFor(city, date, method, hanafi), [city, key, method, hanafi]); // eslint-disable-line react-hooks/exhaustive-deps
+  const times = useMemo(() => timesFor(city, date, method, hanafi, adj), [city, key, method, hanafi, adj]); // eslint-disable-line react-hooks/exhaustive-deps
+  const anyJamaat = Object.keys(jamaat).length > 0;
+  const nextJ = jamaatAt(jamaat, next.name, next.at);
   const frac = Math.max(0, Math.min(1, 1 - next.secs / next.span));
 
   const rows = ORDER.map(n => {
@@ -133,7 +140,7 @@ export default function Prayer() {
     const past = day === 0 && at.getTime() < now.getTime();
     const missed = !done && past;
     const isNext = day === 0 && n === next.name && !done;
-    return { n, at, sun: false as const, done, missed, isNext, canLog: day === 0 };
+    return { n, at, sun: false as const, done, missed, isNext, canLog: day === 0, jam: jamaatAt(jamaat, n, date) };
   });
 
   const pd = detail ? (() => {
@@ -145,7 +152,7 @@ export default function Prayer() {
     const missed = r && !r.sun && r.missed;
     const isNext = r && !r.sun && r.isNext;
     return {
-      time: fmtTime(times[detail]), win,
+      time: fmtTime(times[detail]), win, jam: jamaatAt(jamaat, detail, date),
       badge: done ? 'Prayed' : missed ? 'Missed' : isNext ? 'Next' : 'Upcoming',
       badgeBg: done ? 'rgba(94,184,122,0.16)' : missed ? 'rgba(240,138,122,0.16)' : 'rgba(242,166,90,0.16)',
       badgeInk: done ? t.mint : missed ? t.rose : t.acc,
@@ -156,14 +163,16 @@ export default function Prayer() {
     <View style={{ flex: 1 }}>
       <Screen>
         <FadeIn style={{ paddingHorizontal: 22, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <SerifTitle a="Prayer" b="Times" style={{ flexShrink: 1 }} />
+          {ur
+            ? <Txt ur accessibilityRole="header" style={{ fontSize: 32, lineHeight: 64, flexShrink: 1 }}>{tx('titleA')} <Txt ur style={{ fontSize: 32, color: t.t6 }}>{tx('titleB')}</Txt></Txt>
+            : <SerifTitle a="Prayer" b="Times" style={{ flexShrink: 1 }} />}
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <IconBtn name="pin" label="Location and method" onPress={() => { buzz(6); setLoc(true); }} />
             <IconBtn name="alarm" label="Wake alarm" onPress={() => router.push('/prayer/wake-alarm')} />
           </View>
         </FadeIn>
         <Txt style={{ paddingTop: 10, paddingHorizontal: 22, fontSize: 13.5, color: t.t2 }} numberOfLines={1}>
-          {city.name} · {METHODS[method].k} · {hanafi ? 'Hanafi' : 'Standard'} Asr
+          {city.name} · {METHODS[method].k} · {hanafi ? 'Hanafi' : 'Standard'} Asr{Object.values(adj).some(Boolean) ? ' · adjusted' : ''}
         </Txt>
         <View style={{ paddingTop: 16, paddingHorizontal: 16, flexDirection: 'row' }}>
           <DayStrip count={7} value={day} base={now} onChange={setDay} />
@@ -176,39 +185,56 @@ export default function Prayer() {
               <View style={{ alignItems: 'center' }} accessible accessibilityLabel={`${next.name} at ${fmtTime(next.at)}, ${clock(next.secs)} until adhan`}>
                 <Txt style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, color: t.acc }}>{next.name.toUpperCase()} · {fmtTime(next.at).toUpperCase()}</Txt>
                 <Txt style={{ fontSize: 50, fontWeight: 800, letterSpacing: -1.5, marginTop: 6 }}>{clock(next.secs)}</Txt>
-                <Txt style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>until adhan</Txt>
+                <Txt ur={ur} style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>{tx('untilAdhan')}</Txt>
+                {nextJ && <Txt ur={ur} style={{ fontSize: 12.5, fontWeight: 700, color: t.gold, marginTop: 6 }}>{tx(nextJ.jumuah ? 'jumuah' : 'jamaat')} · {ltr(fmtTime(nextJ.at))}</Txt>}
               </View>
             </Ring>
           </View>
         </View>
 
         <View style={{ paddingTop: 20, paddingHorizontal: 16, gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+            <Label style={{ flex: 1 }}>{masjid ? masjid.toUpperCase() : 'PRAYER'}</Label>
+            {ur ? (
+              <Txt ur style={{ fontSize: 12, color: t.t5 }}>{tx('begins')}{anyJamaat ? <Txt ur style={{ fontSize: 12, color: t.gold }}> · {tx('jamaat')}</Txt> : null}</Txt>
+            ) : (
+              <>
+                <Label color={t.t5}>BEGINS</Label>
+                {anyJamaat && <Label color={t.gold} style={{ marginLeft: 6 }}>· JAMAAT</Label>}
+              </>
+            )}
+          </View>
           {rows.map((r, i) => {
             if (r.sun) {
               return (
                 <FadeIn key={r.n} delay={i * 40} style={{ borderRadius: 26, backgroundColor: t.sunk2, boxShadow: t.edge, paddingVertical: 14, paddingLeft: 16, paddingRight: 14, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
                   <IconChip name="sun" color="#F7BD5A" />
                   <View style={{ flex: 1 }}>
-                    <Txt style={{ fontSize: 16.5, fontWeight: 700 }}>Sunrise</Txt>
-                    <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>Not a prayer time</Txt>
+                    <Txt ur={ur} style={{ fontSize: 16.5, fontWeight: 700, textAlign: 'left' }}>{tx('sunrise')}</Txt>
+                    <Txt ur={ur} style={{ fontSize: 12.5, color: t.t2, marginTop: ur ? 0 : 3, textAlign: 'left' }}>{tx('notPrayer')}</Txt>
                   </View>
                   <Txt style={{ fontSize: 15.5, fontWeight: 600, color: t.t5 }}>{fmtTime(r.at)}</Txt>
                 </FadeIn>
               );
             }
             const n = r.n as PrayerName;
-            const note = r.done ? 'Prayed · logged' : r.missed ? 'Missed · tap to make up' : r.isNext ? `Next · in ${next.secs >= 3600 ? `${Math.floor(next.secs / 3600)}h ${Math.ceil((next.secs % 3600) / 60)}m` : `${Math.ceil(next.secs / 60)} min`}` : adhan[n] ? 'Adhan on' : 'Adhan off';
+            // Shorter notes when the row also carries a jamaat time, so it stays on one or two lines.
+            const left = next.secs >= 3600 ? `${Math.floor(next.secs / 3600)}h ${Math.ceil((next.secs % 3600) / 60)}m` : `${Math.ceil(next.secs / 60)} min`;
+            const note = r.done ? tx('prayed') : r.missed ? tx(r.jam ? 'missedShort' : 'missed') : r.isNext ? `${tx('next')} · ${r.jam || ur ? '' : 'in '}${ur ? ltr(left) : left}` : tx(adhan[n] ? 'adhanOn' : 'adhanOff');
             const noteInk = r.done ? t.mint : r.missed ? t.rose : r.isNext ? t.acc : t.t2;
             return (
               <FadeIn key={n} delay={i * 40}>
-                <Tap scale={0.985} onPress={() => { buzz(6); setDetail(n); }} accessibilityLabel={`${n} ${fmtTime(r.at)}, ${note}`}
+                <Tap scale={0.985} onPress={() => { buzz(6); setDetail(n); }} accessibilityLabel={`${n}, begins ${fmtTime(r.at)}${r.jam ? `, ${r.jam.jumuah ? 'Jumu‘ah' : 'jamaat'} ${fmtTime(r.jam.at)}` : ''}, ${note}`}
                   style={{ borderRadius: 26, backgroundColor: r.isNext ? undefined : t.card, ...bgImage(r.isNext ? G.nextRow : undefined), boxShadow: r.isNext ? 'inset 0 0 0 1.5px rgba(242,166,90,0.5)' : t.edge, paddingVertical: 14, paddingLeft: 16, paddingRight: 14, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
                   <IconChip name={PRAYER_META[n].ic} color={r.done ? t.mint : r.isNext ? t.acc : t.t5} />
                   <View style={{ flex: 1, minWidth: 0 }}>
-                    <Txt style={{ fontSize: 16.5, fontWeight: 700 }}>{n}</Txt>
-                    <Txt style={{ fontSize: 12.5, color: noteInk, marginTop: 3 }}>{note}</Txt>
+                    <Txt ur={ur} style={{ fontSize: 16.5, fontWeight: 700, textAlign: 'left' }}>{prayerName(lang, n)}</Txt>
+                    <Txt ur={ur} style={{ fontSize: 12.5, color: noteInk, marginTop: ur ? 0 : 3, textAlign: 'left' }}>{note}</Txt>
                   </View>
-                  <Txt style={{ fontSize: 15.5, fontWeight: 600, color: t.t5 }}>{fmtTime(r.at)}</Txt>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Txt style={{ fontSize: 15.5, fontWeight: 600, color: t.t5 }}>{fmtTime(r.at)}</Txt>
+                    {r.jam && <Txt ur={ur} style={{ fontSize: 11.5, fontWeight: 700, color: t.gold, marginTop: ur ? 0 : 3 }}>{tx(r.jam.jumuah ? 'jumuah' : 'jamaat')} {ltr(fmtTime(r.jam.at))}</Txt>}
+                  </View>
                   <Tap scale={0.9} accessibilityLabel={`Adhan for ${n}`} accessibilityState={{ checked: adhan[n] }}
                     onPress={() => { buzz(5); set(s => ({ adhan: { ...s.adhan, [n]: !s.adhan[n] } })); say(`Adhan ${adhan[n] ? 'off' : 'on'} for ${n}`); if (!adhan[n]) enableNotifications(); }}
                     style={{ width: 36, height: 44, alignItems: 'center', justifyContent: 'center' }}>
@@ -231,6 +257,19 @@ export default function Prayer() {
           })}
         </View>
         <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
+          <Tap scale={0.99} onPress={() => { buzz(6); router.push('/jamaat'); }} accessibilityRole="button" accessibilityLabel="Masjid and jamaat times"
+            style={{ borderRadius: 26, backgroundColor: t.card, boxShadow: t.edge, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 13 }}>
+            <IconChip name="people" color={t.gold} />
+            <View style={{ flex: 1 }}>
+              <Txt ur={ur} style={{ fontSize: 16.5, fontWeight: 700 }}>{tx('masjidTimes')}</Txt>
+              <Txt ur={ur && !anyJamaat} style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }} numberOfLines={1}>
+                {anyJamaat ? `${masjid || 'Your masjid'} · ${Object.keys(jamaat).length} set by you` : tx('addMasjid')}
+              </Txt>
+            </View>
+            <Icon name="chev" color={t.t2} />
+          </Tap>
+        </View>
+        <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
           <QiblaCard open={qOpen} onToggle={() => setQOpen(o => !o)} />
         </View>
       </Screen>
@@ -247,7 +286,20 @@ export default function Prayer() {
                 <Txt style={{ fontSize: 12, fontWeight: 700, color: pd.badgeInk }}>{pd.badge}</Txt>
               </View>
             </View>
-            <View style={{ marginTop: 18, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 16, paddingHorizontal: 18 }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
+              <View style={{ flex: 1, borderRadius: 22, backgroundColor: t.sheetc, boxShadow: t.edge, padding: 14 }}>
+                <Label>BEGINS</Label>
+                <Txt style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{pd.time}</Txt>
+                <Txt style={{ fontSize: 11.5, color: t.t4, marginTop: 4 }}>{adj[detail] ? `Calculated, ${adj[detail]! > 0 ? '+' : ''}${adj[detail]} min by you` : 'Calculated for your location'}</Txt>
+              </View>
+              <Tap scale={0.98} onPress={() => { setDetail(null); router.push('/jamaat'); }} accessibilityRole="button" accessibilityLabel={pd.jam ? `Jamaat ${fmtTime(pd.jam.at)}, edit` : 'Set jamaat time'}
+                style={{ flex: 1, borderRadius: 22, backgroundColor: t.sheetc, boxShadow: pd.jam ? 'inset 0 0 0 1px rgba(242,196,138,0.35)' : t.edge, padding: 14 }}>
+                <Label color={t.gold}>{pd.jam?.jumuah ? 'JUMU‘AH' : 'JAMAAT'}</Label>
+                <Txt style={{ fontSize: 22, fontWeight: 800, marginTop: 6, color: pd.jam ? t.tx : t.t4 }}>{pd.jam ? fmtTime(pd.jam.at) : 'Not set'}</Txt>
+                <Txt style={{ fontSize: 11.5, color: pd.jam ? t.t4 : t.acc, marginTop: 4 }} numberOfLines={1}>{pd.jam ? (masjid || 'Set by you') : 'Add your masjid’s time'}</Txt>
+              </Tap>
+            </View>
+            <View style={{ marginTop: 10, borderRadius: 24, backgroundColor: t.sheetc, boxShadow: t.edge, paddingVertical: 16, paddingHorizontal: 18 }}>
               <Label>RAK’AH · COMMON HANAFI PRACTICE</Label>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 12 }}>
                 {(PRAYER_META[detail].rak || []).map((r, i) => {

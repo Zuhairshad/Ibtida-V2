@@ -125,7 +125,7 @@ const stamp = (k: string, at = Date.now()) => { stamps[k] = at; persistSoon(); }
 // ---------------------------------------------------------------------------------------------
 const PROFILE_KEYS: (keyof AppState)[] = [
   'name', 'city', 'method', 'hanafi', 'privacy', 'theme', 'adhan', 'sound', 'vib', 'notifs', 'wakeVerify',
-  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes',
+  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj',
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 
@@ -403,6 +403,14 @@ export async function pullAndMerge() {
   } else if (p) {
     stamp('profile', stamps.profile || Date.now());
     enqueue('profile', 'profile');
+  }
+  // No name on this device yet (e.g. signed in instead of onboarding): use the account's.
+  if (!s.name.trim() && !patch.name) {
+    // From the stored session: no extra request.
+    const { data } = await supabase.auth.getSession();
+    const meta = data.session?.user.user_metadata as Record<string, unknown> | undefined;
+    const remote = [p?.display_name, meta?.full_name, meta?.name].find((x): x is string => typeof x === 'string' && !!x.trim());
+    if (remote) patch.name = remote.trim().replace(/\s+/g, ' ').slice(0, 40);
   }
 
   // Prayer logs

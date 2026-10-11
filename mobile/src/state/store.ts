@@ -4,6 +4,7 @@ import { AppState as RNAppState } from 'react-native';
 import { CITIES, PH, type City, type PrayerName } from '../data/content';
 import { isAyahRef } from '../data/surahs';
 import type { LockSched } from '../lib/lockTimes';
+import type { Adjust } from '../lib/prayer';
 import type { NotifLang } from '../data/reminders';
 
 /** Reminder time from the goal-schedule wheels: h indexes 1–12, m indexes 00/15/30/45, a 0=AM 1=PM, days Mon…Sun. */
@@ -36,6 +37,12 @@ export type ThemePref = 'dark' | 'light' | 'system';
 export type WakeMode = 'tag' | 'item';
 /** A reading position: surah, ayah and when it was reached (ms). */
 export type QPos = { s: number; a: number; at: number };
+/** App language for the greeting and the main screens' text. The user's name is never translated. */
+export type Lang = 'en' | 'ur';
+/** A congregation slot: the five prayers, plus Jumu‘ah on Fridays. */
+export type JamaatSlot = PrayerName | 'Jumuah';
+/** Jamaat times as minutes after midnight, exactly as entered for the user's masjid. Missing = not set. */
+export type Jamaat = Partial<Record<JamaatSlot, number>>;
 /** One day of activity: dhikr counted, adhkar sessions completed, Quran ayahs newly read. */
 export type DayAct = { d: number; s: number; q: number };
 
@@ -94,6 +101,14 @@ export type AppState = {
   /** Notification language, and whether reminders carry a short hadith. */
   notifLang: NotifLang;
   notifQuotes: boolean;
+  /** Show a verse each time the app opens. */
+  launchAyah: boolean;
+  lang: Lang;
+  /** The user's masjid and its jamaat times. Only ever entered by the user, never calculated. */
+  masjid: string;
+  jamaat: Jamaat;
+  /** Manual start-time adjustment per prayer, in minutes (to match a local timetable). */
+  adj: Adjust;
   /** Recurring Ibadah Lock windows (time, duration, days). */
   locks: LockSched[];
   /** Emergency unlock of a scheduled window: apps open normally until this epoch ms. */
@@ -153,6 +168,11 @@ const initial: AppState = {
   azBg: 0,
   notifLang: 'both',
   notifQuotes: true,
+  launchAyah: true,
+  lang: 'en',
+  masjid: '',
+  jamaat: {},
+  adj: {},
   sched: { h: 7, m: 0, a: 1, days: [1, 1, 1, 1, 1, 0, 0] },
   streak: 0,
   act: {},
@@ -263,6 +283,9 @@ function migrate(saved: Partial<AppState>): Partial<AppState> {
     qLast: isPos(saved.qLast) ? saved.qLast : null,
     qHist: Array.isArray(saved.qHist) ? saved.qHist.filter(isPos) : [],
     qMax: saved.qMax && typeof saved.qMax === 'object' ? saved.qMax : {},
+    lang: saved.lang === 'ur' ? 'ur' : 'en',
+    jamaat: saved.jamaat && typeof saved.jamaat === 'object' ? saved.jamaat : {},
+    adj: saved.adj && typeof saved.adj === 'object' ? saved.adj : {},
   };
 }
 

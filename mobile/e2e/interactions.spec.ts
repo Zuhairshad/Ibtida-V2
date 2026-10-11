@@ -28,7 +28,7 @@ test.describe('prayer', () => {
   test('prayer detail sheet opens, logs and closes', async ({ page, seed }) => {
     await seed(withSample());
     await page.goto('/prayer');
-    await page.getByRole('button', { name: /^Asr \d/ }).click();
+    await page.getByRole('button', { name: /^Asr, begins \d/ }).click();
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toBeVisible();
     await button(page, 'Madinah').click();
     await button(page, 'Prayed on time').click();
@@ -39,11 +39,11 @@ test.describe('prayer', () => {
     expect(s.sound).toBe(1);
 
     // Re-open and dismiss with the drag handle, then with the scrim.
-    await page.getByRole('button', { name: /^Isha \d/ }).click();
+    await page.getByRole('button', { name: /^Isha, begins \d/ }).click();
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toBeVisible();
     await labelled(page, 'Close').click();
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toHaveCount(0);
-    await page.getByRole('button', { name: /^Fajr \d/ }).click();
+    await page.getByRole('button', { name: /^Fajr, begins \d/ }).click();
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toBeVisible();
     await labelled(page, 'Dismiss').click({ position: { x: 20, y: 20 } });
     await expect(visibleText(page, 'RAK’AH · COMMON HANAFI PRACTICE')).toHaveCount(0);
@@ -590,19 +590,21 @@ test.describe('profile', () => {
 });
 
 test.describe('notifications and qibla', () => {
-  test('reminders can be in Urdu with a daily hadith, previewed live', async ({ page, seed }) => {
+  test('prayer reminders lead with an ayah, in Urdu when chosen, previewed live', async ({ page, seed }) => {
     await seed();
     await page.goto('/profile/notifications');
     const preview = page.getByLabel('Notification preview');
-    // Default: English and Urdu together, with a sourced hadith.
-    await expect(preview.getByText(/^Time for \w+ · \S+ کا وقت$/)).toBeVisible();
-    await expect(preview.getByText(/— .*\d/)).toBeVisible();
+    // Default: English and Urdu together; prayer name and time once, then the ayah with its reference.
+    await expect(preview.getByText(/^(Fajr|Dhuhr|Asr|Maghrib|Isha) · \d+:\d+ [ap]m · \S+$/)).toBeVisible();
+    await expect(preview.getByText(/” — [A-Z][\w‘’'-]+ \d+:\d+$/)).toBeVisible();
     await page.getByRole('tab', { name: 'اردو' }).click();
-    await expect(preview.getByText(/^(فجر|ظہر|عصر|مغرب|عشاء) کا وقت$/)).toBeVisible();
+    await expect(preview.getByText(/^(فجر|ظہر|عصر|مغرب|عشاء) · /)).toBeVisible();
+    await expect(preview.getByText(/\d+:\d+\u2069\)$/)).toBeVisible();
     await storedWhen(page, x => x.notifLang === 'ur');
+    // The hadith switch is for the other reminders; prayer times keep their ayah.
     await page.getByRole('switch', { name: 'Daily hadith' }).click();
-    await expect(preview.getByText(/«/)).toHaveCount(0);
     await storedWhen(page, x => x.notifQuotes === false);
+    await expect(preview.getByText(/\d+:\d+\u2069\)$/)).toBeVisible();
   });
 
   test('qibla card shows the true bearing and an honest compass status', async ({ page, seed }) => {
