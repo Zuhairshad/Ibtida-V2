@@ -279,10 +279,11 @@ test.describe('adhkar', () => {
     await expect(counter).toHaveAttribute('aria-label', 'Count. 98 of 100');
     await counter.click();
     await counter.click();
-    // An extra eager tap before Goal complete opens must not count a 101st.
-    await counter.click();
-    await expect(counter).toHaveAttribute('aria-label', 'Count. 100 of 100');
+    // An extra eager tap before Goal complete opens must not count a 101st (if the screen is
+    // already gone, there is nothing left to tap).
+    await counter.click({ timeout: 1500 }).catch(() => {});
     await expect(page).toHaveURL(/\/goal-done/);
+    expect((await stored(page)).goals[0].prog).toBe(100);
     await expect(visibleText(page, 'Durood Sharif complete. May Allah accept your worship.')).toBeVisible();
     await storedWhen(page, s => s.goals[0].prog === 100);
     await button(page, 'Back to Home').click();
