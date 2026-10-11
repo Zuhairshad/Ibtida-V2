@@ -7,7 +7,7 @@ import { BackBar, buzz, Cta, H1, Page, say, Seg, Tap, Txt } from '../components/
 import { sendMagicLink, sessionEmail, signIn, signInWithGoogle, signUp, type AuthResult } from '../lib/account';
 import { enableNotifications } from '../lib/notifications';
 import { backendEnabled } from '../lib/supabase';
-import { set } from '../state/store';
+import { getState, set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
 const EMAIL = /^\S+@\S+\.\S+$/;
@@ -33,6 +33,9 @@ export default function Auth() {
   const home = () => {
     if (router.canDismiss()) router.dismissAll();
     router.replace('/home');
+    // An invitation opened before signing in continues straight after.
+    const invite = getState().pendingInvite;
+    if (invite) setTimeout(() => router.push({ pathname: '/join', params: { code: invite } }), 50);
   };
   const enter = async () => {
     buzz([10, 30, 10]);

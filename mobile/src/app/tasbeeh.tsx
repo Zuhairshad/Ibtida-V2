@@ -43,23 +43,22 @@ function goalAr(name: string) {
 function Completed({ show, n, label, sub }: { show: number; n: number; label: string; sub: string }) {
   const t = useT();
   const rm = useReducedMotion();
-  const v = useRef(new Animated.Value(0)).current;
-  const [visible, setVisible] = useState(false);
+  // 0 → appearing, 1 → shown, 2 → gone. Starts gone; the overlay never takes touches.
+  const [v] = useState(() => new Animated.Value(2));
   useEffect(() => {
     if (!show) return;
-    setVisible(true);
     v.setValue(0);
     const a = Animated.sequence([
       Animated.timing(v, { toValue: 1, duration: rm ? 0 : 420, easing: Easing.out(Easing.back(1.6)), useNativeDriver: true }),
       Animated.delay(1300),
       Animated.timing(v, { toValue: 2, duration: rm ? 0 : 380, easing: Easing.in(Easing.ease), useNativeDriver: true }),
     ]);
-    a.start(({ finished }) => { if (finished) setVisible(false); });
+    a.start();
     return () => a.stop();
   }, [show, v, rm]);
-  if (!visible) return null;
   return (
-    <Animated.View pointerEvents="none" accessibilityLiveRegion="assertive" accessibilityLabel={`${fmtCount(n)} completed`}
+    <Animated.View pointerEvents="none" accessibilityLiveRegion={show ? 'assertive' : 'none'} accessibilityElementsHidden={!show} importantForAccessibility={show ? 'yes' : 'no-hide-descendants'}
+      accessibilityLabel={show ? `${fmtCount(n)} completed` : undefined}
       style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center',
         opacity: v.interpolate({ inputRange: [0, 0.4, 1, 2], outputRange: [0, 1, 1, 0] }) }}>
       <Animated.View style={{ position: 'absolute', width: 300, height: 300, borderRadius: 150, borderWidth: 2, borderColor: t.gold,
@@ -70,7 +69,7 @@ function Completed({ show, n, label, sub }: { show: number; n: number; label: st
         <View style={{ width: 52, height: 52, borderRadius: 26, ...bgImage(G.brand), alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="check" size={28} color="#111217" />
         </View>
-        <Txt style={{ fontSize: 30, fontWeight: 800, marginTop: 12 }}>{fmtCount(n)} completed</Txt>
+        <Txt style={{ fontSize: 30, fontWeight: 800, marginTop: 12 }}>{show ? `${fmtCount(n)} completed` : ''}</Txt>
         <Txt style={{ fontSize: 14, color: t.gold, marginTop: 4 }} numberOfLines={1}>{label}</Txt>
         <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 6 }}>{sub}</Txt>
       </Animated.View>
@@ -88,7 +87,6 @@ function Tasbeeh() {
   const goal = useApp(s => (goalId ? s.goals.find(g => g.id === goalId) : undefined));
   const dhKey = useApp(s => s.dhKey);
   const tasN = useApp(s => s.tasN);
-  const after = useApp(s => s.tasAfter);
   const custom = useApp(s => s.customDhikr);
   const targets = useApp(s => s.tasTargets);
   const life = useApp(s => s.tasLife);

@@ -5,7 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { say } from '../components/ui';
 import { handleAuthUrl } from '../lib/account';
 import { enableNotifications } from '../lib/notifications';
-import { set } from '../state/store';
+import { getState, set } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
 /**
@@ -25,6 +25,8 @@ export default function AuthCallback() {
         set({ onboarded: true, signedIn: true });
         say('Bismillah — welcome to Ibtida');
         router.replace('/home');
+        const invite = getState().pendingInvite;
+        if (invite) setTimeout(() => router.push({ pathname: '/join', params: { code: invite } }), 50);
         enableNotifications();
       } else {
         if (r.message) say(r.message);

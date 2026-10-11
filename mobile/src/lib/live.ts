@@ -188,6 +188,9 @@ export async function resetLive() {
 const friendly = (e: { message?: string; code?: string } | null | undefined, fallback: string) => {
   if (!e) return fallback;
   if (e.code === 'P0002') return 'No circle found with that code';
+  if (e.code === 'P0003') return 'This invitation was turned off by the circle owner — ask for a new link';
+  if (e.code === 'P0004') return 'This invitation has expired — ask for a new link';
+  if (e.code === '42501' && /sign in/i.test(e.message ?? '')) return 'Sign in to join a circle';
   if (!e.code) return 'You’re offline — try again when connected';
   return fallback;
 };
@@ -213,8 +216,9 @@ export async function joinCircleLive(code: string): Promise<Circle> {
   return c;
 }
 
-export async function regenerateCodeLive(c: Circle): Promise<string> {
-  const { data, error } = await supabase!.rpc('regenerate_circle_invite', { p_circle_id: c.remoteId });
+/** New code (the old code and link stop working). `days` makes the new one expire; omit for never. */
+export async function regenerateCodeLive(c: Circle, days?: number): Promise<string> {
+  const { data, error } = await supabase!.rpc('regenerate_circle_invite', days ? { p_circle_id: c.remoteId, p_days: days } : { p_circle_id: c.remoteId });
   if (error) throw new Error(friendly(error, 'Only the owner can regenerate the code'));
   const code = data as string;
   setFromRemote(s => ({ circles: s.circles.map(x => (x.remoteId === c.remoteId ? { ...x, code } : x)) }));

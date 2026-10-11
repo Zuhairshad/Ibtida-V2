@@ -55,6 +55,8 @@ export type AppState = {
   signedIn: boolean;
   /** The account the local data belongs to (Supabase user id); '' for data made before any sign-in. */
   accountId: string;
+  /** An invitation opened before signing in; joined right after sign-in. */
+  pendingInvite: string | null;
   name: string;
   email: string;
   theme: ThemePref;
@@ -143,6 +145,7 @@ export type AppState = {
 const initial: AppState = {
   hydrated: false,
   accountId: '',
+  pendingInvite: null,
   onboarded: false,
   signedIn: false,
   name: '',

@@ -1,11 +1,12 @@
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Alert, Platform, Pressable, Share, View } from 'react-native';
+import { Alert, Platform, Pressable, View } from 'react-native';
 import { Icon } from '../../../../components/Icon';
 import { Avatar, BackBar, Bar, buzz, Cta, H1, Label, ListCard, say, Screen, Tap, Txt } from '../../../../components/ui';
 import { code8, fmt } from '../../../../data/content';
 import { initialsOf } from '../../../../components/community';
+import { inviteLink, shareInvite } from '../../../../lib/invite';
 import { contributeCircleLive, leaveCircleLive, loadMembers, regenerateCodeLive, useLive } from '../../../../lib/live';
 import { addAct, set, useApp, type Circle } from '../../../../state/store';
 import { useT } from '../../../../theme/ThemeProvider';
@@ -63,6 +64,23 @@ export default function CircleDetail() {
       { text: owner ? 'Delete' : 'Leave', style: 'destructive', onPress: go },
     ]);
   };
+  /** A new code and link; the old ones stop working (shown as "turned off" to anyone who opens them). */
+  const regenerate = () => {
+    const run = (days?: number) => {
+      if (c.remoteId) {
+        regenerateCodeLive(c, days).then(() => say(days ? `New link · works for ${days} days` : 'New link · the old one no longer works')).catch((e: Error) => say(e.message));
+        return;
+      }
+      upd(x => ({ ...x, code: code8() }));
+      say('New code · the old one no longer works');
+    };
+    if (Platform.OS === 'web') { if (window.confirm('Make a new invitation? The old link and code stop working.')) run(); return; }
+    Alert.alert('New invitation link', 'The old link and code stop working.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Expires in 7 days', onPress: () => run(7) },
+      { text: 'Never expires', onPress: () => run() },
+    ]);
+  };
   return (
     <Screen top={54}>
       <BackBar />
@@ -74,26 +92,30 @@ export default function CircleDetail() {
       </View>
       <View style={{ paddingTop: 16, paddingHorizontal: 16 }}>
         <View style={{ borderRadius: 28, padding: 20, ...bgImage(G.circleCode) }}>
-          <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.85)' }}>INVITE CODE</Txt>
-          <Txt mono style={{ fontSize: 32, fontWeight: 800, letterSpacing: 7.7, marginTop: 8, color: '#FFFFFF' }}>{c.code}</Txt>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
-            <Tap onPress={() => { Clipboard.setStringAsync(c.code).catch(() => {}); say('Code copied'); }}
-              style={{ flex: 1, height: 46, borderRadius: 23, backgroundColor: 'rgba(255,255,255,0.18)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
-              <Icon name="copy" size={16} color="#FFFFFF" /><Txt style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>Copy</Txt>
-            </Tap>
-            <Tap onPress={() => Share.share({ message: `Join ${c.name} on Ibtida — invite code: ${c.code}` }).catch(() => {})}
+          <Txt style={{ fontSize: 11.5, letterSpacing: 0.7, color: 'rgba(255,255,255,0.85)' }}>INVITE</Txt>
+          <Txt mono style={{ fontSize: 32, fontWeight: 800, letterSpacing: 7.7, marginTop: 8, color: '#FFFFFF' }} accessibilityLabel={`Invite code ${c.code.split('').join(' ')}`}>{c.code}</Txt>
+          <Txt style={{ fontSize: 12.5, lineHeight: 18, color: 'rgba(255,255,255,0.8)', marginTop: 6 }}>Share the link: it opens Ibtida and joins this circle after sign-in. The code works too.</Txt>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 14 }}>
+            <Tap onPress={() => { buzz(6); shareInvite(c, 'whatsapp').catch(() => say('Couldn’t open WhatsApp')); }} accessibilityRole="button" accessibilityLabel="Invite on WhatsApp"
               style={{ flex: 1, height: 46, borderRadius: 23, backgroundColor: '#FFFFFF', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
-              <Icon name="share" size={16} color="#111217" /><Txt style={{ fontSize: 14, fontWeight: 700, color: '#111217' }}>Share</Txt>
+              <Icon name="share" size={16} color="#111217" /><Txt style={{ fontSize: 14, fontWeight: 700, color: '#111217' }}>WhatsApp</Txt>
+            </Tap>
+            <Tap onPress={() => { buzz(6); shareInvite(c, 'sheet').catch(() => {}); }} accessibilityRole="button" accessibilityLabel="Share invite link"
+              style={{ flex: 1, height: 46, borderRadius: 23, backgroundColor: 'rgba(255,255,255,0.18)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+              <Icon name="share" size={16} color="#FFFFFF" /><Txt style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>Share link</Txt>
             </Tap>
           </View>
-          {owner && (
-            <Pressable onPress={() => {
-              if (c.remoteId) { regenerateCodeLive(c).then(() => say('New code · old one no longer works')).catch((e: Error) => say(e.message)); return; }
-              upd(x => ({ ...x, code: code8() })); say('New code · old one no longer works');
-            }} style={{ marginTop: 10, height: 36, alignSelf: 'center', justifyContent: 'center' }} accessibilityRole="button">
-              <Txt style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Regenerate code</Txt>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 18, marginTop: 8 }}>
+            <Pressable onPress={() => { Clipboard.setStringAsync(inviteLink(c.code)).catch(() => {}); say('Invite link copied'); }} accessibilityRole="button"
+              style={{ height: 36, justifyContent: 'center' }}>
+              <Txt style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>Copy link</Txt>
             </Pressable>
-          )}
+            {owner && (
+              <Pressable onPress={regenerate} style={{ height: 36, justifyContent: 'center' }} accessibilityRole="button">
+                <Txt style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>New link</Txt>
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20, marginBottom: 10, marginHorizontal: 26 }}>
