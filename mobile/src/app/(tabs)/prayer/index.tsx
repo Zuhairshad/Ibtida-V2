@@ -199,7 +199,7 @@ export default function Prayer() {
         <View style={{ paddingTop: 22, paddingHorizontal: 16, alignItems: 'center' }}>
           <View style={{ width: 236, height: 236, alignItems: 'center', justifyContent: 'center' }}>
             <Breathe bg={G.glowAcc} style={{ left: 18, top: 18, right: 18, bottom: 18 }} dur={6000} />
-            <Ring size={236} r={106} stroke={10} pct={frac} track={t.sheetc} gradient={['#F7BD5A', '#E07A4B']} animate={false}>
+            <Ring size={236} r={106} stroke={10} pct={frac} track={t.dark ? t.sheetc : t.ctl3} gradient={['#F7BD5A', '#E07A4B']} animate={false}>
               <View style={{ alignItems: 'center' }} accessible accessibilityLabel={ur ? `${prayerName(lang, next.name)}، ${fmtTime(next.at)}، ${tx('untilAdhan')} ${clock(next.secs)}` : `${next.name} at ${fmtTime(next.at)}, ${clock(next.secs)} until adhan`}>
                 {ur
                   ? <Txt ur style={{ fontSize: 14, color: t.acc }}>{prayerName(lang, next.name)} · {ltr(fmtTime(next.at))}</Txt>
