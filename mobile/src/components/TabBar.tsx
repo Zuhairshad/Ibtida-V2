@@ -1,5 +1,5 @@
 import { BlurView } from 'expo-blur';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Platform, Pressable, View } from 'react-native';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,7 +18,7 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
 
 function TabItem({ name, focused, onPress }: { name: string; focused: boolean; onPress: () => void }) {
   const t = useT();
-  const s = useRef(new Animated.Value(focused ? 1.1 : 1)).current;
+  const s = useState(() => new Animated.Value(focused ? 1.1 : 1))[0];
   useEffect(() => {
     Animated.spring(s, { toValue: focused ? 1.1 : 1, useNativeDriver: true, speed: 16, bounciness: 12 }).start();
   }, [focused, s]);

@@ -23,6 +23,7 @@ export default function Profile() {
   const s = useApp(x => x);
   // Admin entry only for accounts the database lists as admins (re-checked on every write).
   const [isAdmin, setIsAdmin] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync from an external value
   useEffect(() => { if (s.signedIn) checkAdmin().then(setIsAdmin).catch(() => {}); else setIsAdmin(false); }, [s.signedIn]);
   // Consistency over the last 7 days from the on-device prayer log.
   let prayed = 0;

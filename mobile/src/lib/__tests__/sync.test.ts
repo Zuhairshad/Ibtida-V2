@@ -15,6 +15,7 @@ jest.mock('../supabase', () => ({
   onSession: () => () => {},
 }));
 
+// eslint-disable-next-line import/first -- jest.mock above must be registered before the module loads
 import { enqueueCircleContribution, pendingOp, syncNow } from '../sync';
 
 describe('outbox', () => {

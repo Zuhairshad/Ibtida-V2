@@ -1,4 +1,4 @@
-import { Children, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Children, useEffect, useState, type ReactNode } from 'react';
 import {
   Animated, Easing, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
   type PressableProps, type StyleProp, type TextProps, type TextStyle, type ViewStyle,
@@ -60,7 +60,7 @@ type TapProps = Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle>; 
 
 /** Pressable with the prototype's `:active { transform: scale(.97) }` feedback. */
 export function Tap({ style, scale = 0.97, children, onPressIn, onPressOut, ...rest }: TapProps) {
-  const v = useRef(new Animated.Value(1)).current;
+  const v = useState(() => new Animated.Value(1))[0];
   const rm = useReducedMotion();
   const to = (x: number) => { if (!rm) Animated.spring(v, { toValue: x, useNativeDriver: true, speed: 40, bounciness: 6 }).start(); };
   // The style (incl. flex/width) must sit on the touchable itself; on an inner view a `flex: 1`
@@ -282,7 +282,7 @@ export function Chips({ labels, isOn, onPick, wrap, height = 44, size = 13.5, st
 /** Orange radio dot (springs in with the prototype's overshoot curve). */
 export function RadioDot({ on, size = 30 }: { on: boolean; size?: number }) {
   const t = useT();
-  const v = useRef(new Animated.Value(on ? 1 : 0)).current;
+  const v = useState(() => new Animated.Value(on ? 1 : 0))[0];
   useEffect(() => {
     Animated.spring(v, { toValue: on ? 1 : 0, useNativeDriver: true, speed: 18, bounciness: 10 }).start();
   }, [on, v]);
@@ -315,7 +315,7 @@ export function Option({ title, sub, on, onPress, ar, pad = 16, r = 22, dot = 30
 /** iOS-style switch with the prototype's overshoot thumb. */
 export function Switch({ on, onToggle, label }: { on: boolean; onToggle: () => void; label: string }) {
   const t = useT();
-  const v = useRef(new Animated.Value(on ? 20 : 0)).current;
+  const v = useState(() => new Animated.Value(on ? 20 : 0))[0];
   useEffect(() => {
     Animated.spring(v, { toValue: on ? 20 : 0, useNativeDriver: true, speed: 20, bounciness: 8 }).start();
   }, [on, v]);
@@ -375,7 +375,7 @@ export function Ring({ size, r, stroke, pct, track, color, gradient, children, a
   size: number; r: number; stroke: number; pct: number; track: string; color?: string; gradient?: [string, string]; children?: ReactNode; animate?: boolean;
 }) {
   const c = 2 * Math.PI * r;
-  const v = useRef(new Animated.Value(pct)).current;
+  const v = useState(() => new Animated.Value(pct))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     if (!animate || rm) { v.setValue(pct); return; }
@@ -474,8 +474,8 @@ export function Avatar({ i, bg, size = 32, border, fs = 12, style }: { i: string
 export function Sheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
   const t = useT();
   const ins = useSafeAreaInsets();
-  const y = useRef(new Animated.Value(800)).current;
-  const fade = useRef(new Animated.Value(0)).current;
+  const y = useState(() => new Animated.Value(800))[0];
+  const fade = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     if (open) {
       y.setValue(800);
@@ -485,7 +485,10 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
       ]).start();
     } else fade.setValue(0);
   }, [open, y, fade]);
-  const pan = useRef(PanResponder.create({
+  const onCloseRef = useState(() => ({ current: onClose }))[0];
+  useEffect(() => { onCloseRef.current = onClose; });
+  // eslint-disable-next-line react-hooks/refs -- handlers read the latest onClose only when a gesture ends
+  const pan = useState(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_, g) => g.dy > 6 && Math.abs(g.dy) > Math.abs(g.dx),
     onPanResponderMove: (_, g) => { if (g.dy > 0) y.setValue(g.dy); },
     onPanResponderRelease: (_, g) => {
@@ -493,9 +496,7 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
       else Animated.spring(y, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
     },
     onPanResponderTerminate: () => Animated.spring(y, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start(),
-  })).current;
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  }))[0];
   return (
     <Modal visible={open} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(6,7,10,0.6)', opacity: fade }]}>
@@ -522,7 +523,7 @@ export function ToastHost() {
   const t = useT();
   const ins = useSafeAreaInsets();
   const toast = useToast();
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     Animated.timing(v, { toValue: toast.on ? 1 : 0, duration: 350, easing: Easing.bezier(0.22, 1, 0.36, 1), useNativeDriver: true }).start();
   }, [toast.on, toast.key, v]);

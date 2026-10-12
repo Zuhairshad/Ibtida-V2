@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native';
 import { DailyOverview } from '../../../components/DailyOverview';
 import { InspirationCard } from '../../../components/InspirationCard';
@@ -24,7 +24,7 @@ import { FIXED, G, bgImage } from '../../../theme/tokens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function SkyLayer({ bg, on }: { bg: string; on: boolean }) {
-  const v = useRef(new Animated.Value(on ? 1 : 0)).current;
+  const v = useState(() => new Animated.Value(on ? 1 : 0))[0];
   useEffect(() => { Animated.timing(v, { toValue: on ? 1 : 0, duration: 1400, useNativeDriver: true }).start(); }, [on, v]);
   return <Animated.View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, ...bgImage(bg), opacity: v }} />;
 }

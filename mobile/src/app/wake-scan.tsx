@@ -23,7 +23,7 @@ const SAME_TAG_QUIET_MS = 3000;
 const ANY_TAG_QUIET_MS = 1200;
 
 function ScanLine({ color }: { color: string }) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     if (rm) return;

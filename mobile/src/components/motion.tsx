@@ -1,5 +1,5 @@
 import { bgImage } from '../theme/tokens';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing, View, type StyleProp, type ViewStyle } from 'react-native';
 import { STARS } from '../data/content';
 
@@ -15,7 +15,7 @@ export function useReducedMotion() {
 }
 
 function useLoop(duration: number, delay = 0, enabled = true) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     if (rm || !enabled) return;
@@ -34,7 +34,7 @@ function useLoop(duration: number, delay = 0, enabled = true) {
 
 /** ibIn — rise + fade on mount. */
 export function FadeIn({ children, delay = 0, style, dur = 500 }: { children?: ReactNode; delay?: number; style?: StyleProp<ViewStyle>; dur?: number }) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     Animated.timing(v, { toValue: 1, duration: rm ? 0 : dur, delay: rm ? 0 : delay, easing: Easing.out(Easing.ease), useNativeDriver: true }).start();
@@ -97,7 +97,7 @@ export function Stars({ style, color = '#FFFFFF' }: { style?: StyleProp<ViewStyl
 
 /** ibPulse — expanding halo around a dot / node. */
 export function PulseDot({ size, color, ring = 'rgba(242,166,90,0.55)', style, borderColor }: { size: number; color: string; ring?: string; style?: StyleProp<ViewStyle>; borderColor?: string }) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     if (rm) return;
@@ -124,7 +124,7 @@ export function PulseDot({ size, color, ring = 'rgba(242,166,90,0.55)', style, b
 
 /** ibOrbit — continuous rotation. */
 export function Orbit({ children, dur, reverse, style }: { children: ReactNode; dur: number; reverse?: boolean; style?: StyleProp<ViewStyle> }) {
-  const v = useRef(new Animated.Value(0)).current;
+  const v = useState(() => new Animated.Value(0))[0];
   const rm = useReducedMotion();
   useEffect(() => {
     if (rm) return;
@@ -141,6 +141,7 @@ export function useCountUp(to: number, dur = 1500, key?: unknown) {
   const [n, setN] = useState(to);
   const rm = useReducedMotion();
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync from an external value
     if (rm) { setN(to); return; }
     const start = Date.now();
     setN(0);
@@ -166,7 +167,7 @@ export function useNow(intervalMs = 1000) {
 
 /** Tactile press "pop" used by counters (scale .94 → 1 in ~110ms). */
 export function usePop(to = 0.94) {
-  const v = useRef(new Animated.Value(1)).current;
+  const v = useState(() => new Animated.Value(1))[0];
   const pop = () => {
     v.setValue(to);
     Animated.spring(v, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 8 }).start();

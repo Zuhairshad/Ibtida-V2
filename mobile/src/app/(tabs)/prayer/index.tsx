@@ -47,7 +47,7 @@ function QiblaCard({ open, onToggle }: { open: boolean; onToggle: () => void }) 
   // at the Qibla bearing on the dial, points to Makkah. Unwrapped so it never spins the long way.
   const target = live ? -cmp.heading! : 0;
   const unwrapped = useRef(0);
-  const rot = useRef(new Animated.Value(0)).current;
+  const rot = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     unwrapped.current = unwrap(unwrapped.current, target);
     Animated.timing(rot, { toValue: unwrapped.current, duration: live ? 180 : 900, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
@@ -134,6 +134,7 @@ export default function Prayer() {
   const [qOpen, setQOpen] = useState(params.qibla === '1');
   const [detail, setDetail] = useState<PrayerName | null>(null);
   const [loc, setLoc] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync from an external value
   useEffect(() => { if (params.qibla === '1') setQOpen(true); }, [params.qibla]);
 
   const date = addDays(now, day);

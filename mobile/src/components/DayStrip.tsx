@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { addDays, DOW } from '../lib/prayer';
 import { buzz } from '../lib/feedback';
@@ -9,7 +9,7 @@ import { Txt } from './ui';
 
 function Day({ d, on, onPress, sun }: { d: Date; on: boolean; onPress: () => void; sun: number }) {
   const t = useT();
-  const v = useRef(new Animated.Value(on ? 1 : 0)).current;
+  const v = useState(() => new Animated.Value(on ? 1 : 0))[0];
   useEffect(() => { Animated.timing(v, { toValue: on ? 1 : 0, duration: 300, useNativeDriver: true }).start(); }, [on, v]);
   const dow = DOW[d.getDay()];
   return (

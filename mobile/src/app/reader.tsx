@@ -124,7 +124,7 @@ function Reader() {
   const tries = useRef(0);
   const saveT = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const sRef = useRef(s);
-  sRef.current = s;
+  useEffect(() => { sRef.current = s; });
 
   // Jump to the requested ayah once the text is on screen.
   useEffect(() => {
@@ -140,7 +140,7 @@ function Reader() {
   useEffect(() => { recordReading(s, startAyah); }, [s, startAyah]);
   useEffect(() => () => clearTimeout(saveT.current), []);
 
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken<AyahT>[] }) => {
+  const onViewable = useState(() => ({ viewableItems }: { viewableItems: ViewToken<AyahT>[] }) => {
     if (!ready.current || viewableItems.length === 0) return;
     const items = viewableItems.map(v => v.item).filter(Boolean);
     if (!items.length) return;
@@ -150,7 +150,7 @@ function Reader() {
     setCurrent(a);
     clearTimeout(saveT.current);
     saveT.current = setTimeout(() => recordReading(sur, a), 600);
-  }).current;
+  })[0];
 
   // The target row isn't rendered yet: jump near it using the measured average height, then retry.
   // Before any row has been measured the average is 0, so just wait for layout instead of giving up.

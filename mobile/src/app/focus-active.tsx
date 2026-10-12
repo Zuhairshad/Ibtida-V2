@@ -36,6 +36,7 @@ function Lock() {
   const [blocked, setBlocked] = useState(0);
   const [shielding, setShielding] = useState(() => IbadahLock.isSupported() && IbadahLock.isPermissionGranted());
   // Wall-clock based, so the timer stays right while Ibtida is in the background or was restarted.
+  // eslint-disable-next-line react-hooks/purity -- one-time initial value
   const startedAt = useRef(Date.now());
   // Native calls are chained so a quick unlock can't overtake a start() still in flight.
   const native = useRef<Promise<unknown>>(Promise.resolve());
@@ -53,6 +54,7 @@ function Lock() {
     const running = resume ? IbadahLock.getSession() : null;
     if (running) {
       startedAt.current = running.startedAt;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync from an external value
       setSecs(Math.floor((Date.now() - running.startedAt) / 1000));
       setBlocked(running.blocked);
     } else {
@@ -87,8 +89,8 @@ function Lock() {
 
   const knob = 54;
   const maxX = width - 40 - 10 - knob;
-  const x = useRef(new Animated.Value(0)).current;
-  const pan = useRef(PanResponder.create({
+  const x = useState(() => new Animated.Value(0))[0];
+  const pan = useState(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderTerminationRequest: () => false,
     onPanResponderMove: (_, g) => x.setValue(Math.max(0, Math.min(maxX, g.dx))),
@@ -99,7 +101,7 @@ function Lock() {
     },
     // A cancelled drag must not leave the knob stranded mid-track.
     onPanResponderTerminate: () => Animated.spring(x, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start(),
-  })).current;
+  }))[0];
 
   if (!goal) return null;
   const n = goal.prog;

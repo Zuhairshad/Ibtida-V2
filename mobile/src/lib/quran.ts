@@ -399,6 +399,7 @@ export function useSurah(n: number) {
   const [nonce, setNonce] = useState(0);
   useEffect(() => {
     const ac = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync from an external value
     setState(s => (s.surah?.n === n ? s : { surah: null, source: null, offline: false, error: null, loading: true }));
     loadSurah(n, r => setState({ ...r, loading: false }), { signal: ac.signal });
     return () => ac.abort();
