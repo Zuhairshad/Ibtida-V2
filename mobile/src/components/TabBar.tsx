@@ -53,7 +53,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         {ios ? (
           <BlurView intensity={60} tint={t.dark ? 'dark' : 'light'} style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: t.tabbar }} />
         ) : (
-          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: t.dark ? 'rgba(46,47,56,0.97)' : 'rgba(255,255,255,0.97)' }} />
+          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: t.dark ? 'rgba(46,47,56,0.99)' : 'rgba(255,255,255,0.99)' }} />
         )}
         <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', padding: 6, gap: 2 }} accessibilityRole="tablist">
           {state.routes.map((r, i) => (
