@@ -4,28 +4,31 @@ import { Animated, Platform, Pressable, View } from 'react-native';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { buzz } from '../lib/feedback';
+import { useLang } from '../lib/i18n';
 import { useT } from '../theme/ThemeProvider';
 import { Icon, type IconName } from './Icon';
 import { Txt } from './ui';
 
-const TABS: Record<string, { label: string; icon: IconName }> = {
-  home: { label: 'Home', icon: 'home' },
-  prayer: { label: 'Prayer', icon: 'prayer' },
-  adhkar: { label: 'Adhkar', icon: 'beads' },
-  community: { label: 'Ummah', icon: 'people' },
-  profile: { label: 'You', icon: 'user' },
+const TABS: Record<string, { label: { en: string; ur: string }; icon: IconName }> = {
+  home: { label: { en: 'Home', ur: 'ہوم' }, icon: 'home' },
+  prayer: { label: { en: 'Prayer', ur: 'نماز' }, icon: 'prayer' },
+  adhkar: { label: { en: 'Adhkar', ur: 'اذکار' }, icon: 'beads' },
+  community: { label: { en: 'Ummah', ur: 'امت' }, icon: 'people' },
+  profile: { label: { en: 'You', ur: 'آپ' }, icon: 'user' },
 };
 
 function TabItem({ name, focused, onPress }: { name: string; focused: boolean; onPress: () => void }) {
   const t = useT();
+  const { ur } = useLang();
   const s = useState(() => new Animated.Value(focused ? 1.1 : 1))[0];
   useEffect(() => {
     Animated.spring(s, { toValue: focused ? 1.1 : 1, useNativeDriver: true, speed: 16, bounciness: 12 }).start();
   }, [focused, s]);
   const meta = TABS[name];
   if (!meta) return null;
+  const label = ur ? meta.label.ur : meta.label.en;
   return (
-    <Pressable onPress={onPress} accessibilityRole="tab" accessibilityLabel={meta.label} accessibilityState={{ selected: focused }}
+    <Pressable onPress={onPress} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: focused }}
       style={({ pressed }) => ({
         flex: 1, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', gap: 4,
         backgroundColor: focused ? t.tabOn : 'transparent', boxShadow: focused ? t.tabRing : undefined,
@@ -34,7 +37,7 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
       <Animated.View style={{ transform: [{ scale: s }] }}>
         <Icon name={meta.icon} color={focused ? t.acc : t.tabInk} />
       </Animated.View>
-      <Txt style={{ fontSize: 11, fontWeight: 600, color: focused ? t.txw : t.tabInk }}>{meta.label}</Txt>
+      <Txt ur={ur} style={{ fontSize: 11, fontWeight: 600, color: focused ? t.txw : t.tabInk }}>{label}</Txt>
     </Pressable>
   );
 }

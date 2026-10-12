@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
+import { Cap } from '../components/Cap';
 import { Icon } from '../components/Icon';
-import { BackBar, buzz, Cta, Label, ListCard, say, Screen, Seg, Sheet, Statement, Tap, Txt, WheelSet } from '../components/ui';
+import { BackBar, buzz, Cta, ListCard, say, Screen, Seg, Sheet, Statement, Tap, Txt, WheelSet } from '../components/ui';
 import { PH, type PrayerName } from '../data/content';
+import { ltr } from '../data/reminders';
 import { usePrayerNow } from '../lib/hooks';
+import { prayerName, useLang } from '../lib/i18n';
 import { fmtMin, fmtTime } from '../lib/prayer';
 import { set, useApp, type JamaatSlot } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
 
 const SLOTS: JamaatSlot[] = [...PH, 'Jumuah'];
-const LABEL: Record<JamaatSlot, string> = { Fajr: 'Fajr', Dhuhr: 'Dhuhr', Asr: 'Asr', Maghrib: 'Maghrib', Isha: 'Isha', Jumuah: 'Jumu‘ah' };
 const HRS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const MINS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
 const ADJ_MAX = 60;
@@ -20,6 +22,9 @@ const minOf = (d: Date) => d.getHours() * 60 + d.getMinutes();
 /** Wheels for one jamaat time: hour, 5-minute steps and AM/PM, with ±1 minute for exact timetables. */
 function TimeSheet({ slot, start, onClose }: { slot: JamaatSlot | null; start: number; onClose: () => void }) {
   const t = useT();
+  const { lang, ur, t: tx } = useLang();
+  const L = (x: string) => (ur ? ltr(x) : x);
+  const label = (sl: JamaatSlot) => (sl === 'Jumuah' ? tx('jumuah') : prayerName(lang, sl));
   const jamaat = useApp(s => s.jamaat);
   const saved = slot ? jamaat[slot] : undefined;
   // The wheels open on the saved time, or on the prayer's start as a place to begin turning from.
@@ -39,13 +44,13 @@ function TimeSheet({ slot, start, onClose }: { slot: JamaatSlot | null; start: n
   const save = () => {
     if (!slot) return;
     set(s => ({ jamaat: { ...s.jamaat, [slot]: min } }));
-    say(`${LABEL[slot]} jamaat · ${fmtMin(min)}`);
+    say(tx('savedJamaat', { l: label(slot), t: L(fmtMin(min)) }));
     onClose();
   };
   const clear = () => {
     if (!slot) return;
     set(s => { const j = { ...s.jamaat }; delete j[slot]; return { jamaat: j }; });
-    say(`${LABEL[slot]} jamaat cleared`);
+    say(tx('clearedJamaat', { l: label(slot) }));
     onClose();
   };
 
@@ -53,8 +58,8 @@ function TimeSheet({ slot, start, onClose }: { slot: JamaatSlot | null; start: n
     <Sheet open={!!slot} onClose={onClose}>
       {slot && (
         <>
-          <Txt style={{ fontSize: 24, fontWeight: 800, letterSpacing: -0.4 }}>{LABEL[slot]} jamaat</Txt>
-          <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6 }}>Enter the time from your masjid’s timetable.</Txt>
+          <Txt ur={ur} style={{ fontSize: 24, fontWeight: 800, letterSpacing: ur ? 0 : -0.4 }}>{tx('slotJamaat', { l: label(slot) })}</Txt>
+          <Txt ur={ur} style={{ fontSize: 13.5, color: t.t2, marginTop: ur ? 0 : 6 }}>{tx('enterTime')}</Txt>
           <View style={{ marginTop: 14 }}>
             <WheelSet inset={30} cols={[
               { values: HRS, idx: h12, onPick: i => setClock(i, pm) },
@@ -63,22 +68,22 @@ function TimeSheet({ slot, start, onClose }: { slot: JamaatSlot | null; start: n
             ]} />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-            <Tap onPress={() => { buzz(4); put(h, m - 1); }} accessibilityLabel="One minute earlier" style={{ width: 52, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
+            <Tap onPress={() => { buzz(4); put(h, m - 1); }} accessibilityLabel={tx('minEarlier')} style={{ width: 52, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 14, fontWeight: 700 }}>−1</Txt>
             </Tap>
             <Txt style={{ fontSize: 20, fontWeight: 800, minWidth: 110, textAlign: 'center' }} accessibilityLiveRegion="polite">{fmtMin(min)}</Txt>
-            <Tap onPress={() => { buzz(4); put(h, m + 1); }} accessibilityLabel="One minute later" style={{ width: 52, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
+            <Tap onPress={() => { buzz(4); put(h, m + 1); }} accessibilityLabel={tx('minLater')} style={{ width: 52, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={{ fontSize: 14, fontWeight: 700 }}>+1</Txt>
             </Tap>
           </View>
           {early && (
-            <Txt style={{ fontSize: 12.5, lineHeight: 18, color: t.acc, textAlign: 'center', marginTop: 10 }}>
-              This is before {LABEL[slot]} begins today ({fmtMin(start)}). Check it against your masjid’s timetable.
+            <Txt ur={ur} style={{ fontSize: 12.5, lineHeight: ur ? 26 : 18, color: t.acc, textAlign: 'center', marginTop: 10 }}>
+              {tx('earlyWarn', { l: label(slot), t: L(fmtMin(start)) })}
             </Txt>
           )}
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
-            {saved !== undefined && <Cta label="Clear" kind="secondary" height={54} size={15} style={{ flex: 1 }} onPress={clear} />}
-            <Cta label="Save" height={54} size={15} style={{ flex: 1.4 }} onPress={save} />
+            {saved !== undefined && <Cta label={tx('clear')} kind="secondary" height={54} size={15} style={{ flex: 1 }} onPress={clear} />}
+            <Cta label={tx('save')} height={54} size={15} style={{ flex: 1.4 }} onPress={save} />
           </View>
         </>
       )}
@@ -98,6 +103,10 @@ export default function JamaatScreen() {
   const jamaat = useApp(s => s.jamaat);
   const hanafi = useApp(s => s.hanafi);
   const adj = useApp(s => s.adj);
+  const { lang, ur, t: tx } = useLang();
+  const L = (x: string) => (ur ? ltr(x) : x);
+  const label = (sl: JamaatSlot) => (sl === 'Jumuah' ? tx('jumuah') : prayerName(lang, sl));
+  const sa = ur ? 'right' : undefined;
   const [name, setName] = useState(masjid);
   const [edit, setEdit] = useState<JamaatSlot | null>(null);
 
@@ -115,57 +124,57 @@ export default function JamaatScreen() {
 
   return (
     <Screen tabs={false} top={54}>
-      <BackBar title="Masjid & timings" />
-      <Statement a="Your masjid’s times." b="Entered by you, never guessed." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
+      <BackBar title={tx('jTitle')} />
+      {ur ? (
+        <Txt ur accessibilityRole="header" style={{ fontSize: 28, lineHeight: 56, paddingTop: 10, paddingHorizontal: 22, textAlign: 'right' }}>
+          {tx('jStmA')}{'\n'}<Txt ur style={{ fontSize: 28, color: t.t6 }}>{tx('jStmB')}</Txt>
+        </Txt>
+      ) : <Statement a="Your masjid’s times." b="Entered by you, never guessed." style={{ paddingTop: 10, paddingHorizontal: 22 }} />}
 
-      <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>MASJID</Label>
+      <Cap ur={ur} style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26, textAlign: sa }}>{tx('masjidCap')}</Cap>
       <View style={{ marginHorizontal: 16 }}>
         <TextInput value={name} onChangeText={setName} onEndEditing={() => set({ masjid: name.trim().slice(0, 60) })} onBlur={() => set({ masjid: name.trim().slice(0, 60) })}
-          placeholder="e.g. Masjid an-Noor" placeholderTextColor={t.t4} accessibilityLabel="Masjid name" maxLength={60} returnKeyType="done"
+          placeholder={tx('masjidPlaceholder')} placeholderTextColor={t.t4} accessibilityLabel={tx('masjidName')} maxLength={60} returnKeyType="done"
           style={{ outlineWidth: 0, height: 56, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, paddingHorizontal: 18, color: t.txw, fontSize: 16, fontFamily: 'PlusJakartaSans_600SemiBold' }} />
       </View>
 
-      <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>JAMAAT TIMES</Label>
+      <Cap ur={ur} style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26, textAlign: sa }}>{tx('jamaatTimesCap')}</Cap>
       <ListCard>
         {SLOTS.map(slot => {
           const v = jamaat[slot];
-          const sub = slot === 'Jumuah' ? 'Fridays · in place of Dhuhr jamaat' : `Begins ${fmtTime(times[slot])} today`;
+          const sub = slot === 'Jumuah' ? tx('jumuahSub') : tx('beginsToday', { t: L(fmtTime(times[slot])) });
           return (
             <Tap key={slot} scale={0.99} onPress={() => { buzz(6); setEdit(slot); }} accessibilityRole="button"
-              accessibilityLabel={`${LABEL[slot]} jamaat, ${v !== undefined ? fmtMin(v) : 'not set'}`}
+              accessibilityLabel={`${tx('slotJamaat', { l: label(slot) })}${ur ? '،' : ','} ${v !== undefined ? L(fmtMin(v)) : tx('notSetLower')}`}
               style={{ paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ flex: 1 }}>
-                <Txt style={{ fontSize: 15.5, fontWeight: 700 }}>{LABEL[slot]}</Txt>
-                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>{sub}</Txt>
+                <Txt ur={ur} style={{ fontSize: 15.5, fontWeight: 700, textAlign: sa }}>{label(slot)}</Txt>
+                <Txt ur={ur} style={{ fontSize: 12.5, color: t.t2, marginTop: ur ? 0 : 3, textAlign: sa }}>{sub}</Txt>
               </View>
               <View style={{ paddingVertical: 7, paddingHorizontal: 12, borderRadius: 14, backgroundColor: v !== undefined ? 'rgba(242,196,138,0.14)' : t.ctl }}>
-                <Txt style={{ fontSize: 13.5, fontWeight: 700, color: v !== undefined ? t.gold : t.t4 }}>{v !== undefined ? fmtMin(v) : 'Not set'}</Txt>
+                <Txt ur={ur && v === undefined} style={{ fontSize: 13.5, fontWeight: 700, color: v !== undefined ? t.gold : t.t4 }}>{v !== undefined ? fmtMin(v) : tx('notSet')}</Txt>
               </View>
               <Icon name="chev" color={t.t4} />
             </Tap>
           );
         })}
       </ListCard>
-      <Txt style={{ fontSize: 12.5, lineHeight: 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26 }}>
-        Jamaat times differ from masjid to masjid, so Ibtida never calculates them. Only the times you enter are shown, and an empty one stays empty.
-      </Txt>
+      <Txt ur={ur} style={{ fontSize: 12.5, lineHeight: ur ? 26 : 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26, textAlign: sa }}>{tx('neverCalculated')}</Txt>
 
-      <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>SCHOOL OF THOUGHT · ASR</Label>
+      <Cap ur={ur} style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26, textAlign: sa }}>{tx('schoolCap')}</Cap>
       <View style={{ marginHorizontal: 16 }}>
-        <Seg labels={['Ahl-e-Sunnat', 'Ahl-e-Hadith']} value={hanafi ? 0 : 1} onChange={i => set({ hanafi: i === 0 })} height={44} radius={20} inner={16} size={14} />
+        <Seg labels={[tx('schoolSunnat'), tx('schoolHadith')]} value={hanafi ? 0 : 1} onChange={i => set({ hanafi: i === 0 })} height={44} radius={20} inner={16} size={14} />
       </View>
-      <Txt style={{ fontSize: 12.5, lineHeight: 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26 }}>
-        {hanafi
-          ? 'Hanafi Asr, as followed by Ahl-e-Sunnat (Barelvi and Deobandi): Asr begins when an object’s shadow is twice its length.'
-          : 'Standard Asr, as followed by Ahl-e-Hadith (and the Shafi‘i, Maliki and Hanbali schools): Asr begins when an object’s shadow equals its length.'}
-        {' '}Asr today begins at {fmtTime(times.Asr)}.
+      <Txt ur={ur} style={{ fontSize: 12.5, lineHeight: ur ? 26 : 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26, textAlign: sa }}>
+        {tx(hanafi ? 'hanafiExplain' : 'standardExplain')}
+        {' '}{tx('asrToday', { t: L(fmtTime(times.Asr)) })}
       </Txt>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>
-        <Label style={{ flex: 1 }}>ADJUST START TIMES</Label>
+        <Cap ur={ur} style={{ flex: 1, textAlign: sa }}>{tx('adjustCap')}</Cap>
         {anyAdj && (
-          <Tap onPress={() => { buzz(5); set({ adj: {} }); say('Start times reset to calculated'); }} accessibilityRole="button" hitSlop={8}>
-            <Txt style={{ fontSize: 12.5, fontWeight: 700, color: t.acc }}>Reset</Txt>
+          <Tap onPress={() => { buzz(5); set({ adj: {} }); say(tx('resetToast')); }} accessibilityRole="button" hitSlop={8}>
+            <Txt ur={ur} style={{ fontSize: 12.5, fontWeight: 700, color: t.acc }}>{tx('reset')}</Txt>
           </Tap>
         )}
       </View>
@@ -175,23 +184,25 @@ export default function JamaatScreen() {
           return (
             <View key={p} style={{ paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <View style={{ flex: 1 }}>
-                <Txt style={{ fontSize: 15.5, fontWeight: 700 }}>{p}</Txt>
-                <Txt style={{ fontSize: 12.5, color: t.t2, marginTop: 3 }}>Begins {fmtTime(times[p])}{v ? ` · ${v > 0 ? '+' : ''}${v} min` : ' · calculated'}</Txt>
+                <Txt ur={ur} style={{ fontSize: 15.5, fontWeight: 700, textAlign: sa }}>{prayerName(lang, p)}</Txt>
+                <Txt ur={ur} style={{ fontSize: 12.5, color: t.t2, marginTop: ur ? 0 : 3, textAlign: sa }}>
+                  {ur
+                    ? `${tx('begins')} ${L(fmtTime(times[p]))}${v ? ` · ${tx('minutes', { n: `${v > 0 ? '+' : ''}${v}` })}` : ` · ${tx('calculated')}`}`
+                    : `Begins ${fmtTime(times[p])}${v ? ` · ${v > 0 ? '+' : ''}${v} min` : ' · calculated'}`}
+                </Txt>
               </View>
-              <Tap onPress={() => nudge(p, -1)} disabled={v <= -ADJ_MAX} accessibilityLabel={`${p} one minute earlier`} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
+              <Tap onPress={() => nudge(p, -1)} disabled={v <= -ADJ_MAX} accessibilityLabel={tx('oneEarlier', { p: prayerName(lang, p) })} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
                 <Txt style={{ fontSize: 18, fontWeight: 700 }}>−</Txt>
               </Tap>
-              <Txt style={{ width: 40, textAlign: 'center', fontSize: 14, fontWeight: 700, color: v ? t.acc : t.t4 }} accessibilityLabel={`${p} adjustment ${v} minutes`}>{v > 0 ? `+${v}` : v}</Txt>
-              <Tap onPress={() => nudge(p, 1)} disabled={v >= ADJ_MAX} accessibilityLabel={`${p} one minute later`} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
+              <Txt style={{ width: 40, textAlign: 'center', fontSize: 14, fontWeight: 700, color: v ? t.acc : t.t4 }} accessibilityLabel={tx('adjustmentA11y', { p: prayerName(lang, p), v: String(v) })}>{v > 0 ? `+${v}` : v}</Txt>
+              <Tap onPress={() => nudge(p, 1)} disabled={v >= ADJ_MAX} accessibilityLabel={tx('oneLater', { p: prayerName(lang, p) })} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: t.ctl2, alignItems: 'center', justifyContent: 'center' }}>
                 <Txt style={{ fontSize: 18, fontWeight: 700 }}>+</Txt>
               </Tap>
             </View>
           );
         })}
       </ListCard>
-      <Txt style={{ fontSize: 12.5, lineHeight: 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26, marginBottom: 10 }}>
-        Move a start time by a few minutes to match your local timetable. Adhan notifications and the Fajr alarm follow these times.
-      </Txt>
+      <Txt ur={ur} style={{ fontSize: 12.5, lineHeight: ur ? 26 : 18.5, color: t.t4, marginTop: 10, marginHorizontal: 26, marginBottom: 10, textAlign: sa }}>{tx('adjustHelp')}</Txt>
 
       <TimeSheet slot={edit} start={edit ? startOf(edit) : 0} onClose={() => setEdit(null)} />
     </Screen>

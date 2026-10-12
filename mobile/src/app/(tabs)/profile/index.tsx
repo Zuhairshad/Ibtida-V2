@@ -55,7 +55,7 @@ export default function Profile() {
             </View>
           </Ring>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Tap onPress={() => router.push({ pathname: '/name', params: { edit: '1' } })} accessibilityRole="button" accessibilityLabel={s.name ? `Edit name, ${s.name}` : 'Add your name'}>
+            <Tap onPress={() => router.push({ pathname: '/name', params: { edit: '1' } })} accessibilityRole="button" accessibilityLabel={s.name ? `Edit name, ${s.name}` : 'Add your name'} hitSlop={10}>
               <Txt style={{ fontSize: 21, fontWeight: 800, color: s.name ? t.tx : t.acc }}>{s.name || 'Add your name'}</Txt>
             </Tap>
             <Txt style={{ fontSize: 13, color: t.t2, marginTop: 4 }}>{pct}% prayer consistency · 7 days</Txt>

@@ -236,9 +236,13 @@ export function set(patch: Partial<AppState> | ((s: AppState) => Partial<AppStat
   }
 }
 
+/** True when the saved copy could not be read (I/O error, not "nothing saved"): never write over it. */
+let loadFailed = false;
+
 function save() {
   clearTimeout(saveT);
   saveT = undefined;
+  if (loadFailed) return;
   const { hydrated: _h, ...rest } = state;
   AsyncStorage.setItem(KEY, JSON.stringify(rest)).catch(() => {});
 }
@@ -255,20 +259,53 @@ export function useApp<T>(sel: (s: AppState) => T): T {
   return useSyncExternalStore(subscribe, () => sel(state), () => sel(state));
 }
 
+async function readSaved(): Promise<string | null> {
+  // A transient storage error must not look like "nothing saved": retry before giving up.
+  for (let i = 0; ; i++) {
+    try { return await AsyncStorage.getItem(KEY); } catch (e) {
+      if (i >= 2) throw e;
+      await new Promise(r => setTimeout(r, 250));
+    }
+  }
+}
+
 export async function hydrate() {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await readSaved();
+    loadFailed = false;
     if (raw) {
       const saved = JSON.parse(raw) as Partial<AppState>;
       set({ ...saved, ...migrate(saved), hydrated: true });
       rollDay();
+      armMidnight();
       return;
     }
-  } catch {
-    // Corrupt storage falls back to defaults rather than blocking launch.
+  } catch (e) {
+    // Corrupt JSON falls back to defaults rather than blocking launch; an unreadable store is left
+    // untouched (loadFailed) and read again when the app returns to the foreground.
+    if (!(e instanceof SyntaxError)) loadFailed = true;
   }
   set({ hydrated: true, token: newToken() });
   rollDay();
+  armMidnight();
+}
+
+async function retryLoad() {
+  try {
+    const raw = await readSaved();
+    loadFailed = false;
+    if (raw) { const saved = JSON.parse(raw) as Partial<AppState>; set({ ...saved, ...migrate(saved) }); rollDay(); }
+  } catch { /* still unreadable: keep the saved copy untouched */ }
+}
+
+/** Goals and today's counts start a new day at local midnight even when the app stays open. */
+let midnightT: ReturnType<typeof setTimeout> | undefined;
+function armMidnight() {
+  clearTimeout(midnightT);
+  const n = new Date();
+  const wait = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1, 0, 0, 1).getTime() - n.getTime();
+  midnightT = setTimeout(() => { if (state.hydrated) rollDay(); armMidnight(); }, wait);
+  (midnightT as { unref?: () => void }).unref?.();
 }
 
 /** Writes that come from the server (pull/merge), so the sync layer does not echo them back. */
@@ -493,4 +530,9 @@ export function countGoal(id: number, delta: number): Goal | undefined {
   return out;
 }
 
-RNAppState.addEventListener('change', s => { if (s === 'active' && state.hydrated) rollDay(); });
+RNAppState.addEventListener('change', s => {
+  if (s !== 'active' || !state.hydrated) return;
+  if (loadFailed) { retryLoad().catch(() => {}); return; }
+  rollDay();
+  armMidnight();
+});

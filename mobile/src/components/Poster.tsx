@@ -46,12 +46,12 @@ export const Poster = forwardRef<View, { d: Design; width: number }>(function Po
       <View style={{ position: 'absolute', left: m, right: m, top: m * 1.4, bottom: m * 1.4 + (d.show.brand ? 60 * s : 0),
         justifyContent: d.valign === 'top' ? 'flex-start' : d.valign === 'bottom' ? 'flex-end' : 'center', alignItems: align }}>
         {d.show.title && !!d.title.trim() && (
-          <Text style={{ fontFamily: FONTS.sans[700], fontSize: 30 * s, letterSpacing: 6 * s, color: d.accent, textAlign, marginBottom: 34 * s }}>
+          <Text allowFontScaling={false} style={{ fontFamily: FONTS.sans[700], fontSize: 30 * s, letterSpacing: 6 * s, color: d.accent, textAlign, marginBottom: 34 * s }}>
             {d.title.toUpperCase()}
           </Text>
         )}
         {d.show.ar && !!d.ar.trim() && (
-          <Text style={{ fontFamily: FONTS.arabic[600], fontSize: d.arSize * s, lineHeight: lh(d.arSize) * 1.15, color: d.color, textAlign: d.align === 'center' ? 'center' : 'right', writingDirection: 'rtl', alignSelf: 'stretch' }}>
+          <Text allowFontScaling={false} style={{ fontFamily: FONTS.arabic[600], fontSize: d.arSize * s, lineHeight: lh(d.arSize) * 1.15, color: d.color, textAlign: d.align === 'center' ? 'center' : 'right', writingDirection: 'rtl', alignSelf: 'stretch' }}>
             {d.ar}
           </Text>
         )}
@@ -63,17 +63,17 @@ export const Poster = forwardRef<View, { d: Design; width: number }>(function Po
           </View>
         )}
         {d.show.en && !!d.en.trim() && (
-          <Text style={{ fontFamily: latin, fontSize: d.enSize * s, lineHeight: lh(d.enSize), color: d.color, textAlign }}>
+          <Text allowFontScaling={false} style={{ fontFamily: latin, fontSize: d.enSize * s, lineHeight: lh(d.enSize), color: d.color, textAlign }}>
             {d.en}
           </Text>
         )}
         {d.show.ur && !!d.ur.trim() && (
-          <Text style={{ fontFamily: FONTS.urdu, fontSize: d.urSize * s, lineHeight: lh(d.urSize) * 1.45, color: d.color, textAlign: d.align === 'center' ? 'center' : 'right', writingDirection: 'rtl', alignSelf: 'stretch', marginTop: d.show.en && d.en.trim() ? 24 * s : 0 }}>
+          <Text allowFontScaling={false} style={{ fontFamily: FONTS.urdu, fontSize: d.urSize * s, lineHeight: lh(d.urSize) * 1.45, color: d.color, textAlign: d.align === 'center' ? 'center' : 'right', writingDirection: 'rtl', alignSelf: 'stretch', marginTop: d.show.en && d.en.trim() ? 24 * s : 0 }}>
             {d.ur}
           </Text>
         )}
         {d.show.source && !!d.source.trim() && (
-          <Text style={{ fontFamily: FONTS.sans[600], fontSize: 28 * s, letterSpacing: 2 * s, color: d.accent, textAlign, marginTop: 34 * s }}>
+          <Text allowFontScaling={false} style={{ fontFamily: FONTS.sans[600], fontSize: 28 * s, letterSpacing: 2 * s, color: d.accent, textAlign, marginTop: 34 * s }}>
             {d.source.toUpperCase()}
           </Text>
         )}
@@ -82,7 +82,7 @@ export const Poster = forwardRef<View, { d: Design; width: number }>(function Po
       {d.show.brand && (
         <View style={{ position: 'absolute', left: 0, right: 0, bottom: m * 0.9, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 10 * s, opacity: 0.85 }}>
           <MosqueLogo size={38 * s} />
-          <Text style={{ fontFamily: FONTS.sans[800], fontSize: 30 * s, letterSpacing: -0.5 * s, color: d.color }}>ibtida</Text>
+          <Text allowFontScaling={false} style={{ fontFamily: FONTS.sans[800], fontSize: 30 * s, letterSpacing: -0.5 * s, color: d.color }}>ibtida</Text>
         </View>
       )}
     </View>

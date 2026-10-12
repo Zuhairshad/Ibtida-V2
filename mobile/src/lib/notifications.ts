@@ -23,7 +23,8 @@ const NATIVE = Platform.OS === 'ios' || Platform.OS === 'android';
 const PREFIX = 'ibtida.';
 const HORIZON_DAYS = 7;
 /** iOS keeps at most 64 pending requests per app; leave headroom for previews/tests. */
-const MAX_PENDING = 60;
+// iOS keeps at most 64 pending local notifications; Android allows far more, so the whole week is scheduled there.
+const MAX_PENDING = Platform.OS === 'ios' ? 60 : 300;
 const MIN = 60_000;
 
 /* ------------------------------------------------------------- Sounds */

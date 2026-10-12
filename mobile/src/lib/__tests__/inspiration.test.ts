@@ -1,4 +1,4 @@
-import { fromRow, groupFeed, publishedOn, validateDraft, type Draft, type Inspiration } from '../inspiration';
+import { editorialDay, fromRow, groupFeed, publishedOn, validateDraft, type Draft, type Inspiration } from '../inspiration';
 import { BACKGROUNDS, designFor, FORMATS, hasText } from '../studio';
 
 const now = new Date(2026, 9, 11, 15, 0).getTime();
@@ -38,6 +38,13 @@ describe('feed', () => {
     const list = [post({ id: 'a' }), post({ id: 'b' }), post({ id: 'c', status: 'draft' }), post({ id: 'd', publishAt: now - 86_400_000 })];
     expect(publishedOn(list, now)).toBe(2);
     expect(publishedOn(list, now, 'a')).toBe(1);
+  });
+  it('counts the limit in the editors’ day (Asia/Karachi), as the database does', () => {
+    // 20:30 UTC on 11 Oct is already 01:30 on 12 Oct in Karachi.
+    expect(editorialDay(Date.parse('2026-10-11T20:30:00Z'))).toBe('2026-10-12');
+    expect(editorialDay(Date.parse('2026-10-11T18:59:00Z'))).toBe('2026-10-11');
+    const late = Date.parse('2026-10-11T20:30:00Z'), earlySameKarachiDay = Date.parse('2026-10-11T19:30:00Z');
+    expect(publishedOn([post({ id: 'x', publishAt: earlySameKarachiDay })], late)).toBe(1);
   });
   it('reads database rows', () => {
     const p = fromRow({ id: '1', kind: 'ayah', title: null, body_ar: 'ع', body_en: 'E', body_ur: null, source: 'Al-Baqarah 2:153', surah: 2, ayah: 153, status: 'published', publish_at: '2026-10-11T10:00:00Z' });

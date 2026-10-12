@@ -38,6 +38,10 @@ export async function signUp(email: string, password: string): Promise<AuthResul
     options: { emailRedirectTo: authRedirect(), data: { full_name: getState().name } },
   });
   if (error) return { ok: false, message: friendly(error) };
+  // For an address that already has an account Supabase answers with a user that has no identities.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { ok: false, message: 'That email already has an account — sign in, or use Forgot password.' };
+  }
   // With "Confirm email" on (Supabase default) there is no session until the link is opened.
   return { ok: true, needsConfirm: !data.session };
 }

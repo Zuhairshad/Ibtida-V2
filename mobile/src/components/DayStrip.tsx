@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, View } from 'react-native';
-import { addDays, DOW } from '../lib/prayer';
+import { addDays } from '../lib/prayer';
 import { buzz } from '../lib/feedback';
+import { dowLabel, useLang } from '../lib/i18n';
 import { useT } from '../theme/ThemeProvider';
 import { FIXED } from '../theme/tokens';
 import { Icon } from './Icon';
@@ -9,13 +10,14 @@ import { Txt } from './ui';
 
 function Day({ d, on, onPress, sun }: { d: Date; on: boolean; onPress: () => void; sun: number }) {
   const t = useT();
+  const { lang, ur } = useLang();
   const v = useState(() => new Animated.Value(on ? 1 : 0))[0];
   useEffect(() => { Animated.timing(v, { toValue: on ? 1 : 0, duration: 300, useNativeDriver: true }).start(); }, [on, v]);
-  const dow = DOW[d.getDay()];
+  const dow = dowLabel(lang, d.getDay());
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={`${dow} ${d.getDate()}`}
       style={{ flex: 1, minWidth: 0, paddingTop: 10, paddingBottom: 9, borderRadius: 24, alignItems: 'center', gap: 7, backgroundColor: on ? t.dayBg : 'transparent', boxShadow: on ? t.dayRing : undefined }}>
-      <Txt style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.44, color: on ? t.acc : t.t2 }}>{dow}</Txt>
+      <Txt ur={ur} numberOfLines={1} style={{ fontSize: 11, fontWeight: 600, letterSpacing: ur ? 0 : 0.44, color: on ? t.acc : t.t2 }}>{dow}</Txt>
       <Animated.View style={{
         opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }),
         transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] }) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '20deg'] }) }],

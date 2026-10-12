@@ -45,7 +45,7 @@ export async function sendImage(uri: string, target: Target, caption?: string): 
   if (target === 'save') {
     // Loaded only here: the media library has no web build, and only phones save to a gallery.
     const media = await import('expo-media-library');
-    const perm = await media.requestPermissionsAsync(true);
+    const perm = await media.requestPermissionsAsync(true, ['photo']);
     if (!perm.granted) throw new Error('Allow Ibtida to save photos to your gallery in Settings');
     await media.Asset.create(uri);
     return 'saved';

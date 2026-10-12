@@ -93,7 +93,7 @@ export default function Studio() {
     <View style={{ flex: 1, backgroundColor: t.bg }}>
       <View style={{ paddingTop: ins.top + 6 }}>
         <BackBar title="Studio" right={
-          <Tap onPress={() => { buzz(5); setD(designFor((id && findPost(id)) || BLANK)); say('Design reset'); }} accessibilityRole="button" hitSlop={8} style={{ marginRight: 16 }}>
+          <Tap onPress={() => { buzz(5); setD(designFor((id && findPost(id)) || BLANK)); say('Design reset'); }} accessibilityRole="button" hitSlop={14} style={{ marginRight: 16 }}>
             <Txt style={{ fontSize: 13.5, fontWeight: 700, color: t.acc }}>Reset</Txt>
           </Tap>
         } />

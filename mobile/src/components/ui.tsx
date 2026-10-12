@@ -42,6 +42,7 @@ export function Txt({ style, ar, ur, serif, mono, ...rest }: TxtProps) {
   if (mono) fontFamily = FONTS.mono;
   return (
     <Text
+      maxFontSizeMultiplier={1.4}
       {...rest}
       style={[
         { color: t.tx },
@@ -68,6 +69,7 @@ export function Tap({ style, scale = 0.97, children, onPressIn, onPressOut, ...r
   return (
     <AnimatedPressable
       accessibilityRole="button"
+      hitSlop={4}
       {...rest}
       onPressIn={e => { to(scale); onPressIn?.(e); }}
       onPressOut={e => { to(1); onPressOut?.(e); }}
@@ -250,7 +252,7 @@ export function Seg({ labels, value, onChange, height = 46, radius = 22, inner =
       {labels.map((l, i) => {
         const on = i === value;
         return (
-          <Pressable key={l} accessibilityRole="tab" accessibilityState={{ selected: on }}
+          <Pressable key={l} accessibilityRole="tab" accessibilityState={{ selected: on }} hitSlop={{ top: 3, bottom: 3 }}
             onPress={() => { buzz(5); onChange(i); }}
             style={{ flex: 1, height, borderRadius: inner, backgroundColor: on ? (t.dark ? t.seg : t.cta) : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
             <Txt numberOfLines={1} style={{ fontSize: size, fontWeight: 700, color: on ? (t.dark ? t.txw : t.ctaInk) : t.t2 }}>{l}</Txt>
@@ -450,7 +452,7 @@ export function WheelSet({ cols, inset = 18 }: { cols: { values: string[]; idx: 
 export function UrduToggle({ on, onPress }: { on: boolean; onPress: () => void }) {
   const t = useT();
   return (
-    <Tap onPress={() => { buzz(5); onPress(); }} scale={0.94} accessibilityLabel="Toggle Urdu translation" accessibilityState={{ checked: on }}
+    <Tap onPress={() => { buzz(5); onPress(); }} scale={0.94} accessibilityLabel="Toggle Urdu translation" accessibilityState={{ checked: on }} hitSlop={6}
       style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: on ? 'rgba(242,166,90,0.18)' : t.ctl, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <Txt style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.44, color: on ? t.acc : t.t2 }}>UR</Txt>
       <Txt ur style={{ fontSize: 13, lineHeight: 30, color: on ? t.acc : t.t2 }}>اردو</Txt>
@@ -476,15 +478,17 @@ export function Sheet({ open, onClose, children }: { open: boolean; onClose: () 
   const ins = useSafeAreaInsets();
   const y = useState(() => new Animated.Value(800))[0];
   const fade = useState(() => new Animated.Value(0))[0];
+  const rm = useReducedMotion();
   useEffect(() => {
     if (open) {
+      if (rm) { y.setValue(0); fade.setValue(1); return; }
       y.setValue(800);
       Animated.parallel([
         Animated.timing(y, { toValue: 0, duration: 420, easing: Easing.bezier(0.22, 1, 0.36, 1), useNativeDriver: true }),
         Animated.timing(fade, { toValue: 1, duration: 250, useNativeDriver: true }),
       ]).start();
     } else fade.setValue(0);
-  }, [open, y, fade]);
+  }, [open, y, fade, rm]);
   const onCloseRef = useState(() => ({ current: onClose }))[0];
   useEffect(() => { onCloseRef.current = onClose; });
   // eslint-disable-next-line react-hooks/refs -- handlers read the latest onClose only when a gesture ends

@@ -54,12 +54,12 @@ test('greeting language switches between English and Urdu and keeps the name', a
   const s = await storedWhen(page, x => x.lang === 'ur');
   expect(s.name).toBe('Aisha Siddiqui');
 
-  await page.getByRole('tab', { name: 'Home', exact: true }).click();
+  await page.getByRole('tab', { name: 'ہوم', exact: true }).click();
   await expect(visibleText(page, 'السلام علیکم،')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'السلام علیکم، Aisha' })).toBeVisible();
   await expect(visibleText(page, 'اگلی نماز')).toBeVisible();
 
-  await page.getByRole('tab', { name: 'Prayer', exact: true }).click();
+  await page.getByRole('tab', { name: 'نماز', exact: true }).click();
   await expect(visibleText(page, 'اذان تک')).toBeVisible();
   expect(errors).toEqual([]);
 });

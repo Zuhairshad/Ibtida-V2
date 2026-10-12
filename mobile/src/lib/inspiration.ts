@@ -4,6 +4,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
+import { AppState } from 'react-native';
 import { supabase } from './supabase';
 
 export type InspirationKind = 'ayah' | 'hadith' | 'reminder' | 'quote';
@@ -92,9 +93,12 @@ export function groupFeed(posts: Inspiration[], now = Date.now()) {
   return groups;
 }
 
-/** How many posts are published for the day of `ms` (excluding `exceptId`). */
+/** The editors' day, which the database's 3-a-day limit counts in: Asia/Karachi (UTC+5, no DST). */
+export const editorialDay = (ms: number) => new Date(ms + 5 * 3_600_000).toISOString().slice(0, 10);
+
+/** How many posts are published for the editors' day of `ms` (excluding `exceptId`). */
 export const publishedOn = (posts: Inspiration[], ms: number, exceptId?: string) =>
-  posts.filter(p => p.status === 'published' && p.id !== exceptId && dayOf(p.publishAt) === dayOf(ms)).length;
+  posts.filter(p => p.status === 'published' && p.id !== exceptId && editorialDay(p.publishAt) === editorialDay(ms)).length;
 
 /* ------------------------------------------------------------------ Feed */
 
@@ -144,7 +148,11 @@ export function useInspirationFeed() {
     listeners.add(l);
     refreshFeed().catch(() => put({ loading: false }));
     startLive();
-    return () => { listeners.delete(l); };
+    // Scheduled posts go live at their time without any database change, so look again when the app
+    // returns to the foreground and every few minutes while a feed is on screen.
+    const sub = AppState.addEventListener('change', s => { if (s === 'active') refreshFeed().catch(() => {}); });
+    const id = setInterval(() => { refreshFeed().catch(() => {}); }, 5 * 60_000);
+    return () => { listeners.delete(l); sub.remove(); clearInterval(id); };
   }, []);
   return { ...feed, groups: groupFeed(feed.posts), refresh: refreshFeed };
 }

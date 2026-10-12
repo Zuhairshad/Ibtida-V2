@@ -88,7 +88,8 @@
         {
           "savePhotosPermission": "Ibtida saves the posts you design to your gallery when you tap Save.",
           "photosPermission": "Ibtida saves the posts you design to your gallery when you tap Save.",
-          "isAccessMediaLocationEnabled": false
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": ["photo"]
         }
       ]
     ],

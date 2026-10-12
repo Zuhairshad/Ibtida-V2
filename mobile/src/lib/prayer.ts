@@ -101,7 +101,8 @@ export function qibla(city: City) {
 
 /** Tabular (Kuwaiti) Hijri conversion — ±1 day, needs no Intl calendar support. */
 const HIJRI_MONTHS = ['Muharram', 'Safar', 'Rabi’ al-Awwal', 'Rabi’ al-Thani', 'Jumada al-Ula', 'Jumada al-Akhirah', 'Rajab', 'Sha’ban', 'Ramadan', 'Shawwal', 'Dhu al-Qa’dah', 'Dhu al-Hijjah'];
-export function hijri(date: Date) {
+/** Hijri day, month (1–12) and year for a date. */
+export function hijriParts(date: Date) {
   const d = date.getDate();
   let m = date.getMonth();
   let y = date.getFullYear();
@@ -123,6 +124,11 @@ export function hijri(date: Date) {
   let im = Math.floor((z + 28.5001) / 29.5);
   if (im === 13) im = 12;
   const id = z - Math.floor(29.5001 * im - 29);
+  return { id, im, iy };
+}
+
+export function hijri(date: Date) {
+  const { id, im, iy } = hijriParts(date);
   return `${id} ${HIJRI_MONTHS[im - 1]} ${iy} AH`;
 }
 
