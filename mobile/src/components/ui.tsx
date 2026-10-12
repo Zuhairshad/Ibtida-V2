@@ -199,15 +199,19 @@ export function SectionHead({ title, action, onAction }: { title: string; action
 export function Screen({ children, tabs = true, top = 58, style, bg }: { children: ReactNode; tabs?: boolean; top?: number; style?: StyleProp<ViewStyle>; bg?: string }) {
   const t = useT();
   const ins = useSafeAreaInsets();
+  const base = bg ?? t.bg;
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: bg ?? t.bg }}
-      contentContainerStyle={[{ paddingTop: ins.top + top - 48, paddingBottom: tabs ? 120 + ins.bottom : 34 + ins.bottom }, style]}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: base }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: base }}
+        contentContainerStyle={[{ paddingTop: ins.top + top - 48, paddingBottom: tabs ? 120 + ins.bottom : 34 + ins.bottom }, style]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {children}
+      </ScrollView>
+      {ins.top > 0 && <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: ins.top, backgroundColor: base, opacity: 0.94 }} />}
+    </View>
   );
 }
 

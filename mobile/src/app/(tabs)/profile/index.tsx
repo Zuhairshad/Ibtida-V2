@@ -102,7 +102,9 @@ export default function Profile() {
         ))}
       </ListCard>
       <View style={{ paddingTop: 14, paddingHorizontal: 16 }}>
-        <Cta label="Sign out" kind="danger" height={54} size={14.5} onPress={async () => { await signOut(); say('Signed out safely'); router.replace({ pathname: '/auth', params: { mode: 'in' } }); }} />
+        {s.signedIn || !backendEnabled
+          ? <Cta label="Sign out" kind="danger" height={54} size={14.5} onPress={async () => { await signOut(); say('Signed out safely'); router.replace({ pathname: '/auth', params: { mode: 'in' } }); }} />
+          : <Cta label="Sign in" height={54} size={14.5} onPress={() => router.push({ pathname: '/auth', params: { mode: 'in' } })} />}
       </View>
     </Screen>
   );
