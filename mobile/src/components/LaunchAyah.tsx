@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,6 +21,7 @@ function Verse({ ayah, onDone }: { ayah: Ayah; onDone: () => void }) {
   const ur = lang !== 'en';
   return (
     <Pressable onPress={onDone} accessibilityLabel="Continue to Ibtida" style={{ flex: 1, ...bgImage(G.launch), backgroundColor: t.bg }}>
+      <StatusBar style="light" />
       <Stars style={{ bottom: '55%' }} />
       <Breathe bg={G.glowGoldSoft} style={{ left: '-20%', right: '-20%', top: '6%', aspectRatio: 1 }} dur={9000} />
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 30, paddingTop: insets.top + 40, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
