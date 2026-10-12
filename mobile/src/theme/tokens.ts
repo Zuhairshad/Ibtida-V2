@@ -45,7 +45,7 @@ export const LIGHT: Palette = {
   tMint: '#E3F1EC', bg: '#FFFFFF', sunk: '#FFFFFF', card: '#FFFFFF', opt: '#FFFFFF', sheetc: '#FFFFFF',
   ctl2: '#EEEEF2', ctl: '#EFEFF3', ctl3: '#E7E7EC', seg: '#FFFFFF', ctl4: '#D9D9E0', sunk2: '#FFFFFF',
   tx: '#0F1014', t2: '#5E5E66', t3: '#55555D', t4: '#6B6B73', t5: '#26262B', t6: '#70707A', ctl4b: '#CFCFD6',
-  acc: '#A8561E', gold: '#9A5B20', mint: '#2B7458', rose: '#B4463A', peri: '#3F55A6', lav: '#7447A0',
+  acc: '#A2521C', gold: '#9A5B20', mint: '#2B7458', rose: '#B4463A', peri: '#3F55A6', lav: '#7447A0',
   noteBg: '#FBF1E3', noteTx: '#7A4A12', iosBg: '#EEF1FA', iosTx: '#34457E', iosB: '#1F2B55',
   mintTx: '#1F5B47', okTx: '#22613A', errTx: '#B4463A',
   tBlue: '#E7EBF8', tAmb: '#F6ECDF', tLav: '#F1E8F6',
