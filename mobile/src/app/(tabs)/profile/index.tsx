@@ -34,7 +34,7 @@ export default function Profile() {
     ['Inspiration studio', 'spark', t.gold, '/inspiration', ''],
     ...(isAdmin ? [['Admin · publish', 'shield', t.acc, '/admin', ''] as [string, IconName, string, string, string]] : []),
     ['Goals', 'beads', t.acc, '/adhkar/goals', `${s.goals.length} active`],
-    ['Quran bookmarks', 'bookmark', t.mint, '/home/quran', marks ? String(marks) : ''],
+    ['Quran bookmarks', 'bookmark', t.mint, '/home/quran?tab=saved', marks ? String(marks) : ''],
     ['Masjid & timings', 'people', t.gold, '/jamaat', Object.keys(s.jamaat).length ? `${Object.keys(s.jamaat).length} jamaat` : ''],
     ['Travel dua', 'pin', t.mint, '/travel', s.travelOn ? 'On' : 'Off'],
     ['Wake alarm', 'alarm', t.peri, '/prayer/wake-alarm', `${s.wakeVerify.filter(Boolean).length} on`],

@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { Icon } from '../../../components/Icon';
@@ -27,7 +27,9 @@ export default function Quran() {
   const t = useT();
   const router = useRouter();
   const [q, setQ] = useState('');
-  const [tab, setTab] = useState(0);
+  const { tab: tabParam } = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState(tabParam === 'saved' ? 3 : 0);
+  const marks = useApp(s => s.marks);
   const last = useApp(s => s.qLast);
   const hist = useApp(s => s.qHist);
   const qMax = useApp(s => s.qMax);
@@ -45,6 +47,10 @@ export default function Quran() {
           const pct = last ? juzPct(j, last.s, last.a) : null;
           return { key: `j${j}`, n: j, name: `Juz ${j}`, meta: `${pct != null ? `${pct}% read · ` : ''}Starts ${SURAHS[s - 1].name} ${s}:${a}`, ar: `الجزء ${arNum(j)}`, bar: pct, s, a, label: `Juz ${j}, starts at ${SURAHS[s - 1].name} ${s}:${a}` };
         })
+      : tab === 3
+        ? Object.keys(marks).filter(k => marks[k]).map(k => k.split(':').map(Number) as [number, number])
+            .filter(([s, a]) => SURAHS[s - 1] && a >= 1).sort((x, y) => x[0] - y[0] || x[1] - y[1])
+            .map(([s, a]) => ({ key: `m${s}:${a}`, n: s, name: `${SURAHS[s - 1].name} ${s}:${a}`, meta: `Juz ${juzOf(s, a)} · bookmarked`, ar: SURAHS[s - 1].ar, bar: null, s, a, label: `Bookmark ${SURAHS[s - 1].name} ayah ${a}` }))
       : hist.map(h => {
           const m = SURAHS[h.s - 1];
           return { key: `h${h.s}`, n: h.s, name: `${m.name} ${h.s}:${h.a}`, meta: `${when(h.at)} · ${surahPct(h.s, h.a)}% read`, ar: m.ar, bar: null, s: h.s, a: h.a, label: `Resume ${m.name} at ayah ${h.a}` };
@@ -82,7 +88,7 @@ export default function Quran() {
         </View>
       </View>
       <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
-        <Seg labels={['Surahs', 'Juz', 'History']} value={tab} onChange={setTab} height={42} size={13.5} />
+        <Seg labels={['Surahs', 'Juz', 'History', 'Saved']} value={tab} onChange={setTab} height={42} size={13.5} />
       </View>
       <View style={{ paddingTop: 10, paddingHorizontal: 16, gap: 8 }}>
         {rows.map(r => (
@@ -105,8 +111,8 @@ export default function Quran() {
         ))}
         {rows.length === 0 && (
           <View style={{ borderRadius: 24, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 28, paddingHorizontal: 20, alignItems: 'center' }}>
-            <Txt style={{ fontSize: 16, fontWeight: 700 }}>{tab === 2 ? 'Nothing read yet' : 'No matches'}</Txt>
-            <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6 }}>{tab === 2 ? 'Surahs you open will appear here.' : 'Try a surah number, like 18.'}</Txt>
+            <Txt style={{ fontSize: 16, fontWeight: 700 }}>{tab === 3 ? 'No bookmarks yet' : tab === 2 ? 'Nothing read yet' : 'No matches'}</Txt>
+            <Txt style={{ fontSize: 13.5, color: t.t2, marginTop: 6 }}>{tab === 3 ? 'Tap the bookmark on any ayah while reading to keep it here.' : tab === 2 ? 'Surahs you open will appear here.' : 'Try a surah number, like 18.'}</Txt>
           </View>
         )}
       </View>

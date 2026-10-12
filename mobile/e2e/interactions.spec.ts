@@ -628,7 +628,7 @@ test.describe('profile', () => {
     await seed(withSample());
     await page.goto('/profile');
     const rows: [RegExp, RegExp][] = [
-      [/^Goals/, /\/adhkar\/goals$/], [/^Quran bookmarks/, /\/home\/quran$/], [/^Wake alarm/, /\/prayer\/wake-alarm$/],
+      [/^Goals/, /\/adhkar\/goals$/], [/^Quran bookmarks/, /\/home\/quran(\?tab=saved)?$/], [/^Wake alarm/, /\/prayer\/wake-alarm$/],
       [/^Emergency history/, /\/profile\/emergency$/], [/^Notifications/, /\/profile\/notifications$/], [/^Privacy/, /\/profile\/privacy$/],
       [/^Offline & sync/, /\/offline$/],
     ];

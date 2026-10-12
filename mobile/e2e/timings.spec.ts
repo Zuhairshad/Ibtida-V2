@@ -73,3 +73,14 @@ test('onboarding asks which language to greet in', async ({ page, errors }) => {
   expect(s.name).toBe('Bilal');
   expect(errors).toEqual([]);
 });
+
+test('Profile → Quran bookmarks lists saved ayahs and opens one in the reader', async ({ page, seed, errors }) => {
+  await seed({ marks: { '94:6': true, '2:255': true } });
+  await page.goto('/profile');
+  await page.getByText('Quran bookmarks').filter({ visible: true }).click();
+  await expect(page).toHaveURL(/\/home\/quran\?tab=saved$/);
+  await expect(page.getByLabel('Bookmark Al-Baqarah ayah 255').filter({ visible: true }).first()).toBeVisible();
+  await page.getByLabel(/^Bookmark .*ayah 6$/).filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/reader\?surah=94&ayah=6/);
+  expect(errors).toEqual([]);
+});
