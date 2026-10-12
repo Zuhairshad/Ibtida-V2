@@ -3,18 +3,19 @@ import { useEffect, useState } from 'react';
 import { Animated, ScrollView, useWindowDimensions, View } from 'react-native';
 import { DailyOverview } from '../../../components/DailyOverview';
 import { InspirationCard } from '../../../components/InspirationCard';
+import { VerseStrip } from '../../../components/VerseStrip';
 import { QuickTile3D, type TileArt } from '../../../components/QuickTile3D';
 import { DayStrip } from '../../../components/DayStrip';
 import { Icon, MosqueLogo, type IconName } from '../../../components/Icon';
 import { InsightSheet } from '../../../components/InsightSheet';
 import { Breathe, FadeIn, PulseDot, Stars, useCountUp } from '../../../components/motion';
-import { buzz, IconBtn, PillShortcut, say, SerifTitle, Tap, Txt, UrduToggle } from '../../../components/ui';
+import { buzz, IconBtn, PillShortcut, say, SerifTitle, Tap, Txt } from '../../../components/ui';
 import { HourBars } from '../../../components/community';
 import { adhkarCat, catMinutes } from '../../../data/adhkar';
-import { fmt, HADITH, PH, type PrayerName } from '../../../data/content';
+import { fmt, PH, type PrayerName } from '../../../data/content';
 import { useLive } from '../../../lib/live';
 import { SURAHS, surahPct } from '../../../data/surahs';
-import { fmtCountdown, usePrayerNow, useUrdu } from '../../../lib/hooks';
+import { fmtCountdown, usePrayerNow } from '../../../lib/hooks';
 import { adhkarCatName, countdownText, dirUr, dowWord, hijriText, iso, monLabel, prayerName, streakNote, useFirstName, useLang } from '../../../lib/i18n';
 import { ltr } from '../../../data/reminders';
 import { fmtTime, jamaatAt, qibla } from '../../../lib/prayer';
@@ -47,26 +48,18 @@ export default function Home() {
   const [day, setDay] = useState(0);
   const [phase, setPhase] = useState<PrayerName | null>(null);
   const [car, setCar] = useState(0);
-  const [had, setHad] = useState(0);
   const [insight, setInsight] = useState(false);
   const ummah = useLive(l => (l.on ? l.ummah : null));
   const hours = useLive(l => (l.on ? l.hours : null));
   const impact = useCountUp(ummah ? ummah.today : 0);
   const nowCat = adhkarCat(now >= times.Isha || now < times.Fajr ? 'Before Sleep' : now >= times.Asr ? 'Evening' : 'Morning');
-  const [urOn, urFlip] = useUrdu('had' + had);
   const q = qibla(city);
   const start = ur ? 'right' : 'left';
   const sa = ur ? 'right' : undefined;
 
-  useEffect(() => {
-    const id = setInterval(() => setHad(h => (h + 1) % HADITH.length), 7000);
-    return () => clearInterval(id);
-  }, []);
-
   const shownPhase = phase ?? next.phase;
   const frac = 1 - next.secs / next.span;
   const tPct = Math.max(0, Math.min(100, ((next.idx - 1 + frac) / 4) * 100));
-  const h = HADITH[had];
 
   const quick: { title: string; sub: string; icon: IconName; art: TileArt; tint: string; ink: string; go: () => void }[] = [
     { title: tx('prayerTimes'), sub: `${prayerName(lang, next.name)} · ${ur ? ltr(fmtTime(next.at)) : fmtTime(next.at)}`, icon: 'prayer', art: 'mat', tint: t.tBlue, ink: t.peri, go: () => router.navigate('/prayer') },
@@ -100,6 +93,10 @@ export default function Home() {
           <Txt ur={ur} style={{ fontSize: 13.5, color: t.t2, flexShrink: 1 }} numberOfLines={1}>
             {hijriText(lang, now)} <Txt ur={ur} style={{ color: t.t4 }}>·</Txt> {ur ? iso(city.name) : city.name}
           </Txt>
+        </FadeIn>
+
+        <FadeIn delay={60} style={{ paddingTop: 14 }}>
+          <VerseStrip day={now} />
         </FadeIn>
 
         <FadeIn delay={80} style={{ paddingTop: 18, paddingHorizontal: 16, flexDirection: 'row', gap: 8 }}>
@@ -242,29 +239,6 @@ export default function Home() {
           ))}
         </FadeIn>
 
-        <FadeIn delay={260} style={{ paddingTop: 22, paddingHorizontal: 16 }}>
-          <View style={{ borderRadius: 30, backgroundColor: t.card, boxShadow: t.edge, padding: 22, overflow: 'hidden' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Txt ur={ur} style={{ fontSize: ur ? 13 : 11.5, fontWeight: 700, letterSpacing: ur ? 0 : 0.92, color: t.t2 }}>{tx('hadithMoment')}</Txt>
-              <View style={{ flexDirection: 'row', gap: 5 }}>
-                {HADITH.map((_, i) => <View key={i} style={{ width: had === i ? 16 : 5, height: 5, borderRadius: 3, backgroundColor: had === i ? t.acc : t.ctl4 }} />)}
-              </View>
-            </View>
-            <FadeIn key={had} dur={600} style={{ minHeight: 190 }}>
-              <Txt ar style={{ fontSize: 25, lineHeight: 44, color: t.gold, marginTop: 16, textAlign: 'right' }}>{h.ar}</Txt>
-              <Txt style={{ fontSize: 15.5, lineHeight: 24, color: t.t5, marginTop: 10 }}>“{h.en}”</Txt>
-              <Txt style={{ fontSize: 12.5, color: t.t4, marginTop: 10 }}>{h.src}</Txt>
-              {urOn && (
-                <FadeIn dur={300} style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.line }}>
-                  <Txt ur style={{ fontSize: 16, lineHeight: 34, color: t.t5, textAlign: 'right' }}>{h.ur}</Txt>
-                </FadeIn>
-              )}
-              <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12 }}>
-                <UrduToggle on={urOn} onPress={urFlip} />
-              </View>
-            </FadeIn>
-          </View>
-        </FadeIn>
       </ScrollView>
       <InsightSheet open={insight} onClose={() => setInsight(false)} impact={impact} />
     </View>

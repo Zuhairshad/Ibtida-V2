@@ -4,10 +4,12 @@ import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import { PH, type PrayerName } from '../data/content';
+import { SURAHS } from '../data/surahs';
 import { ayahFor, compose, durUr, ltr, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
-import { getState, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
+import { getState, isActive, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
 import { ADHAN_CHOICES, adhanFile, soundFile, TAKBIR } from './sounds';
+import { planCare } from './care';
 import { FajrAlarm, wakeAt } from './fajrAlarm';
 import { addDays, dayKey, fmtTime, jamaatAt, nextPrayer, timesFor } from './prayer';
 
@@ -42,6 +44,7 @@ const CH = {
   adhan: (sound: number, short = false) => chanFor(adhanFile(sound, short)),
   wake: `wake-alarm-v${CHANNEL_VERSION}`,
   reminders: `reminders-v${CHANNEL_VERSION}`,
+  care: `care-v${CHANNEL_VERSION}`,
 };
 
 function adhanSound(sound: number, short = false): Notifications.NotificationContentInput['sound'] {
@@ -83,6 +86,12 @@ function ensureChannels() {
     await Notifications.setNotificationChannelAsync(CH.reminders, {
       name: 'Gentle reminders',
       description: 'Adhkar, goal and Quran reminders.',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      sound: 'default',
+    });
+    await Notifications.setNotificationChannelAsync(CH.care, {
+      name: 'Encouragement',
+      description: 'Warm check-ins based on your own progress: at most one a day, and they stop if you are away for a month.',
       importance: Notifications.AndroidImportance.DEFAULT,
       sound: 'default',
     });
@@ -189,6 +198,7 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
   const out: Planned[] = [];
   const [prayerOn, adhkarOn, goalsOn, quranOn] = s.notifs;
   const lang = s.notifLang ?? 'both';
+  const care = s.notifCare !== false;
   /**
    * Title and body in the user's language, with the day's hadith for this kind of reminder.
    * Prayer and wake notifications carry an ayah instead (see `prayerNotice`).
@@ -241,9 +251,13 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
       });
     }
     if (quranOn) {
+      // Someone mid-way through the Quran is invited back to their own place, not to a generic prompt.
+      const sur = care && s.qLast ? SURAHS[s.qLast.s - 1] : null;
       out.push({
         at: new Date(times.Fajr.getTime() + 20 * MIN), kind: `quran.${key}`,
-        ...txt(day, 'quran', { en: 'Quran', ur: 'قرآن' }, { en: 'A few verses after Fajr?', ur: 'فجر کے بعد چند آیات کی تلاوت؟' }),
+        ...txt(day, 'quran', { en: 'Quran', ur: 'قرآن' }, sur
+          ? { en: `Continue ${sur.name}: pick up where you left off.`, ur: `جہاں چھوڑا تھا وہیں سے ${sur.ar} جاری رکھیں۔` }
+          : { en: 'A few verses after Fajr?', ur: 'فجر کے بعد چند آیات کی تلاوت؟' }),
         url: '/home/quran', channelId: CH.reminders, sound: 'default',
       });
     }
@@ -251,9 +265,14 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
       for (const g of s.goals) {
         const t = goalTime(g, day, times.Fajr);
         if (!t) continue;
+        // Already finished today: a reminder now would only be noise.
+        if (g.day === key && g.prog >= g.target) continue;
+        const run = care && d === 0 ? g.streak : 0;
         out.push({
           at: t, kind: `goal.${g.id}.${key}`,
-          ...txt(day, 'goal', { en: g.name, ur: g.name }, { en: `Your ${g.target} for today · tap to begin.`, ur: `آج کا ہدف ${ltr(g.target)} · شروع کرنے کے لیے ٹیپ کریں۔` }, g.id),
+          ...txt(day, 'goal', { en: g.name, ur: g.name }, run >= 2
+            ? { en: `Day ${run + 1} of your streak · ${g.target} today.`, ur: `آپ کے سلسلے کا دن ${ltr(run + 1)} · آج ${ltr(g.target)}۔` }
+            : { en: `Your ${g.target} for today · tap to begin.`, ur: `آج کا ہدف ${ltr(g.target)} · شروع کرنے کے لیے ٹیپ کریں۔` }, g.id),
           url: `/tasbeeh?goal=${g.id}`, channelId: CH.reminders, sound: 'default',
         });
       }
@@ -276,11 +295,19 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
       });
     }
   }
+  // Check-ins drawn from the person's history. They reach up to a month ahead, so they keep their own
+  // share of the pending limit instead of competing with the next few days of prayer times.
+  const cares: Planned[] = planCare(s, now).map(c => ({
+    at: c.at, kind: c.kind,
+    ...compose(lang, c.title, c.body, s.notifQuotes === false || !c.quote ? null : quoteFor(c.quote, c.at, c.at.getDate())),
+    url: c.url, channelId: CH.care, sound: 'default',
+  }));
   // Soonest first, then cap so the nearest reminders always fit iOS's pending limit.
-  return out
+  const core = out
     .filter(n => n.at.getTime() > now.getTime() + 5000)
     .sort((a, b) => a.at.getTime() - b.at.getTime())
-    .slice(0, MAX_PENDING);
+    .slice(0, MAX_PENDING - cares.length);
+  return core.concat(cares).sort((a, b) => a.at.getTime() - b.at.getTime());
 }
 
 /* -------------------------------------------------------------- Apply */
@@ -344,10 +371,13 @@ if (NATIVE) {
 
 /** Only the fields that change what gets scheduled — tasbeeh taps must not reschedule. */
 function signature(s: Store) {
+  const today = dayKey(new Date());
   return JSON.stringify([
     s.hydrated, s.onboarded, s.city, s.method, s.hanafi, s.adhan, s.sound, s.adhanShort, s.notifs, s.wakeVerify, s.wake,
-    s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days]),
+    s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days, g.day === today && g.prog >= g.target]),
     s.locks, s.notifLang, s.notifQuotes, s.adj, s.jamaat, s.masjid, s.lang,
+    // Check-ins follow progress, but only in coarse steps: a streak change, today becoming active, a new surah.
+    s.notifCare, s.name, s.since, s.streak, isActive(s, today), s.qLast?.s, PH.filter(p => s.logs[today]?.[p]).length,
   ]);
 }
 

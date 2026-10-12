@@ -9,7 +9,7 @@ import { SURAHS } from './surahs';
 
 export type NotifLang = 'en' | 'ur' | 'both';
 export type Quote = { en: string; ur: string; src: string };
-export type QuoteKind = 'prayer' | 'fajr' | 'adhkar' | 'quran' | 'goal' | 'focus';
+export type QuoteKind = 'prayer' | 'fajr' | 'adhkar' | 'quran' | 'goal' | 'focus' | 'return';
 
 export const QUOTES: Record<QuoteKind, Quote[]> = {
   prayer: [
@@ -44,6 +44,12 @@ export const QUOTES: Record<QuoteKind, Quote[]> = {
     { en: 'The Prophet ﷺ sought Allah’s forgiveness a hundred times a day.', ur: 'نبی ﷺ دن میں سو مرتبہ اللہ سے استغفار کیا کرتے تھے۔', src: 'Sahih Muslim 2702' },
     { en: 'Allah says: My servant keeps drawing near to Me with voluntary deeds until I love him.', ur: 'اللہ فرماتا ہے: میرا بندہ نفل عبادات سے میرے قریب ہوتا رہتا ہے یہاں تک کہ میں اس سے محبت کرنے لگتا ہوں۔', src: 'Sahih al-Bukhari 6502' },
   ],
+  return: [
+    { en: 'Follow up a bad deed with a good deed, and it will wipe it out.', ur: 'برائی کے بعد نیکی کر لو، وہ اسے مٹا دے گی۔', src: 'Jamiʿ at-Tirmidhi 1987' },
+    { en: 'If My servant comes to Me walking, I go to him running.', ur: 'اگر میرا بندہ میری طرف چل کر آئے تو میں اس کی طرف دوڑ کر آتا ہوں۔', src: 'Sahih al-Bukhari 7405' },
+    { en: 'Make things easy and do not make them difficult; give glad tidings and do not drive people away.', ur: 'آسانی کرو، مشکل نہ بناؤ؛ خوشخبری دو، نفرت نہ دلاؤ۔', src: 'Sahih al-Bukhari 69 · Sahih Muslim 1734' },
+    { en: 'The religion is ease.', ur: 'دین آسان ہے۔', src: 'Sahih al-Bukhari 39' },
+  ],
   focus: [
     { en: 'Two blessings many people are deceived about: health and free time.', ur: 'دو نعمتیں ایسی ہیں جن کے بارے میں اکثر لوگ دھوکے میں ہیں: صحت اور فراغت۔', src: 'Sahih al-Bukhari 6412' },
     { en: 'Part of the excellence of a person’s Islam is leaving what does not concern him.', ur: 'آدمی کے اسلام کی خوبی میں سے ہے کہ وہ بے فائدہ چیزوں کو چھوڑ دے۔', src: 'Jamiʿ at-Tirmidhi 2317' },
@@ -55,7 +61,7 @@ export const PRAYER_UR: Record<PrayerName | 'Sunrise', string> = {
   Fajr: 'فجر', Sunrise: 'طلوعِ آفتاب', Dhuhr: 'ظہر', Asr: 'عصر', Maghrib: 'مغرب', Isha: 'عشاء',
 };
 
-const dayNum = (day: Date) => Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
+export const dayNum = (day: Date) => Math.floor(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate()) / 86_400_000);
 
 /** Same quote all day for a reminder (so the schedule stays stable), a different one each day. */
 export function quoteFor(kind: QuoteKind, day: Date, salt = 0): Quote {

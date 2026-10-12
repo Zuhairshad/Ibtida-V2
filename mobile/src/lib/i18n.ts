@@ -67,7 +67,9 @@ export const STR = {
   firstHour: { en: 'be the first this hour', ur: 'اس گھنٹے میں پہلے بنیں' },
   countTogether: { en: 'Count together with the Ummah', ur: 'امت کے ساتھ مل کر ذکر کریں' },
   signInLive: { en: 'Sign in and connect to see today’s live total.', ur: 'آج کا براہِ راست مجموعہ دیکھنے کے لیے سائن اِن کریں اور آن لائن ہوں۔' },
-  hadithMoment: { en: 'HADITH OF THE MOMENT', ur: 'اس لمحے کی حدیث' },
+  verseKick: { en: 'AYAH', ur: 'آیت' },
+  hadithKick: { en: 'HADITH', ur: 'حدیث' },
+  verseStrip: { en: 'Ayah and hadith for today', ur: 'آج کی آیت اور حدیث' },
   // Prayer
   locationMethod: { en: 'Location and method', ur: 'مقام اور طریقہ' },
   wakeAlarm: { en: 'Wake alarm', ur: 'جگانے والا الارم' },

@@ -695,6 +695,25 @@ test.describe('notifications and qibla', () => {
     await expect(preview.getByText(/\d+:\d+\u2069\)$/)).toBeVisible();
   });
 
+  test('the journey card reads the history and the next check-in can be switched off', async ({ page, seed }) => {
+    const key = (n: number) => {
+      const d = new Date(); d.setDate(d.getDate() - n);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+    await seed({ act: Object.fromEntries([0, 1, 2, 3, 4].map(n => [key(n), { d: 12, s: 0, q: 0 }])), notifLang: 'en' });
+    await page.goto('/profile/notifications');
+    await expect(page.getByLabel('Your journey. 5 day streak, best 5. Active on 5 of the last 7 days.')).toBeVisible();
+    await expect(page.getByText('You showed up today. Alhamdulillah.')).toBeVisible();
+    // Active today, so the next word is tomorrow evening's: it names what is true, never what was missed.
+    const next = page.getByLabel('Next check-in');
+    await expect(next.getByText(/^IBTIDA · Tomorrow · \d+:\d+ [ap]m$/)).toBeVisible();
+    await expect(next.getByText(/5-day streak|Day 6|5 days of showing up/).first()).toBeVisible();
+    await page.getByRole('switch', { name: 'Encouragement' }).click();
+    await storedWhen(page, x => x.notifCare === false);
+    await expect(page.getByText('Encouragement is off. You will only get the reminders you chose above.')).toBeVisible();
+    await expect(next.getByText(/^IBTIDA/)).toHaveCount(0);
+  });
+
   test('qibla card shows the true bearing and an honest compass status', async ({ page, seed }) => {
     await seed({ city: { name: 'London, United Kingdom', lat: 51.5074, lng: -0.1278, cc: 'GB' } });
     await page.goto('/prayer?qibla=1');
@@ -705,6 +724,19 @@ test.describe('notifications and qibla', () => {
     const tap = button(page, 'Use compass');
     if (await tap.isVisible()) await tap.click();
     await expect(visibleText(page, /This device has no compass|Compass access is off/)).toBeVisible({ timeout: 8000 });
+  });
+});
+
+test.describe('verse strip', () => {
+  test('Home opens with an ayah and its translations, and swiping reaches a hadith', async ({ page, seed }) => {
+    await seed();
+    await page.goto('/home');
+    const strip = page.getByLabel('Ayah and hadith for today');
+    await expect(strip).toBeVisible();
+    await expect(strip.getByText('AYAH').first()).toBeVisible();
+    await expect(strip.getByText(/^“.+”$/).first()).toBeVisible();
+    await expect(strip.getByText(/\d+:\d+$/).first()).toBeVisible();
+    await expect(strip.getByText('HADITH').first()).toBeAttached();
   });
 });
 

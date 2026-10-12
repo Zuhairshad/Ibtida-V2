@@ -119,6 +119,10 @@ export type AppState = {
   /** Notification language, and whether reminders carry a short hadith. */
   notifLang: NotifLang;
   notifQuotes: boolean;
+  /** Gentle check-ins drawn from the user's own progress (streaks, returning after a break). */
+  notifCare: boolean;
+  /** When this install first ran (epoch ms); anchors the welcome check-ins for someone who has not started yet. */
+  since: number;
   /** Show a verse each time the app opens. */
   launchAyah: boolean;
   lang: Lang;
@@ -200,6 +204,8 @@ const initial: AppState = {
   azBg: 0,
   notifLang: 'both',
   notifQuotes: true,
+  notifCare: true,
+  since: 0,
   launchAyah: true,
   lang: 'en',
   masjid: '',
@@ -285,7 +291,7 @@ export async function hydrate() {
     // untouched (loadFailed) and read again when the app returns to the foreground.
     if (!(e instanceof SyntaxError)) loadFailed = true;
   }
-  set({ hydrated: true, token: newToken() });
+  set({ hydrated: true, token: newToken(), since: Date.now() });
   rollDay();
   armMidnight();
 }
@@ -335,7 +341,7 @@ export function resetAccountData(accountId: string) {
 
 export async function resetAll() {
   await AsyncStorage.removeItem(KEY).catch(() => {});
-  state = { ...initial, hydrated: true, token: newToken() };
+  state = { ...initial, hydrated: true, token: newToken(), since: Date.now() };
   listeners.forEach(l => l());
 }
 
@@ -390,6 +396,8 @@ function migrate(saved: Partial<AppState>): Partial<AppState> {
     qHist: Array.isArray(saved.qHist) ? saved.qHist.filter(isPos) : [],
     qMax: saved.qMax && typeof saved.qMax === 'object' ? saved.qMax : {},
     lang: saved.lang === 'ur' ? 'ur' : 'en',
+    notifCare: saved.notifCare !== false,
+    since: typeof saved.since === 'number' && saved.since > 0 ? saved.since : Date.now(),
     jamaat: saved.jamaat && typeof saved.jamaat === 'object' ? saved.jamaat : {},
     adj: saved.adj && typeof saved.adj === 'object' ? saved.adj : {},
     // The counter used to run past its target ("37 / 33"): keep only the current round.
@@ -437,7 +445,7 @@ export function newToken() {
 }
 
 const ACT_DAYS = 400;
-const isActive = (s: Pick<AppState, 'act' | 'logs'>, k: string) => {
+export const isActive = (s: Pick<AppState, 'act' | 'logs'>, k: string) => {
   const a = s.act[k];
   if (a && (a.d > 0 || a.s > 0 || a.q > 0)) return true;
   const l = s.logs[k];
