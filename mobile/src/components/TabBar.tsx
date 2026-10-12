@@ -31,13 +31,13 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
     <Pressable onPress={onPress} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: focused }}
       style={({ pressed }) => ({
         flex: 1, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', gap: 4,
-        backgroundColor: focused ? t.tabOn : 'transparent', boxShadow: focused ? t.tabRing : undefined,
+        backgroundColor: focused ? (t.dark ? t.tabOn : t.pill) : 'transparent', boxShadow: focused ? t.tabRing : undefined,
         transform: [{ scale: pressed ? 0.93 : 1 }],
       })}>
       <Animated.View style={{ transform: [{ scale: s }] }}>
-        <Icon name={meta.icon} color={focused ? t.acc : t.tabInk} />
+        <Icon name={meta.icon} color={focused ? (t.dark ? t.acc : t.onPill) : t.tabInk} />
       </Animated.View>
-      <Txt ur={ur} style={{ fontSize: 11, fontWeight: 600, color: focused ? t.txw : t.tabInk }}>{label}</Txt>
+      <Txt ur={ur} style={{ fontSize: 11, fontWeight: 600, color: focused ? (t.dark ? t.txw : t.onPill) : t.tabInk }}>{label}</Txt>
     </Pressable>
   );
 }

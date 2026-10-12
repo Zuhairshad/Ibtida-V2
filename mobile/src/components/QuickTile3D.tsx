@@ -234,8 +234,8 @@ export function QuickTile3D({ art, title, sub, onPress, style }: { art: TileArt;
   const Art = ART[art];
   return (
     <Tap scale={0.96} onPress={() => { buzz(6); onPress(); }} accessibilityRole="button" accessibilityLabel={`${title}, ${sub}`}
-      style={[{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, padding: 14, paddingBottom: 18, overflow: 'hidden' }, style]}>
-      <View style={{ height: 104, borderRadius: 20, backgroundColor: t.dark ? 'rgba(244,238,223,0.05)' : '#F7F3E8', overflow: 'hidden' }}>
+      style={[{ borderRadius: 32, backgroundColor: t.card, boxShadow: t.edge, padding: 14, paddingBottom: 18, overflow: 'hidden', ...bgImage(t.glass) }, style]}>
+      <View style={{ height: 104, borderRadius: 20, backgroundColor: t.scene, overflow: 'hidden' }}>
         {/* warm light from above, so each object sits in its own little scene */}
         <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
           ...bgImage(`radial-gradient(70% 85% at 50% 18%, rgba(216,184,119,${t.dark ? 0.16 : 0.24}) 0%, rgba(216,184,119,0) 100%)`) }} />

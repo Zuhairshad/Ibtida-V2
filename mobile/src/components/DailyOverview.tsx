@@ -5,6 +5,7 @@ import { endsIn, useLive } from '../lib/live';
 import { dailyOverview } from '../lib/overview';
 import { useApp } from '../state/store';
 import { useT } from '../theme/ThemeProvider';
+import { bgImage } from '../theme/tokens';
 import { Icon, type IconName } from './Icon';
 import { Bar, buzz, Ring, Tap, Txt } from './ui';
 
@@ -32,7 +33,7 @@ export function DailyOverview({ now }: { now: Date }) {
   ];
 
   return (
-    <View style={{ borderRadius: 30, backgroundColor: t.card, boxShadow: t.edge, padding: 20 }} accessibilityLabel={tr(lang, 'ovTodayA11y', { p: String(o.pct), m: message })}>
+    <View style={{ borderRadius: 34, backgroundColor: t.card, boxShadow: t.edge, padding: 22, ...bgImage(t.rosy) }} accessibilityLabel={tr(lang, 'ovTodayA11y', { p: String(o.pct), m: message })}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <Ring size={72} r={30} stroke={7} pct={o.pct / 100} track={t.ctl3} color={o.pct >= 100 ? t.mint : t.acc}>
           <Txt style={{ fontSize: 16, fontWeight: 800 }}>{o.pct}%</Txt>

@@ -599,13 +599,13 @@ test.describe('profile', () => {
     await page.goto('/profile');
     expect(await inkOf(page, 'Appearance')).toBe('rgb(245, 243, 239)');
     await page.getByRole('tab', { name: 'Light' }).click();
-    await expect.poll(() => inkOf(page, 'Appearance')).toBe('rgb(15, 16, 20)');
+    await expect.poll(() => inkOf(page, 'Appearance')).toBe('rgb(22, 21, 28)');
     await storedWhen(page, s => s.theme === 'light');
     // Light mode survives a relaunch, and immersive screens stay dark.
     await page.reload();
-    await expect.poll(() => inkOf(page, 'Appearance')).toBe('rgb(15, 16, 20)');
+    await expect.poll(() => inkOf(page, 'Appearance')).toBe('rgb(22, 21, 28)');
     await page.goto('/tasbeeh');
-    expect(await inkOf(page, 'Tap to count · hold to undo')).not.toBe('rgb(15, 16, 20)');
+    expect(await inkOf(page, 'Tap to count · hold to undo')).not.toBe('rgb(22, 21, 28)');
     await page.goto('/profile');
     await page.getByRole('tab', { name: 'Dark' }).click();
     await expect.poll(() => inkOf(page, 'Appearance')).toBe('rgb(245, 243, 239)');
@@ -728,15 +728,18 @@ test.describe('notifications and qibla', () => {
 });
 
 test.describe('verse strip', () => {
-  test('Home opens with an ayah and its translations, and swiping reaches a hadith', async ({ page, seed }) => {
+  test('Home opens with an ayah and its translation, and moves on to a hadith by itself', async ({ page, seed }) => {
+    test.setTimeout(45_000);
     await seed();
     await page.goto('/home');
-    const strip = page.getByLabel('Ayah and hadith for today');
-    await expect(strip).toBeVisible();
-    await expect(strip.getByText('AYAH').first()).toBeVisible();
-    await expect(strip.getByText(/^“.+”$/).first()).toBeVisible();
-    await expect(strip.getByText(/\d+:\d+$/).first()).toBeVisible();
-    await expect(strip.getByText('HADITH').first()).toBeAttached();
+    const where = page.getByRole('progressbar', { name: 'Ayah and hadith for today' });
+    await expect(where).toHaveAttribute('aria-valuenow', '1');
+    await expect(page.getByText('AYAH').first()).toBeVisible();
+    await expect(page.getByText(/^“.+”$/).first()).toBeVisible();
+    await expect(page.getByText(/\d+:\d+$/).first()).toBeVisible();
+    // Auto-advance: the bar in the indicator fills, then the next card slides in (9s per card).
+    await expect(where).toHaveAttribute('aria-valuenow', '2', { timeout: 20_000 });
+    await expect(page.getByText('HADITH').first()).toBeAttached();
   });
 });
 

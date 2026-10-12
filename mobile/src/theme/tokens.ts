@@ -17,6 +17,12 @@ export type Palette = {
   toast: string; line: string; hair: string; bord: string; dayRing: string; dayBg: string;
   /** Outline for cards and rows: none in dark mode; a hairline + soft shadow on light mode's white surfaces. */
   edge: string;
+  /** Backdrop of the Home shortcut scenes, and a soft colour wash across the top of Home (empty in dark mode). */
+  scene: string; wash: string;
+  /** Fill and ink of the selected tab and day in light mode: a near-black pill. */
+  pill: string; onPill: string;
+  /** Gradients that give light-mode cards a frosted look (`glass`) and the day overview a dusty-rose one (`rosy`); empty in dark mode. */
+  glass: string; rosy: string;
   dark: boolean;
 };
 
@@ -37,26 +43,48 @@ export const DARK: Palette = {
   hair: 'inset 0 0 0 1px rgba(255,255,255,0.08)', bord: 'rgba(255,255,255,0.08)',
   dayRing: 'inset 0 0 0 1.5px rgba(255,255,255,0.3)', dayBg: 'rgba(255,255,255,0.06)',
   edge: '0 0 0 0 transparent',
+  scene: 'rgba(244,238,223,0.05)', wash: '',
+  pill: '#FFFFFF', onPill: '#111217',
+  glass: '', rosy: '',
 };
 
+const hex = (c: string) => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
+const mix = (a: string, b: string, t: number) => {
+  const [x, y] = [hex(a), hex(b)];
+  return '#' + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, '0')).join('');
+};
+const rgb = (c: string, a: number) => `rgba(${hex(c).join(',')},${a})`;
+
+const INK = '#16151C';
+const MID = '#4E4863';
+const CARD = '#FFFFFF';
+const BG = '#F6F5F9';
+const ACC = '#5F3DA8';
+
+/**
+ * The light theme: a clean white ground, white cards that float on a soft violet-tinted shadow, a dusty-rose overview card, near-black pills for whatever is selected, and
+ * rose, lilac and mint tints for tiles.
+ */
 export const LIGHT: Palette = {
   dark: false,
-  // Light mode is pure white: every surface is #FFFFFF and cards are set apart by `edge`.
-  tMint: '#E3F1EC', bg: '#FFFFFF', sunk: '#FFFFFF', card: '#FFFFFF', opt: '#FFFFFF', sheetc: '#FFFFFF',
-  ctl2: '#EEEEF2', ctl: '#EFEFF3', ctl3: '#E7E7EC', seg: '#FFFFFF', ctl4: '#D9D9E0', sunk2: '#FFFFFF',
-  tx: '#0F1014', t2: '#5E5E66', t3: '#55555D', t4: '#6B6B73', t5: '#26262B', t6: '#70707A', ctl4b: '#CFCFD6',
-  acc: '#A2521C', gold: '#9A5B20', mint: '#2B7458', rose: '#B4463A', peri: '#3F55A6', lav: '#7447A0',
-  noteBg: '#FBF1E3', noteTx: '#7A4A12', iosBg: '#EEF1FA', iosTx: '#34457E', iosB: '#1F2B55',
+  tMint: '#D4EBE5', bg: BG, sunk: CARD, card: CARD, opt: CARD, sheetc: CARD,
+  ctl2: '#F0EEF5', ctl: '#EAE7F1', ctl3: '#DCD7E8', ctl4: mix('#DCD7E8', INK, 0.14), ctl4b: mix('#DCD7E8', INK, 0.22), seg: CARD, sunk2: 'rgba(255,255,255,0.6)',
+  tx: INK, t2: MID, t3: mix(MID, INK, 0.22), t4: mix(MID, CARD, 0.03), t5: mix(INK, CARD, 0.12), t6: mix(MID, CARD, 0.05),
+  acc: ACC, gold: '#7C4054', mint: '#2B7458', rose: '#B4463A', peri: '#3F55A6', lav: '#7447A0',
+  noteBg: '#F1E8F6', noteTx: '#5B3A7A', iosBg: '#EEF1FA', iosTx: '#34457E', iosB: '#1F2B55',
   mintTx: '#1F5B47', okTx: '#22613A', errTx: '#B4463A',
-  tBlue: '#E7EBF8', tAmb: '#F6ECDF', tLav: '#F1E8F6',
-  cta: '#0F1014', ctaInk: '#FFFFFF', txw: '#0F1014', sheet: '#FFFFFF',
-  tabbar: 'rgba(255,255,255,0.9)',
-  tabShadow: 'inset 0 0 0 1px rgba(15,16,20,0.06), 0 18px 40px -12px rgba(15,16,20,0.22)',
-  tabOn: 'rgba(15,16,20,0.05)', tabRing: 'inset 0 0 0 1px rgba(15,16,20,0.07)', tabInk: '#55545D',
-  toast: 'rgba(255,255,255,0.97)', line: 'rgba(15,16,20,0.06)',
-  hair: 'inset 0 0 0 1px rgba(15,16,20,0.06)', bord: 'rgba(15,16,20,0.1)',
-  dayRing: 'inset 0 0 0 1.5px rgba(15,16,20,0.18)', dayBg: '#FFFFFF',
-  edge: 'inset 0 0 0 1px rgba(15,16,20,0.08), 0 2px 10px -4px rgba(15,16,20,0.08)',
+  tBlue: '#E2E1F4', tAmb: '#F5E1E4', tLav: '#EAE0F5',
+  cta: INK, ctaInk: CARD, txw: INK, sheet: CARD,
+  tabbar: rgb(CARD, 0.9),
+  tabShadow: `inset 0 0 0 1px ${rgb(INK, 0.06)}, 0 18px 40px -12px ${rgb(INK, 0.26)}`,
+  tabOn: rgb(ACC, 0.1), tabRing: '0 0 0 0 transparent', tabInk: mix(MID, INK, 0.25),
+  toast: rgb(CARD, 0.97), line: rgb(INK, 0.07),
+  hair: `inset 0 0 0 1px ${rgb(INK, 0.07)}`, bord: rgb(INK, 0.1),
+  dayRing: '0 0 0 0 transparent', dayBg: INK,
+  edge: `inset 0 0 0 1px ${rgb(INK, 0.05)}, 0 1px 2px ${rgb(INK, 0.05)}, 0 18px 32px -18px ${rgb(ACC, 0.32)}`,
+  scene: '#F1EEF8', wash: 'linear-gradient(180deg, rgba(232,228,243,0.55) 0%, rgba(232,228,243,0) 100%)',
+  pill: INK, onPill: '#FFFFFF',
+  glass: 'linear-gradient(155deg, #FFFFFF 0%, #F7F4FC 100%)', rosy: 'linear-gradient(155deg, #F6E3E7 0%, #EBCED6 100%)',
 };
 
 /** Theme-independent colours used by the design (illustration, brand gradient, avatars). */

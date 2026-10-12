@@ -27,7 +27,7 @@ function NoticeCard({ when, title, body, arabic, label }: { when: string; title:
   const t = useT();
   const lines = body.split('\n');
   return (
-    <View style={{ marginHorizontal: 16, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, padding: 16 }} accessibilityLabel={label}>
+    <View style={{ marginHorizontal: 16, borderRadius: 24, borderCurve: 'continuous', backgroundColor: t.card, boxShadow: t.edge, padding: 16 }} accessibilityLabel={label}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.acc }} />
         <Txt style={{ fontSize: 12, fontWeight: 700, color: t.t2 }}>IBTIDA · {when}</Txt>
@@ -74,7 +74,7 @@ function Journey() {
     : 'Your journey starts with one small step.';
   const stats: [number, string][] = [[j.weekPrayers, 'prayers'], [j.weekDhikr, 'dhikr'], [j.weekAyahs, 'ayahs']];
   return (
-    <View style={{ marginHorizontal: 16, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}
+    <View style={{ marginHorizontal: 16, borderRadius: 24, borderCurve: 'continuous', backgroundColor: t.card, boxShadow: t.edge, padding: 18 }}
       accessibilityLabel={`Your journey. ${j.streak} day streak, best ${j.best}. Active on ${j.week.filter(Boolean).length} of the last 7 days.`}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -129,7 +129,7 @@ function NextCheckIn() {
   const next: CareItem | undefined = useMemo(() => planCare({ act, logs, tasLife, since, name, notifCare: care, city, method, hanafi, adj }, new Date())[0], [act, logs, tasLife, since, name, care, city, method, hanafi, adj]);
   if (!care || !next) {
     return (
-      <View style={{ marginHorizontal: 16, borderRadius: 22, backgroundColor: t.card, boxShadow: t.edge, padding: 16 }} accessibilityLabel="Next check-in">
+      <View style={{ marginHorizontal: 16, borderRadius: 24, borderCurve: 'continuous', backgroundColor: t.card, boxShadow: t.edge, padding: 16 }} accessibilityLabel="Next check-in">
         <Txt style={{ fontSize: 14, lineHeight: 21, color: t.t2 }}>{care ? 'Nothing is planned. You are on track.' : 'Encouragement is off. You will only get the reminders you chose above.'}</Txt>
       </View>
     );

@@ -16,15 +16,15 @@ function Day({ d, on, onPress, sun }: { d: Date; on: boolean; onPress: () => voi
   const dow = dowLabel(lang, d.getDay());
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={`${dow} ${d.getDate()}`}
-      style={{ flex: 1, minWidth: 0, paddingTop: 10, paddingBottom: 9, borderRadius: 24, alignItems: 'center', gap: 7, backgroundColor: on ? t.dayBg : 'transparent', boxShadow: on ? t.dayRing : undefined }}>
-      <Txt ur={ur} numberOfLines={1} style={{ fontSize: 11, fontWeight: 600, letterSpacing: ur ? 0 : 0.44, color: on ? t.acc : t.t2 }}>{dow}</Txt>
+      style={{ flex: 1, minWidth: 0, paddingTop: 10, paddingBottom: 9, borderRadius: 24, alignItems: 'center', gap: 7, backgroundColor: on ? (t.dark ? t.dayBg : t.pill) : 'transparent', boxShadow: on ? t.dayRing : undefined }}>
+      <Txt ur={ur} numberOfLines={1} style={{ fontSize: 11, fontWeight: 600, letterSpacing: ur ? 0 : 0.44, color: on ? (t.dark ? t.acc : t.onPill) : t.t2 }}>{dow}</Txt>
       <Animated.View style={{
         opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }),
         transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] }) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '20deg'] }) }],
       }}>
         <Icon name="sunDay" size={sun} color={FIXED.sun} />
       </Animated.View>
-      <Txt style={{ fontSize: sun > 22 ? 15 : 14, fontWeight: 700 }}>{d.getDate()}</Txt>
+      <Txt style={{ fontSize: sun > 22 ? 15 : 14, fontWeight: 700, color: on && !t.dark ? t.onPill : undefined }}>{d.getDate()}</Txt>
     </Pressable>
   );
 }

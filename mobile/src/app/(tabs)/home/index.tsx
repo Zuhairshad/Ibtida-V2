@@ -72,6 +72,7 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
+      {!!t.wash && <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 420, ...bgImage(t.wash) }} />}
       <ScrollView contentContainerStyle={{ paddingTop: ins.top + 10, paddingBottom: 120 + ins.bottom }} showsVerticalScrollIndicator={false}>
         <FadeIn style={{ paddingHorizontal: 22, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
           <View style={{ flex: 1 }}>

@@ -228,7 +228,7 @@ export function Page({ children, top = 54, bottom = 34, style, bg }: { children:
 
 export function Card({ children, style, r = 28, pad = 18 }: { children: ReactNode; style?: StyleProp<ViewStyle>; r?: number; pad?: number }) {
   const t = useT();
-  return <View style={[{ borderRadius: r, backgroundColor: t.card, boxShadow: t.edge, padding: pad }, style]}>{children}</View>;
+  return <View style={[{ borderRadius: r, backgroundColor: t.card, boxShadow: t.edge, padding: pad, ...bgImage(t.glass) }, style]}>{children}</View>;
 }
 
 /** List card with hairline separators between rows (Privacy, Notifications, Profile menu). */
@@ -236,7 +236,7 @@ export function ListCard({ children, style }: { children: ReactNode; style?: Sty
   const t = useT();
   const rows = Children.toArray(children);
   return (
-    <View style={[{ marginHorizontal: 16, borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, overflow: 'hidden' }, style]}>
+    <View style={[{ marginHorizontal: 16, borderRadius: 32, backgroundColor: t.card, boxShadow: t.edge, overflow: 'hidden', ...bgImage(t.glass) }, style]}>
       {rows.map((c, i) => (
         <View key={i} style={i < rows.length - 1 ? { borderBottomWidth: 1, borderBottomColor: t.line } : undefined}>{c}</View>
       ))}
@@ -362,7 +362,7 @@ export function IconChip({ name, color, bg, size = 44, r = 15, icon = 22 }: { na
 export function PillShortcut({ icon, kicker, title, onPress }: { icon: IconName; kicker: string; title: string; onPress: () => void }) {
   const t = useT();
   return (
-    <Tap onPress={onPress} style={{ flex: 1, height: 72, borderRadius: 36, backgroundColor: t.card, boxShadow: t.edge, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 14 }}>
+    <Tap onPress={onPress} style={{ flex: 1, height: 72, borderRadius: 36, backgroundColor: t.card, boxShadow: t.edge, flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 14, ...bgImage(t.glass) }}>
       <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: t.ctl, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} color={t.acc} />
       </View>
