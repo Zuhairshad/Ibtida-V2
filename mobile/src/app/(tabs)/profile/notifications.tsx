@@ -12,7 +12,7 @@ import { useT } from '../../../theme/ThemeProvider';
 
 const ROWS: [string, string, IconName][] = [
   ['Prayer', 'Adhan at each prayer time', 'prayer'],
-  ['Adhkar', '“Your evening adhkar are ready.”', 'moon'],
+  ['Adhkar', '“The day is winding down: seal it with your evening adhkar.”', 'moon'],
   ['Goals', 'One reminder at your set time', 'beads'],
   ['Quran', 'A gentle nudge after Fajr', 'book'],
   ['Focus', 'When Ibadah Lock starts and ends', 'lock'],
@@ -144,10 +144,11 @@ export default function Notifications() {
   const quotes = useApp(s => s.notifQuotes);
   const launch = useApp(s => s.launchAyah);
   const care = useApp(s => s.notifCare);
+  const ending = useApp(s => s.notifEnding !== false);
   return (
     <Screen top={54}>
       <BackBar title="Notifications" />
-      <Statement a="Gentle reminders." b="Never noise." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
+      <Statement a="Reminders that lift you." b="Never noise." style={{ paddingTop: 10, paddingHorizontal: 22 }} />
       <Label style={{ marginTop: 18, marginBottom: 10, marginHorizontal: 26 }}>YOUR JOURNEY</Label>
       <Journey />
       <ListCard style={{ marginTop: 14 }}>
@@ -158,6 +159,8 @@ export default function Notifications() {
       <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>REMINDERS</Label>
       <ListCard>
         {ROWS.map(([l, s, ic], i) => <SwitchRow key={l} label={l} sub={s} icon={ic} on={n[i]} onToggle={() => { const a = n.slice(); a[i] = !a[i]; set({ notifs: a }); if (a[i]) enableNotifications(); }} />)}
+        <SwitchRow label="Before a prayer ends" sub={n[0] ? 'A nudge about 20 minutes before a prayer’s time runs out · skipped once you’ve marked it' : 'Turn on Prayer notifications to use this'} icon="alarm"
+          on={ending && n[0]} onToggle={() => { if (!n[0]) return; set({ notifEnding: !ending }); if (!ending) enableNotifications(); }} />
       </ListCard>
       <Label style={{ marginTop: 22, marginBottom: 10, marginHorizontal: 26 }}>LANGUAGE · زبان</Label>
       <View style={{ paddingHorizontal: 16 }}>

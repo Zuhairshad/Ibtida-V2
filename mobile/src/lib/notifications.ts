@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { AppState, Platform } from 'react-native';
 import { PH, type PrayerName } from '../data/content';
 import { SURAHS } from '../data/surahs';
-import { ayahFor, compose, durUr, ltr, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
+import { ayahFor, compose, durUr, ltr, nudge, PRAYER_UR, prayerNotice, quoteFor, type Line, type QuoteKind } from '../data/reminders';
 import { getState, isActive, subscribe, type AppState as Store, type Goal, type Sched } from '../state/store';
 import { say } from './feedback';
 import { ADHAN_CHOICES, adhanFile, soundFile, TAKBIR } from './sounds';
@@ -40,11 +40,18 @@ const CHANNEL_VERSION = 2;
 
 const chanFor = (file: string | 'default' | null) => `adhan-${file === null ? 'silent' : file.replace(/\.[a-z0-9]+$/, '')}-v${CHANNEL_VERSION}`;
 
+/**
+ * Reminders and encouragement arrive as heads-up banners with a vibration. Android fixes a channel's
+ * importance when it is created, so raising it needs new channel ids; the old ones are removed.
+ */
+const REMINDER_VERSION = 3;
+const OLD_CHANNELS = [`reminders-v${CHANNEL_VERSION}`, `care-v${CHANNEL_VERSION}`];
+
 const CH = {
   adhan: (sound: number, short = false) => chanFor(adhanFile(sound, short)),
   wake: `wake-alarm-v${CHANNEL_VERSION}`,
-  reminders: `reminders-v${CHANNEL_VERSION}`,
-  care: `care-v${CHANNEL_VERSION}`,
+  reminders: `reminders-v${REMINDER_VERSION}`,
+  care: `care-v${REMINDER_VERSION}`,
 };
 
 function adhanSound(sound: number, short = false): Notifications.NotificationContentInput['sound'] {
@@ -84,17 +91,24 @@ function ensureChannels() {
       audioAttributes: { usage: Notifications.AndroidAudioUsage.ALARM, contentType: Notifications.AndroidAudioContentType.SONIFICATION },
     });
     await Notifications.setNotificationChannelAsync(CH.reminders, {
-      name: 'Gentle reminders',
-      description: 'Adhkar, goal and Quran reminders.',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      name: 'Reminders',
+      description: 'Adhkar, goal and Quran reminders, and a nudge before a prayer’s time runs out.',
+      importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
+      enableVibrate: true,
+      vibrationPattern: [0, 180, 120, 180],
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
     await Notifications.setNotificationChannelAsync(CH.care, {
       name: 'Encouragement',
       description: 'Warm check-ins based on your own progress: at most one a day, and they stop if you are away for a month.',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
+      enableVibrate: true,
+      vibrationPattern: [0, 180, 120, 180],
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
+    await Promise.all(OLD_CHANNELS.map(id => Notifications.deleteNotificationChannelAsync(id).catch(() => {})));
   })().catch(e => { channelsReady = null; throw e; });
   return channelsReady;
 }
@@ -238,15 +252,37 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
       }
     });
 
+    // A nudge shortly before each prayer's time runs out, for today and tomorrow (it re-plans as
+    // prayers are marked, and iOS's pending limit is better spent on the adhan further ahead).
+    if (prayerOn && s.notifEnding !== false && d <= 1) {
+      const next = timesFor(s.city, addDays(day, 1), s.method, s.hanafi, s.adj);
+      // Isha's preferred time ends at the middle of the night, halfway from Maghrib to Fajr.
+      const midnight = new Date((times.Maghrib.getTime() + next.Fajr.getTime()) / 2);
+      const ends: [PrayerName, Date, number][] = [
+        ['Fajr', times.Sunrise, 20], ['Dhuhr', times.Asr, 20], ['Asr', times.Maghrib, 20], ['Maghrib', times.Isha, 15], ['Isha', midnight, 30],
+      ];
+      ends.forEach(([p, end, lead], i) => {
+        if (!s.adhan[p] || s.logs[key]?.[p]) return;
+        const at = new Date(end.getTime() - lead * MIN);
+        // Too short a window to need a reminder on top of the adhan.
+        if (at.getTime() - times[p].getTime() < 20 * MIN) return;
+        out.push({
+          at, kind: `ending.${p}.${key}`,
+          ...txt(day, 'prayer', { en: `${p} ends in ${lead} min`, ur: `${PRAYER_UR[p]} ${ltr(lead)} منٹ میں ختم` }, nudge('ending', day, i, { p }, { p: PRAYER_UR[p] }), i),
+          url: '/prayer', channelId: CH.reminders, sound: 'default',
+        });
+      });
+    }
+
     if (adhkarOn) {
       out.push({
         at: new Date(times.Fajr.getTime() + 10 * MIN), kind: `adhkar.am.${key}`,
-        ...txt(day, 'adhkar', { en: 'Morning adhkar', ur: 'صبح کے اذکار' }, { en: 'Your morning adhkar are ready.', ur: 'آپ کے صبح کے اذکار تیار ہیں۔' }),
+        ...txt(day, 'adhkar', { en: 'Morning adhkar', ur: 'صبح کے اذکار' }, nudge('adhkarAm', day)),
         url: '/session?cat=Morning', channelId: CH.reminders, sound: 'default',
       });
       out.push({
         at: new Date(times.Asr.getTime() + 10 * MIN), kind: `adhkar.pm.${key}`,
-        ...txt(day, 'adhkar', { en: 'Evening adhkar', ur: 'شام کے اذکار' }, { en: 'Your evening adhkar are ready.', ur: 'آپ کے شام کے اذکار تیار ہیں۔' }, 1),
+        ...txt(day, 'adhkar', { en: 'Evening adhkar', ur: 'شام کے اذکار' }, nudge('adhkarPm', day), 1),
         url: '/session?cat=Evening', channelId: CH.reminders, sound: 'default',
       });
     }
@@ -256,8 +292,8 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
       out.push({
         at: new Date(times.Fajr.getTime() + 20 * MIN), kind: `quran.${key}`,
         ...txt(day, 'quran', { en: 'Quran', ur: 'قرآن' }, sur
-          ? { en: `Continue ${sur.name}: pick up where you left off.`, ur: `جہاں چھوڑا تھا وہیں سے ${sur.ar} جاری رکھیں۔` }
-          : { en: 'A few verses after Fajr?', ur: 'فجر کے بعد چند آیات کی تلاوت؟' }),
+          ? nudge('quranContinue', day, 0, { surah: sur.name }, { surah: sur.ar })
+          : nudge('quran', day)),
         url: '/home/quran', channelId: CH.reminders, sound: 'default',
       });
     }
@@ -271,8 +307,8 @@ export function planNotifications(s: Store, now = new Date(), nativeAlarm = Fajr
         out.push({
           at: t, kind: `goal.${g.id}.${key}`,
           ...txt(day, 'goal', { en: g.name, ur: g.name }, run >= 2
-            ? { en: `Day ${run + 1} of your streak · ${g.target} today.`, ur: `آپ کے سلسلے کا دن ${ltr(run + 1)} · آج ${ltr(g.target)}۔` }
-            : { en: `Your ${g.target} for today · tap to begin.`, ur: `آج کا ہدف ${ltr(g.target)} · شروع کرنے کے لیے ٹیپ کریں۔` }, g.id),
+            ? nudge('goalStreak', day, g.id, { run, day: run + 1, n: g.target })
+            : nudge('goal', day, g.id, { n: g.target }), g.id),
           url: `/tasbeeh?goal=${g.id}`, channelId: CH.reminders, sound: 'default',
         });
       }
@@ -377,7 +413,7 @@ function signature(s: Store) {
     s.goals.map(g => [g.id, g.name, g.target, g.remind, g.sched, g.days, g.day === today && g.prog >= g.target]),
     s.locks, s.notifLang, s.notifQuotes, s.adj, s.jamaat, s.masjid, s.lang,
     // Check-ins follow progress, but only in coarse steps: a streak change, today becoming active, a new surah.
-    s.notifCare, s.name, s.since, s.streak, isActive(s, today), s.qLast?.s, PH.filter(p => s.logs[today]?.[p]).length,
+    s.notifCare, s.notifEnding, s.name, s.since, s.streak, isActive(s, today), s.qLast?.s, PH.filter(p => s.logs[today]?.[p]).length,
   ]);
 }
 

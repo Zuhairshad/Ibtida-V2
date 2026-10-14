@@ -579,13 +579,32 @@ test.describe('community', () => {
     await expect(visibleText(page, 'Sign in to see the feed')).toBeVisible();
   });
 
+  test('each community goal opens its own page and its own way to contribute', async ({ page, seed, errors }) => {
+    await seed(withSample());
+    await page.goto('/community');
+    await page.getByRole('tab', { name: 'Goals' }).click();
+    for (const [name, counts] of [['1 Million Salawat', 'Counts Durood'], ['Fajr together · 30 days', 'Counts Fajr prayed'], ['10 Million Istighfar', 'Counts Astaghfirullah']]) {
+      await visibleText(page, name).first().click();
+      await expect(page.getByRole('heading', { name })).toBeVisible();
+      await expect(visibleText(page, counts)).toBeVisible();
+      await page.goBack();
+    }
+    // Fajr together is counted from prayers marked, so it leads to Prayer, not the counter.
+    await page.goto('/community/goal/1');
+    await button(page, 'Join & mark Fajr').click();
+    await expect(page).toHaveURL(/\/prayer$/);
+    expect(errors).toEqual([]);
+  });
+
   test('contributing to a community goal counts toward a linked personal goal', async ({ page, seed }) => {
     await seed(withSample());
     await page.goto('/community/goal/2'); // 10 Million Istighfar — no linked personal goal
     await button(page, 'Join & contribute').click();
     await expect(page).toHaveURL(/\/tasbeeh/);
-    // Falls back to the free counter rather than silently counting Durood toward Istighfar.
+    // Opens the free counter on Istighfar itself, never counting Durood toward it.
     await expect(visibleText(page, /Counting toward 1 Million Salawat/)).toHaveCount(0);
+    await expect(visibleText(page, 'Counting toward 10 Million Istighfar')).toBeVisible();
+    await storedWhen(page, s => s.dhKey === 'b:Astaghfirullah' && s.joined?.[2] === true);
 
     await page.goto('/community/goal/0'); // 1 Million Salawat — linked to Durood Sharif
     await button(page, 'Contribute with Tasbeeh').click();

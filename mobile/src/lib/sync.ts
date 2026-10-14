@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState as RNAppState } from 'react-native';
-import { COMMUNITY_GOALS, PH, type PrayerName } from '../data/content';
+import { cgForDhikr, COMMUNITY_GOALS, PH, type PrayerName } from '../data/content';
 import {
   getState, isRemoteWrite, resetAccountData, setFromRemote, subscribe,
   type AppState, type Emergency, type Goal, type PrayerLog, type WakeEntry,
@@ -129,7 +129,7 @@ const stamp = (k: string, at = Date.now()) => { stamps[k] = at; persistSoon(); }
 // ---------------------------------------------------------------------------------------------
 const PROFILE_KEYS: (keyof AppState)[] = [
   'name', 'city', 'method', 'hanafi', 'privacy', 'theme', 'adhan', 'sound', 'vib', 'notifs', 'wakeVerify',
-  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'notifCare', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj', 'alarmSound', 'adhanShort', 'tasAfter', 'tasTargets', 'tasLife', 'customDhikr', 'dhKey',
+  'wake', 'intents', 'fontSize', 'showTr', 'rTheme', 'urduAll', 'focus', 'sched', 'token', 'marks', 'streak', 'dh', 'act', 'wakeMode', 'locks', 'azSize', 'azBg', 'notifLang', 'notifQuotes', 'notifCare', 'notifEnding', 'sky', 'launchAyah', 'lang', 'masjid', 'jamaat', 'adj', 'alarmSound', 'adhanShort', 'tasAfter', 'tasTargets', 'tasLife', 'customDhikr', 'dhKey',
 ];
 const SETTINGS_KEYS = PROFILE_KEYS.filter(k => !['name', 'city', 'method', 'hanafi', 'privacy'].includes(k as string));
 
@@ -189,8 +189,9 @@ function diff(a: AppState, b: AppState) {
   // Free tasbeeh counter. Counted from the lifetime totals, which change only by taps (+n) and
   // undo (−1): the round count itself drops back to 1 when a new round starts, and to 0 on reset or
   // when switching dhikr, none of which may add to or subtract from the Ummah total.
+  // Counting a joined community goal's own dhikr (e.g. Durood for 1 Million Salawat) adds to that goal.
   const td = tasbeehDelta(a, b);
-  if (td) addDhikr(td, null);
+  if (td) addDhikr(td, cgForDhikr(b.dhKey, b.joined));
 
   if (a.wakeLog !== b.wakeLog) {
     const seen = new Set(a.wakeLog.map(w => w.at));

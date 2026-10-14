@@ -87,6 +87,70 @@ export const LIGHT: Palette = {
   glass: 'linear-gradient(155deg, #FFFFFF 0%, #F7F4FC 100%)', rosy: 'linear-gradient(155deg, #F6E3E7 0%, #EBCED6 100%)',
 };
 
+/* ------------------------------------------------------------ Prayer-time sky */
+
+export type SkyPhase = 'Fajr' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
+
+/**
+ * How each prayer window colours the app, echoing the timeline card's sky: the ground and surfaces
+ * lean toward `tint`, the accent takes the hour's light, and `wash` glows down from the top.
+ */
+const SKY: Record<SkyPhase, { dark: { tint: string; acc: string; wash: string }; light: { bg: string; acc: string; wash: string } }> = {
+  Fajr: {
+    dark: { tint: '#2E2C5C', acc: '#F5AE90', wash: 'linear-gradient(180deg, rgba(91,78,131,0.55) 0%, rgba(229,154,116,0.14) 48%, rgba(229,154,116,0) 100%)' },
+    light: { bg: '#F7EFF4', acc: '#8A3D6B', wash: 'linear-gradient(180deg, rgba(214,190,226,0.75) 0%, rgba(246,206,190,0.35) 50%, rgba(246,206,190,0) 100%)' },
+  },
+  Dhuhr: {
+    dark: { tint: '#1B3D63', acc: '#86C4F2', wash: 'linear-gradient(180deg, rgba(31,92,158,0.55) 0%, rgba(94,154,214,0.14) 50%, rgba(94,154,214,0) 100%)' },
+    light: { bg: '#EFF5FB', acc: '#1D5A96', wash: 'linear-gradient(180deg, rgba(169,205,238,0.75) 0%, rgba(206,226,245,0.35) 50%, rgba(206,226,245,0) 100%)' },
+  },
+  Asr: {
+    dark: { tint: '#4A3523', acc: '#F2B862', wash: 'linear-gradient(180deg, rgba(154,110,106,0.5) 0%, rgba(231,169,104,0.14) 50%, rgba(231,169,104,0) 100%)' },
+    light: { bg: '#FBF4EA', acc: '#8A4A12', wash: 'linear-gradient(180deg, rgba(240,205,160,0.75) 0%, rgba(247,224,196,0.35) 50%, rgba(247,224,196,0) 100%)' },
+  },
+  Maghrib: {
+    dark: { tint: '#4C1F38', acc: '#F69476', wash: 'linear-gradient(180deg, rgba(122,48,80,0.6) 0%, rgba(229,119,74,0.16) 50%, rgba(229,119,74,0) 100%)' },
+    light: { bg: '#FAEEEE', acc: '#A33A45', wash: 'linear-gradient(180deg, rgba(238,180,186,0.75) 0%, rgba(246,200,176,0.35) 50%, rgba(246,200,176,0) 100%)' },
+  },
+  Isha: {
+    dark: { tint: '#151D42', acc: '#AEB9F6', wash: 'linear-gradient(180deg, rgba(42,53,99,0.6) 0%, rgba(22,32,63,0.2) 50%, rgba(22,32,63,0) 100%)' },
+    light: { bg: '#EEF0F8', acc: '#3E4A9C', wash: 'linear-gradient(180deg, rgba(190,198,232,0.75) 0%, rgba(214,219,240,0.35) 50%, rgba(214,219,240,0) 100%)' },
+  },
+};
+
+function skyDark(phase: SkyPhase): Palette {
+  const { tint, acc, wash } = SKY[phase].dark;
+  const lean = (c: string, k: number) => mix(c, tint, k);
+  return {
+    ...DARK,
+    bg: lean(DARK.bg, 0.22), sunk: lean(DARK.sunk, 0.2), card: lean(DARK.card, 0.18), opt: lean(DARK.opt, 0.18), sheetc: lean(DARK.sheetc, 0.18),
+    sheet: lean(DARK.sheet, 0.2), sunk2: lean(DARK.sunk2, 0.2),
+    ctl: lean(DARK.ctl, 0.16), ctl2: lean(DARK.ctl2, 0.16), ctl3: lean(DARK.ctl3, 0.14), seg: lean(DARK.seg, 0.14),
+    acc, tAmb: mix(DARK.bg, acc, 0.16), wash,
+    // The faintest text, lifted a touch so it reads as well on the tinted ground as on the plain one.
+    t6: mix(DARK.t6, '#FFFFFF', 0.1),
+  };
+}
+
+function skyLight(phase: SkyPhase): Palette {
+  const { bg, acc, wash } = SKY[phase].light;
+  return {
+    ...LIGHT,
+    bg, acc, wash,
+    tabOn: rgb(acc, 0.1),
+    edge: `inset 0 0 0 1px ${rgb(INK, 0.05)}, 0 1px 2px ${rgb(INK, 0.05)}, 0 18px 32px -18px ${rgb(acc, 0.32)}`,
+  };
+}
+
+const SKY_CACHE = new Map<string, Palette>();
+/** The palette for a prayer window, built once per phase and mode. */
+export function skyPalette(phase: SkyPhase, light: boolean): Palette {
+  const k = `${phase}.${light ? 'l' : 'd'}`;
+  let p = SKY_CACHE.get(k);
+  if (!p) { p = light ? skyLight(phase) : skyDark(phase); SKY_CACHE.set(k, p); }
+  return p;
+}
+
 /** Theme-independent colours used by the design (illustration, brand gradient, avatars). */
 export const FIXED = {
   orangeA: '#F7BD5A',
@@ -134,7 +198,8 @@ export const G = {
   } as Record<string, string>,
   skyFade: 'linear-gradient(180deg, rgba(14,15,19,0), rgba(14,15,19,0.78))',
   session: 'radial-gradient(120% 70% at 50% 0%, #2A2440 0%, #16171D 62%)',
-  tasbeeh: 'radial-gradient(100% 60% at 50% 38%, #26203C 0%, #14151B 70%)',
+  tasbeeh: 'radial-gradient(110% 62% at 50% 46%, #2A2244 0%, #17151F 58%, #111117 100%)',
+  tasbeehDisc: 'radial-gradient(circle at 50% 30%, #332B4C 0%, #1E1C2C 62%, #17161F 100%)',
   goalDone: 'radial-gradient(90% 55% at 50% 30%, #4A3420 0%, #16171D 70%)',
   launch: 'radial-gradient(110% 65% at 50% 30%, #2A2440 0%, #14151B 68%)',
   focus: 'radial-gradient(100% 60% at 50% 35%, #1F2A2A 0%, #0F1013 70%)',

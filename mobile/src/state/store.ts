@@ -121,6 +121,10 @@ export type AppState = {
   notifQuotes: boolean;
   /** Gentle check-ins drawn from the user's own progress (streaks, returning after a break). */
   notifCare: boolean;
+  /** A nudge shortly before a prayer's time runs out, unless it is already marked. */
+  notifEnding: boolean;
+  /** Colours follow the current prayer time (Fajr dawn, Dhuhr sky, Asr gold, Maghrib sunset, Isha night). */
+  sky: boolean;
   /** When this install first ran (epoch ms); anchors the welcome check-ins for someone who has not started yet. */
   since: number;
   /** Show a verse each time the app opens. */
@@ -205,6 +209,8 @@ const initial: AppState = {
   notifLang: 'both',
   notifQuotes: true,
   notifCare: true,
+  notifEnding: true,
+  sky: true,
   since: 0,
   launchAyah: true,
   lang: 'en',
@@ -397,6 +403,8 @@ function migrate(saved: Partial<AppState>): Partial<AppState> {
     qMax: saved.qMax && typeof saved.qMax === 'object' ? saved.qMax : {},
     lang: saved.lang === 'ur' ? 'ur' : 'en',
     notifCare: saved.notifCare !== false,
+    notifEnding: saved.notifEnding !== false,
+    sky: saved.sky !== false,
     since: typeof saved.since === 'number' && saved.since > 0 ? saved.since : Date.now(),
     jamaat: saved.jamaat && typeof saved.jamaat === 'object' ? saved.jamaat : {},
     adj: saved.adj && typeof saved.adj === 'object' ? saved.adj : {},

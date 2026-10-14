@@ -200,17 +200,25 @@ export function Screen({ children, tabs = true, top = 58, style, bg }: { childre
   const t = useT();
   const ins = useSafeAreaInsets();
   const base = bg ?? t.bg;
+  // The prayer-time wash glows down from the top of every themed screen (not over a custom ground).
+  const wash = bg ? '' : t.wash;
   return (
     <View style={{ flex: 1, backgroundColor: base }}>
+      {!!wash && <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 420, ...bgImage(wash) }} />}
       <ScrollView
-        style={{ flex: 1, backgroundColor: base }}
+        style={{ flex: 1 }}
         contentContainerStyle={[{ paddingTop: ins.top + top - 48, paddingBottom: tabs ? 120 + ins.bottom : 34 + ins.bottom }, style]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {children}
       </ScrollView>
-      {ins.top > 0 && <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: ins.top, backgroundColor: base, opacity: 0.94 }} />}
+      {ins.top > 0 && (
+        <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: ins.top, overflow: 'hidden', opacity: 0.94 }}>
+          <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: base }} />
+          {!!wash && <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 420, ...bgImage(wash) }} />}
+        </View>
+      )}
     </View>
   );
 }
@@ -221,6 +229,7 @@ export function Page({ children, top = 54, bottom = 34, style, bg }: { children:
   const ins = useSafeAreaInsets();
   return (
     <View style={[{ flex: 1, backgroundColor: bg ?? t.bg, paddingTop: ins.top + top - 48, paddingBottom: ins.bottom + bottom }, style]}>
+      {!bg && !!t.wash && <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 420, ...bgImage(t.wash) }} />}
       {children}
     </View>
   );

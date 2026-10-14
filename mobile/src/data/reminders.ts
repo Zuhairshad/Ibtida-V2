@@ -57,6 +57,68 @@ export const QUOTES: Record<QuoteKind, Quote[]> = {
   ],
 };
 
+/**
+ * Rotating lines for the everyday reminders, so the same words don't arrive every morning. Warm and
+ * encouraging, never guilt: each one points at the reward, the next small step, or progress made.
+ */
+type Fill = Record<string, string | number>;
+const fill = (s: string, v: Fill) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? ''));
+const urFill = (s: string, v: Fill) => s.replace(/\{(\w+)\}/g, (_, k) => {
+  const x = v[k];
+  if (x === undefined) return '';
+  // Numbers and Latin text keep their order inside the Urdu line; Arabic-script values need no wrapping.
+  return /[A-Za-z0-9]/.test(String(x)) ? ltr(x) : String(x);
+});
+
+export const NUDGES = {
+  adhkarAm: [
+    { en: 'Start your day under Allah’s protection: five minutes of morning adhkar.', ur: 'اپنے دن کا آغاز اللہ کی حفاظت میں کریں: صبح کے اذکار کے پانچ منٹ۔' },
+    { en: 'Before the world gets busy, give your heart its morning remembrance.', ur: 'دنیا کی مصروفیت سے پہلے اپنے دل کو صبح کا ذکر دیں۔' },
+    { en: 'A few minutes now, a protected day ahead. Your morning adhkar are ready.', ur: 'ابھی چند منٹ، آگے پورا دن محفوظ۔ آپ کے صبح کے اذکار تیار ہیں۔' },
+    { en: 'Light on the tongue, heavy on the scale: begin the day with your adhkar.', ur: 'زبان پر ہلکے، میزان میں بھاری: دن کا آغاز اذکار سے کریں۔' },
+  ],
+  adhkarPm: [
+    { en: 'The day is winding down: seal it with your evening adhkar.', ur: 'دن ڈھل رہا ہے: اسے شام کے اذکار سے مکمل کریں۔' },
+    { en: 'Five quiet minutes with Allah before the evening rush.', ur: 'شام کی مصروفیت سے پہلے اللہ کے ساتھ پانچ پرسکون منٹ۔' },
+    { en: 'Protection for the night begins with your evening adhkar. They’re ready.', ur: 'رات کی حفاظت شام کے اذکار سے شروع ہوتی ہے۔ وہ تیار ہیں۔' },
+    { en: 'Whatever today held, end it remembering Allah.', ur: 'آج جو بھی ہوا، اسے اللہ کی یاد پر ختم کریں۔' },
+  ],
+  quran: [
+    { en: 'A few verses after Fajr? Even one page lights up the day.', ur: 'فجر کے بعد چند آیات؟ ایک صفحہ بھی دن کو روشن کر دیتا ہے۔' },
+    { en: 'Every letter you read is a good deed, multiplied by ten. Open the Quran.', ur: 'ہر حرف ایک نیکی ہے، دس گنا۔ قرآن کھولیں۔' },
+    { en: 'Your daily time with the Quran is waiting. Start with a few verses.', ur: 'قرآن کے ساتھ آپ کا روزانہ کا وقت منتظر ہے۔ چند آیات سے شروع کریں۔' },
+  ],
+  quranContinue: [
+    { en: 'Continue {surah}: pick up right where you left off.', ur: 'جہاں چھوڑا تھا وہیں سے {surah} جاری رکھیں۔' },
+    { en: '{surah} is waiting for you. A few verses keep the habit alive.', ur: '{surah} آپ کی منتظر ہے۔ چند آیات عادت کو زندہ رکھتی ہیں۔' },
+  ],
+  goal: [
+    { en: 'Your {n} for today · tap to begin.', ur: 'آج کا ہدف {n} · شروع کرنے کے لیے ٹیپ کریں۔' },
+    { en: 'Small and steady is most beloved to Allah. {n} today, starting now?', ur: 'تھوڑا مگر مسلسل عمل اللہ کو سب سے محبوب ہے۔ آج {n}، ابھی سے؟' },
+    { en: 'A minute or two is all it takes. Your {n} is ready.', ur: 'بس ایک دو منٹ۔ آپ کا {n} تیار ہے۔' },
+  ],
+  goalStreak: [
+    { en: 'Day {day} of your streak · {n} today.', ur: 'آپ کے سلسلے کا دن {day} · آج {n}۔' },
+    { en: '{run} days strong, mashaAllah. Make it {day}: {n} today.', ur: '{run} دن مسلسل، ماشاءاللہ۔ آج دن {day} بنائیں: {n}۔' },
+    { en: 'You’ve shown up {run} days in a row. Keep it going: {n} today.', ur: 'آپ {run} دن سے مسلسل ہیں۔ جاری رکھیں: آج {n}۔' },
+  ],
+  ending: [
+    { en: 'There’s still time. Pray {p} now, then tap to mark it.', ur: 'ابھی وقت ہے۔ {p} ابھی پڑھیں، پھر درج کرنے کے لیے ٹیپ کریں۔' },
+    { en: 'Don’t let {p} slip away. A few minutes is all it takes.', ur: '{p} کو ہاتھ سے نہ جانے دیں۔ بس چند منٹ لگتے ہیں۔' },
+    { en: 'Already prayed {p}? Tap to mark it and keep your streak alive.', ur: 'کیا {p} پڑھ لی؟ ٹیپ کر کے درج کریں اور اپنا سلسلہ قائم رکھیں۔' },
+  ],
+} satisfies Record<string, Line[]>;
+
+/**
+ * One line from a pool, the same all day (so the schedule stays stable) and a different one the next.
+ * `{name}` placeholders are filled; in Urdu, values are wrapped so Latin text keeps its order.
+ */
+export function nudge(kind: keyof typeof NUDGES, day: Date, salt = 0, en: Fill = {}, ur: Fill = en): Line {
+  const list: Line[] = NUDGES[kind];
+  const l = list[(dayNum(day) + salt) % list.length];
+  return { en: fill(l.en, en), ur: urFill(l.ur, ur) };
+}
+
 export const PRAYER_UR: Record<PrayerName | 'Sunrise', string> = {
   Fajr: 'فجر', Sunrise: 'طلوعِ آفتاب', Dhuhr: 'ظہر', Asr: 'عصر', Maghrib: 'مغرب', Isha: 'عشاء',
 };

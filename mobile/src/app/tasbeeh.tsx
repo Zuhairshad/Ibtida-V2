@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../components/Icon';
 import { Breathe, Stars, usePop, useReducedMotion } from '../components/motion';
 import { buzz, Chips, Cta, Label, Ring, say, Seg, Sheet, Tap, Txt, useBack } from '../components/ui';
-import { GOAL_PRESETS, mmss } from '../data/content';
+import { cgForDhikr, GOAL_PRESETS, mmss } from '../data/content';
 import { allDhikr, fmtCount, nextKey, parseTarget, TAS_AFTER, TARGET_MAX, TARGET_PRESETS, tap as tapRound, undo as undoRound } from '../lib/tasbeeh';
-import { addAct, countGoal, getState, rollDay, set, useApp } from '../state/store';
+import { addAct, countGoal, getState, rollDay, set, todayKey, useApp } from '../state/store';
 import { Immersive, useT } from '../theme/ThemeProvider';
 import { G, bgImage } from '../theme/tokens';
 
@@ -37,6 +37,37 @@ function Beads({ count }: { count: number }) {
 /** Arabic for a goal: from its preset, or from the user's own dhikr of the same name. */
 function goalAr(name: string) {
   return GOAL_PRESETS.find(([n]) => n === name)?.[1] ?? getState().customDhikr.find(c => c.name === name && !c.archived)?.ar ?? '';
+}
+
+/** A soft ring that spreads from the dial on every counted tap. */
+function Ripple({ n }: { n: number }) {
+  const rm = useReducedMotion();
+  const [v] = useState(() => new Animated.Value(1));
+  useEffect(() => {
+    if (!n || rm) return;
+    v.setValue(0);
+    const a = Animated.timing(v, { toValue: 1, duration: 700, easing: Easing.out(Easing.cubic), useNativeDriver: true });
+    a.start();
+    return () => a.stop();
+  }, [n, v, rm]);
+  return (
+    <Animated.View pointerEvents="none" style={{
+      position: 'absolute', left: 50, top: 50, width: 200, height: 200, borderRadius: 100, borderWidth: 2, borderColor: 'rgba(247,189,90,0.75)',
+      opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.85, 0] }),
+      transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.92, 1.42] }) }],
+    }} />
+  );
+}
+
+/** One figure in the stats strip above the dial. */
+function Stat({ k, v, a11y }: { k: string; v: string; a11y?: string }) {
+  const t = useT();
+  return (
+    <View accessible accessibilityLabel={a11y ?? `${k} ${v}`} style={{ flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.05)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)' }}>
+      <Txt style={{ fontSize: 18, fontWeight: 800, letterSpacing: -0.3 }}>{v}</Txt>
+      <Txt style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 1, color: t.t4, marginTop: 2 }}>{k}</Txt>
+    </View>
+  );
 }
 
 /** "33 completed" — a soft gold burst over the dial, then it fades. */
@@ -82,7 +113,8 @@ function Tasbeeh() {
   const router = useRouter();
   const back = useBack();
   const ins = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ goal?: string }>();
+  // `goal` counts a personal goal; `dhikr` opens the free counter on a dhikr (e.g. from a community goal).
+  const params = useLocalSearchParams<{ goal?: string; dhikr?: string }>();
   const goalId = params.goal ? Number(params.goal) : null;
   const goal = useApp(s => (goalId ? s.goals.find(g => g.id === goalId) : undefined));
   const dhKey = useApp(s => s.dhKey);
@@ -91,7 +123,11 @@ function Tasbeeh() {
   const targets = useApp(s => s.tasTargets);
   const life = useApp(s => s.tasLife);
   const vib = useApp(s => s.vib);
+  const joined = useApp(s => s.joined);
+  const today = useApp(s => s.act[todayKey()]?.d ?? 0);
+  const streak = useApp(s => s.streak);
   const [secs, setSecs] = useState(0);
+  const [taps, setTaps] = useState(0);
   const [scale, pop] = usePop(0.97);
   const [burst, setBurst] = useState(0);
   const [burstInfo, setBurstInfo] = useState({ n: 0, label: '', sub: '' });
@@ -101,6 +137,12 @@ function Tasbeeh() {
   const goalDone = useRef(false);
   useEffect(() => { const id = setInterval(() => setSecs(x => x + 1), 1000); return () => clearInterval(id); }, []);
   useEffect(() => { rollDay(); }, []);
+  useEffect(() => {
+    const want = params.dhikr;
+    if (!want) return;
+    const s = getState();
+    if (s.dhKey !== want && allDhikr(s.customDhikr, s.tasTargets).some(d => d.key === want)) set({ dhKey: want, tasN: 0 });
+  }, [params.dhikr]);
 
   const list = allDhikr(custom, targets);
   const dh = list.find(d => d.key === dhKey) ?? list[0];
@@ -108,6 +150,9 @@ function Tasbeeh() {
   const target = goal ? goal.target : dh.t;
   const frac = Math.min(count / Math.max(1, target), 1);
   const lifeOf = life[dh.key] ?? { n: 0, rounds: 0 };
+  // The community goal these taps add to: a goal's own link, or the joined goal for this dhikr.
+  const toward = goal ? goal.cg : cgForDhikr(dh.key, joined);
+  const left = Math.max(0, target - count);
 
   const celebrate = (n: number, label: string, sub: string) => {
     quietUntil.current = Date.now() + 700;
@@ -121,6 +166,7 @@ function Tasbeeh() {
     if (goal) {
       if (goalDone.current || goal.prog >= goal.target) return;
       pop();
+      setTaps(x => x + 1);
       const prog = countGoal(goal.id, 1)?.prog ?? goal.prog;
       if (prog >= goal.target) {
         goalDone.current = true;
@@ -134,6 +180,7 @@ function Tasbeeh() {
     const r = tapRound({ count: s.tasN, target: cur.t }, s.tasAfter);
     if (!r.added) { buzz(5); say(`${cur.label} complete · tap Reset to count again`); return; }
     pop();
+    setTaps(x => x + 1);
     const key = r.advance ? nextKey(list, cur.key) : cur.key;
     const was = s.tasLife[key] ?? { n: 0, rounds: 0 };
     set({
@@ -152,7 +199,7 @@ function Tasbeeh() {
 
   const undo = () => {
     if (goal) {
-      if (goal.prog > 0 && !goalDone.current) { countGoal(goal.id, -1); buzz([40]); say('Undid one count'); }
+      if (goal.prog > 0 && !goalDone.current) { countGoal(goal.id, -1); setTaps(x => Math.max(0, x - 1)); buzz([40]); say('Undid one count'); }
       return;
     }
     const s = getState();
@@ -161,6 +208,7 @@ function Tasbeeh() {
     const was = s.tasLife[dh.key] ?? { n: 0, rounds: 0 };
     set({ tasN: r.count, tasLife: { ...s.tasLife, [dh.key]: { n: Math.max(0, was.n - 1), rounds: Math.max(0, was.rounds - (r.reopened ? 1 : 0)) } } });
     addAct('d', -1);
+    setTaps(x => Math.max(0, x - 1));
     buzz([40]);
     say('Undid one count');
   };
@@ -189,45 +237,67 @@ function Tasbeeh() {
           <Icon name="vib" color={vib ? t.acc : t.t4} />
         </Tap>
       </View>
-      {goal?.cg && (
-        <View style={{ alignItems: 'center', marginTop: 10 }}>
-          <View style={{ paddingVertical: 8, paddingHorizontal: 13, borderRadius: 14, backgroundColor: 'rgba(90,160,138,0.18)' }}>
-            <Txt style={{ fontSize: 12.5, fontWeight: 700, color: t.mint }}>Counting toward {goal.cg}</Txt>
+      <View style={{ paddingTop: 12, paddingHorizontal: 16, gap: 10 }}>
+        {toward ? (
+          <View style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 7, paddingHorizontal: 12, borderRadius: 14, backgroundColor: 'rgba(90,160,138,0.18)' }}>
+            <Icon name="spark" size={12} color={t.mint} />
+            <Txt style={{ fontSize: 12.5, fontWeight: 700, color: t.mint }}>Counting toward {toward}</Txt>
           </View>
+        ) : null}
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {goal ? (
+            <>
+              <Stat k="TO GO" v={fmtCount(left)} />
+              <Stat k="STREAK" v={`${goal.streak}d`} a11y={`Streak ${goal.streak} days`} />
+              <Stat k="THIS SESSION" v={fmtCount(taps)} />
+            </>
+          ) : (
+            <>
+              <Stat k="TODAY" v={fmtCount(today)} />
+              <Stat k="STREAK" v={`${streak}d`} a11y={`Streak ${streak} days`} />
+              <Stat k="THIS SESSION" v={fmtCount(taps)} />
+            </>
+          )}
         </View>
-      )}
+      </View>
       <Pressable onPress={countOne} onLongPress={undo} delayLongPress={550}
         accessibilityLabel={`Count. ${count} of ${target}`} accessibilityHint="Tap to count, hold to undo"
         style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Animated.View style={{ width: 300, height: 300, transform: [{ scale }] }}>
-          <Breathe bg={G.glowAcc2} style={{ left: 40, top: 40, right: 40, bottom: 40 }} dur={7000} />
+          <Breathe bg={G.glowAcc2} style={{ left: -10, top: -10, right: -10, bottom: -10 }} dur={7000} />
+          {/* Glass disc: a raised centre the count sits on. */}
+          <View pointerEvents="none" style={{ position: 'absolute', left: 46, top: 46, width: 208, height: 208, borderRadius: 104, ...bgImage(G.tasbeehDisc), boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 0 0 1px rgba(255,255,255,0.06), 0 24px 50px -18px rgba(0,0,0,0.85)' }} />
+          <Ripple n={taps} />
           <View style={{ position: 'absolute', left: 0, top: 0 }}>
-            <Ring size={300} r={104} stroke={5} pct={frac} track={t.ctl2} color={t.acc} />
+            <Ring size={300} r={113} stroke={6} pct={frac} track="rgba(255,255,255,0.07)" gradient={['#FFD27A', '#E07A4B']} />
           </View>
           <Beads count={count} />
           <View style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-            <Txt ar style={{ fontSize: 26, lineHeight: 44, color: t.gold, maxWidth: 210, textAlign: 'center' }} numberOfLines={2}>{goal ? goalAr(goal.name) : dh.ar}</Txt>
-            <Txt style={{ fontSize: count >= 1000 ? 60 : 78, fontWeight: 800, letterSpacing: -3, lineHeight: 82, marginTop: 2 }}>{fmtCount(count)}</Txt>
+            <Txt ar style={{ fontSize: 24, lineHeight: 40, color: t.gold, maxWidth: 180, textAlign: 'center' }} numberOfLines={2}>{goal ? goalAr(goal.name) : dh.ar}</Txt>
+            <Txt style={{ fontSize: count >= 1000 ? 54 : 72, fontWeight: 800, letterSpacing: -3, lineHeight: 76 }}>{fmtCount(count)}</Txt>
             {goal
-              ? <Txt style={{ fontSize: 15, color: t.t2, marginTop: 4 }}>/ {fmtCount(target)}</Txt>
+              ? <Txt style={{ fontSize: 14, color: t.t2, marginTop: 2 }}>of {fmtCount(target)}</Txt>
               : <Tap onPress={() => { buzz(5); setSheet(true); }} accessibilityRole="button" accessibilityLabel={`Target ${target}, change`} hitSlop={10}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4, paddingHorizontal: 8 }}>
-                  <Txt style={{ fontSize: 15, color: t.t2 }}>/ {fmtCount(target)}</Txt>
-                  <Icon name="chev" size={14} color={t.t4} />
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2, paddingVertical: 4, paddingHorizontal: 10, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.07)' }}>
+                  <Txt style={{ fontSize: 13.5, fontWeight: 600, color: t.t2 }}>of {fmtCount(target)}</Txt>
+                  <Icon name="chev" size={12} color={t.t4} />
                 </Tap>}
           </View>
           <Completed show={burst} n={burstInfo.n} label={burstInfo.label} sub={burstInfo.sub} />
         </Animated.View>
       </Pressable>
-      <Txt style={{ fontSize: 12.5, color: t.t4, textAlign: 'center' }}>Tap to count · hold to undo</Txt>
+      <Txt style={{ fontSize: 14, fontWeight: 700, color: t.gold, textAlign: 'center' }}>
+        {left === 0 ? (goal ? 'Goal complete · Alhamdulillah' : 'Round complete · Alhamdulillah') : `${fmtCount(left)} more to ${goal ? 'reach your goal' : 'complete the round'}`}
+      </Txt>
+      <Txt style={{ fontSize: 12.5, color: t.t4, textAlign: 'center', marginTop: 4 }}>Tap to count · hold to undo</Txt>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingTop: 14, paddingHorizontal: 16 }}>
         {list.map(d => {
           const on = !goal && dh.key === d.key;
           return (
             <Tap key={d.key} scale={0.95} accessibilityRole="button" accessibilityLabel={d.label} accessibilityState={{ selected: on }}
               onPress={() => pick(d.key)} onLongPress={d.custom ? () => router.push({ pathname: '/dhikr-edit', params: { id: d.key.slice(2) } }) : undefined}
-              style={{ height: 46, paddingHorizontal: 16, borderRadius: 23, backgroundColor: on ? 'rgba(242,166,90,0.22)' : 'rgba(40,41,50,0.7)', boxShadow: on ? `inset 0 0 0 1.5px ${t.acc}` : 'inset 0 0 0 1px rgba(255,255,255,0.08)', justifyContent: 'center' }}>
-              <Txt style={{ fontSize: 13.5, fontWeight: 700 }}>{d.label}</Txt>
+              style={{ height: 46, paddingHorizontal: 18, borderRadius: 23, backgroundColor: on ? '#F2A65A' : 'rgba(40,41,50,0.7)', ...bgImage(on ? G.brand : undefined), boxShadow: on ? '0 8px 20px -8px rgba(242,166,90,0.8)' : 'inset 0 0 0 1px rgba(255,255,255,0.08)', justifyContent: 'center' }}>
+              <Txt style={{ fontSize: 13.5, fontWeight: 700, color: on ? '#111217' : t.tx }}>{d.label}</Txt>
             </Tap>
           );
         })}
@@ -237,7 +307,7 @@ function Tasbeeh() {
           <Txt style={{ fontSize: 13.5, fontWeight: 700, color: t.acc }}>Add</Txt>
         </Tap>
       </ScrollView>
-      <View style={{ marginTop: 12, marginHorizontal: 16, marginBottom: ins.bottom + 30, borderRadius: 22, backgroundColor: 'rgba(40,41,50,0.7)', boxShadow: t.hair, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ marginTop: 12, marginHorizontal: 16, marginBottom: ins.bottom + 24, borderRadius: 22, backgroundColor: 'rgba(40,41,50,0.7)', ...bgImage('linear-gradient(135deg, rgba(247,189,90,0.10), rgba(40,41,50,0.55))'), boxShadow: t.hair, paddingVertical: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Txt style={{ fontSize: 13, lineHeight: 19.5, color: '#D8D6D2' }}>
             {goal ? (goal.prog >= goal.target ? 'Goal complete for today' : `${goal.target - goal.prog} remaining toward your goal · counts sync to your circle and community`) : dh.note}

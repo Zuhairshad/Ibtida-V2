@@ -15,7 +15,7 @@ const ROUTES: [string, string | RegExp][] = [
   ['/community/goal/0', 'YOUR CONTRIBUTION'],
   ['/profile', 'Appearance'],
   ['/profile/emergency', 'Emergency unlocks'],
-  ['/profile/notifications', 'Gentle reminders.'],
+  ['/profile/notifications', 'Reminders that lift you.'],
   ['/profile/privacy', 'Private by default.'],
   ['/search', 'TRY'],
   ['/session', 'Tap to count · hold to undo · swipe for next'],

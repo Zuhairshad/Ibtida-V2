@@ -85,11 +85,36 @@ export type FeedTint = 'amb' | 'mint' | 'blue' | 'lav';
  * Supabase seed (migration 0019). Progress, participants and end dates only ever come live
  * from the server — nothing here is shown as a count.
  */
-export const COMMUNITY_GOALS = [
-  { name: '1 Million Salawat', total: 1000000 },
-  { name: 'Fajr together · 30 days', total: 300000 },
-  { name: '10 Million Istighfar', total: 10000000 },
+export type CommunityGoalDef = {
+  name: string;
+  total: number;
+  /** What adds to it: the built-in dhikr counted in Tasbeeh, or each Fajr marked as prayed. */
+  counts: { dhikr: string } | { prayer: 'Fajr' };
+  /** One line on what the goal is for. */
+  about: string;
+  ar: string;
+};
+
+export const COMMUNITY_GOALS: CommunityGoalDef[] = [
+  { name: '1 Million Salawat', total: 1000000, counts: { dhikr: 'Durood' }, ar: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ', about: 'Whoever sends one blessing upon the Prophet ﷺ, Allah sends ten upon him · Sahih Muslim 408' },
+  { name: 'Fajr together · 30 days', total: 300000, counts: { prayer: 'Fajr' }, ar: 'الصَّلَاةُ خَيْرٌ مِنَ النَّوْمِ', about: 'Whoever prays Fajr is under the protection of Allah · Sahih Muslim 657' },
+  { name: '10 Million Istighfar', total: 10000000, counts: { dhikr: 'Astaghfirullah' }, ar: 'أَسْتَغْفِرُ اللهَ', about: 'The Prophet ﷺ sought forgiveness a hundred times a day · Sahih Muslim 2702' },
 ];
+
+/** Tasbeeh key of the dhikr a community goal counts, or null for the Fajr goal. */
+export const cgDhikrKey = (i: number) => {
+  const c = COMMUNITY_GOALS[i]?.counts;
+  return c && 'dhikr' in c ? `b:${c.dhikr}` : null;
+};
+
+/**
+ * The community goal a free-counter tap on `dhKey` adds to: the joined goal that counts that dhikr.
+ * Not joined, or a dhikr no goal counts → null (it still adds to the Ummah total).
+ */
+export function cgForDhikr(dhKey: string, joined: boolean[]): string | null {
+  const i = COMMUNITY_GOALS.findIndex((_, k) => joined[k] && cgDhikrKey(k) === dhKey);
+  return i < 0 ? null : COMMUNITY_GOALS[i].name;
+}
 
 export const GOAL_PRESETS: [string, string][] = [
   ['Durood Sharif', 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ'],

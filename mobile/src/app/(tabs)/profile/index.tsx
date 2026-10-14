@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { Icon, type IconName } from '../../../components/Icon';
 import { LangSeg } from '../../../components/LangSeg';
 import { FadeIn } from '../../../components/motion';
-import { Cta, IconChip, ListCard, Ring, say, Screen, Seg, SerifTitle, Tap, Txt } from '../../../components/ui';
+import { Cta, IconChip, ListCard, Ring, say, Screen, Seg, SerifTitle, SwitchRow, Tap, Txt } from '../../../components/ui';
 import { METHODS, PH } from '../../../data/content';
 import { signOut } from '../../../lib/account';
 import { checkAdmin } from '../../../lib/inspiration';
@@ -81,6 +81,10 @@ export default function Profile() {
           </View>
         </View>
       </View>
+      <ListCard style={{ marginTop: 10 }}>
+        <SwitchRow label="Follow prayer times" sub="Colours shift with the day: Fajr dawn, Dhuhr sky, Asr gold, Maghrib sunset, Isha night" icon="sunDay"
+          on={s.sky !== false} onToggle={() => { set({ sky: s.sky === false }); say(s.sky === false ? 'Colours now follow the prayer times' : 'Colours stay fixed'); }} />
+      </ListCard>
       <View style={{ paddingTop: 10, paddingHorizontal: 16 }}>
         <View style={{ borderRadius: 28, backgroundColor: t.card, boxShadow: t.edge, paddingVertical: 12, paddingRight: 12, paddingLeft: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
           <View>

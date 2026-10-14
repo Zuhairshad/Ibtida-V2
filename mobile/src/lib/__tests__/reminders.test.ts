@@ -1,6 +1,6 @@
 import { CITIES } from '../../data/content';
 import { LAUNCH_AYAT, PRAYER_AYAT } from '../../data/ayat';
-import { ayahFor, ayahRef, compose, durUr, ltr, prayerNotice, QUOTES, quoteFor } from '../../data/reminders';
+import { ayahFor, ayahRef, compose, durUr, ltr, nudge, NUDGES, prayerNotice, QUOTES, quoteFor } from '../../data/reminders';
 import { SURAHS } from '../../data/surahs';
 import { planNotifications } from '../notifications';
 import { getState } from '../../state/store';
@@ -91,7 +91,8 @@ describe('planned notifications', () => {
     expect(lines).toHaveLength(3);
     expect(PRAYER_AYAT.map(x => x.ar)).toContain(lines[0]);
     expect(plan.find(p => p.kind.startsWith('adhkar.am'))!.title).toBe('صبح کے اذکار');
-    expect(plan.find(p => p.kind.startsWith('quran'))!.body).toMatch(/^فجر کے بعد/);
+    const quran = plan.find(p => p.kind.startsWith('quran'))!.body.split('\n')[0];
+    expect(NUDGES.quran.map(l => l.ur)).toContain(quran);
   });
   it('the hadith switch only affects other reminders', () => {
     const plan = planNotifications({ ...base, notifLang: 'en', notifQuotes: false }, new Date(2026, 9, 7, 0, 30));
@@ -105,5 +106,50 @@ describe('planned notifications', () => {
     const wake = plan.find(p => p.kind.startsWith('wake.Fajr'))!;
     expect(wake.title).toMatch(/^Fajr · /);
     expect(wake.body.split('\n')[2]).toBe('Scan your wudu station to stop the alarm.');
+  });
+});
+
+describe('motivational nudges', () => {
+  it('every line has English and Urdu', () => {
+    for (const list of Object.values(NUDGES)) for (const l of list) {
+      expect(l.en.length).toBeGreaterThan(15);
+      expect(l.ur).toMatch(/[؀-ۿ]/);
+    }
+  });
+  it('stay the same all day and change the next', () => {
+    const a = nudge('adhkarAm', new Date(2026, 9, 7, 5));
+    expect(nudge('adhkarAm', new Date(2026, 9, 7, 22))).toEqual(a);
+    expect(nudge('adhkarAm', new Date(2026, 9, 8, 5))).not.toEqual(a);
+  });
+  it('fill numbers, keeping them in order inside Urdu', () => {
+    const day = new Date(2026, 9, 7);
+    const all = [0, 1, 2].map(salt => nudge('goalStreak', day, salt, { run: 6, day: 7, n: 100 }));
+    for (const l of all) {
+      expect(l.en).not.toMatch(/[{}]/);
+      expect(l.en).toMatch(/100/);
+      expect(l.ur).toContain(ltr(100));
+    }
+  });
+});
+
+describe('prayer ending nudges', () => {
+  const base = { ...getState(), hydrated: true, onboarded: true, city: CITIES[0], notifs: [true, false, false, false, false, false], wakeVerify: [false, false, false, false, false], notifLang: 'en' as const,
+    adhan: { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true } };
+  const now = new Date(2026, 9, 7, 0, 30);
+  const ending = (plan: ReturnType<typeof planNotifications>) => plan.filter(p => p.kind.startsWith('ending.'));
+
+  it('come before each prayer ends, today and tomorrow only, and open Prayer', () => {
+    const e = ending(planNotifications(base, now));
+    expect(e.map(x => x.kind.split('.')[1])).toEqual(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha', 'Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']);
+    expect(e[0].title).toBe('Fajr ends in 20 min');
+    expect(e.every(x => x.url === '/prayer')).toBe(true);
+  });
+  it('skip a prayer already marked, and respect the switches', () => {
+    const logs = { '2026-10-07': { Fajr: 'prayed' as const } };
+    expect(ending(planNotifications({ ...base, logs }, now)).map(x => x.kind)).not.toContain('ending.Fajr.2026-10-07');
+    expect(ending(planNotifications({ ...base, notifEnding: false }, now))).toHaveLength(0);
+    // A prayer whose own notification is off gets no nudge either (Isha is off by default).
+    expect(ending(planNotifications({ ...base, adhan: { ...base.adhan, Isha: false } }, now)).some(x => x.kind.startsWith('ending.Isha'))).toBe(false);
+    expect(ending(planNotifications({ ...base, notifs: [false, false, false, false, false, false] }, now))).toHaveLength(0);
   });
 });
