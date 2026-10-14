@@ -79,7 +79,6 @@
         "expo-image-picker",
         {
           "photosPermission": "Ibtida uses a photo you choose only as the background of a post you design. It stays on your phone.",
-          "cameraPermission": false,
           "microphonePermission": false
         }
       ],
