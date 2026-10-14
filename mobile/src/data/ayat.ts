@@ -3,6 +3,7 @@
  *
  * Verbatim from AlQuran Cloud (Tanzil): Arabic quran-uthmani, English en.sahih (Saheeh
  * International), Urdu ur.jalandhry (Fateh Muhammad Jalandhry) — the same editions as the reader.
+ * The English drops straight double quotes, since the app wraps it in its own (punctuation only).
  */
 export type Ayah = { s: number; a: number; ar: string; en: string; ur: string };
 

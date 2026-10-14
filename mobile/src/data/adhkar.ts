@@ -512,7 +512,7 @@ const TRAVEL: Dhikr[] = [
     tr: 'Allahu akbar, Allahu akbar, Allahu akbar. Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila rabbina lamunqalibun. Allahumma inna nasʾaluka fi safarina hadhal-birra wat-taqwa, wa minal-ʿamali ma tarda. Allahumma hawwin ʿalayna safarana hadha watwi ʿanna buʿdah. Allahumma antas-sahibu fis-safar, wal-khalifatu fil-ahl. Allahumma inni aʿudhu bika min waʿthaʾis-safar, wa kaʾabatil-manzar, wa suʾil-munqalabi fil-mali wal-ahl',
     en: 'Allah is the Greatest (three times). Glory be to the One who has subjected this to us, for we could never have done so ourselves, and to our Lord we shall surely return. O Allah, we ask You on this journey for righteousness and piety, and for deeds that please You. O Allah, make this journey easy for us and shorten its distance. O Allah, You are the Companion on the journey and the Guardian of the family. O Allah, I seek refuge in You from the hardship of travel, from distressing sights, and from an evil return to wealth and family.',
     ur: 'اللہ سب سے بڑا ہے (تین بار)۔ پاک ہے وہ ذات جس نے اسے ہمارے تابع کر دیا، ورنہ ہم اسے قابو میں نہ لا سکتے تھے، اور بے شک ہم اپنے رب کی طرف لوٹنے والے ہیں۔ اے اللہ! ہم اپنے اس سفر میں تجھ سے نیکی اور تقویٰ مانگتے ہیں اور ایسا عمل جسے تو پسند کرے۔ اے اللہ! ہمارا یہ سفر آسان کر دے اور اس کی دوری ہم پر لپیٹ دے۔ اے اللہ! تو ہی سفر میں ساتھی اور گھر والوں میں نگہبان ہے۔ اے اللہ! میں سفر کی مشقت، برے منظر اور مال و اہل میں بری واپسی سے تیری پناہ مانگتا ہوں۔',
-    src: 'Sahih Muslim 1342',
+    src: 'Sahih Muslim 1342 · Quran 43:13–14',
   },
   {
     id: 'rukub', title: 'Mounting a vehicle', n: 1, w: 40,
@@ -520,7 +520,7 @@ const TRAVEL: Dhikr[] = [
     tr: 'Bismillah, alhamdulillah. Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila rabbina lamunqalibun. Alhamdulillah, alhamdulillah, alhamdulillah. Allahu akbar, Allahu akbar, Allahu akbar. Subhanaka Allahumma inni zalamtu nafsi faghfir li, fa innahu la yaghfirudh-dhunuba illa ant',
     en: 'In the name of Allah; all praise is for Allah. Glory be to the One who has subjected this to us, for we could never have done so ourselves, and to our Lord we shall surely return. All praise is for Allah (three times). Allah is the Greatest (three times). Glory be to You, O Allah; I have wronged myself, so forgive me, for none forgives sins but You.',
     ur: 'اللہ کے نام سے، تمام تعریف اللہ کے لیے ہے۔ پاک ہے وہ ذات جس نے اسے ہمارے تابع کر دیا، ورنہ ہم اسے قابو میں نہ لا سکتے تھے، اور بے شک ہم اپنے رب کی طرف لوٹنے والے ہیں۔ الحمد للہ (تین بار)، اللہ اکبر (تین بار)۔ اے اللہ! تو پاک ہے، میں نے اپنے اوپر ظلم کیا، پس مجھے بخش دے، کیونکہ تیرے سوا کوئی گناہوں کو نہیں بخشتا۔',
-    src: 'Abu Dawud 2602 · at-Tirmidhi 3446',
+    src: 'Abu Dawud 2602 · at-Tirmidhi 3446 · Quran 43:13–14',
   },
   {
     id: 'ascending', title: 'When going up', n: 1, w: 2,

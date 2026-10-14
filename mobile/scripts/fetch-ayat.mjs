@@ -19,6 +19,13 @@ const PRAYER = ['2:43', '2:45', '2:153', '2:238', '11:114', '14:40', '17:78', '2
 /** Shown on launch: prayer, remembrance of Allah, hope and worship. */
 const LAUNCH = ['2:152', '13:28', '39:53', '94:5', '2:186', '51:56', '33:41', '3:139', '93:5', '29:69', '50:16', '73:8', '2:153', '20:14', '29:45', '7:205'];
 
+/**
+ * The app shows each translation inside its own quotation marks, so Saheeh International's
+ * straight double quotes are dropped: in 39:53 they would double up, and 13:28 ends on a stray
+ * closing quote that belongs to a speech opened in 13:27. Punctuation only; no word is changed.
+ */
+const display = en => en.replace(/"/g, '').replace(/\s{2,}/g, ' ').trim();
+
 async function ayah(ref) {
   const res = await fetch(`https://api.alquran.cloud/v1/ayah/${ref}/editions/${EDITIONS.join(',')}`);
   if (!res.ok) throw new Error(`${ref}: HTTP ${res.status}`);
@@ -28,7 +35,7 @@ async function ayah(ref) {
   data.forEach((d, i) => {
     if (d.edition.identifier !== EDITIONS[i] || d.surah.number !== s || d.numberInSurah !== a || !d.text.trim()) throw new Error(`${ref}: unexpected ${d.edition.identifier}`);
   });
-  return { s, a, ar: data[0].text, en: data[1].text, ur: data[2].text };
+  return { s, a, ar: data[0].text, en: display(data[1].text), ur: data[2].text };
 }
 
 const refs = [...new Set([...PRAYER, ...LAUNCH])];
@@ -45,6 +52,7 @@ const out = `/**
  *
  * Verbatim from AlQuran Cloud (Tanzil): Arabic quran-uthmani, English en.sahih (Saheeh
  * International), Urdu ur.jalandhry (Fateh Muhammad Jalandhry) — the same editions as the reader.
+ * The English drops straight double quotes, since the app wraps it in its own (punctuation only).
  */
 export type Ayah = { s: number; a: number; ar: string; en: string; ur: string };
 

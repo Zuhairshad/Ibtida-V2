@@ -20,7 +20,8 @@ describe('travel reminder', () => {
   });
   it('uses the sourced dua from the adhkar data', () => {
     const d = travelDua()!;
-    expect(d.src).toBe('Sahih Muslim 1342');
+    // The hadith it comes from, and the ayat it quotes.
+    expect(d.src).toBe('Sahih Muslim 1342 · Quran 43:13–14');
     expect(d.ar).toMatch(/سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا/);
   });
 });
